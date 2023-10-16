@@ -6,6 +6,7 @@ import br.com.gwenilorac.biblioteca.model.Autor;
 public class AutorDao {
 	
 	private EntityManager em;
+	
 
 	public AutorDao(EntityManager em) {
 		this.em = em;
