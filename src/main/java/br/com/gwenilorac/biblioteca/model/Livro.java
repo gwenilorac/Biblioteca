@@ -15,8 +15,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.swing.ImageIcon;
 
 
 @Entity
@@ -36,9 +37,6 @@ public class Livro implements Serializable{
 	@JoinColumn(name = "autor_id")
     private Autor autor;
 	
-	@Column(name = "ano_publicacao")
-	private Year anoPublicacao;
-	
 	@Enumerated(EnumType.STRING) 
     @Column(nullable = false)
     private Estado estado = Estado.DISPONIVEL;
@@ -47,16 +45,16 @@ public class Livro implements Serializable{
     @JoinColumn(name = "genero_id")
     private Genero genero;
 	
+	private ImageIcon capa;
 	
 	@Deprecated
 	public Livro() {
 	}
 
-	public Livro(String titulo, Autor autor, Genero genero, Year anoPublicacao) {
+	public Livro(String titulo, Autor autor, Genero genero) {
 		this.titulo = titulo;
 		this.autor = autor;
 		this.genero = genero;
-		this.anoPublicacao = anoPublicacao;
 		this.estado = Estado.DISPONIVEL;
 		
 		this.adicionarLivroNaListaDoAutor(this);
@@ -87,14 +85,6 @@ public class Livro implements Serializable{
 		this.genero = genero;
 	}
 
-	public Year getAnoPublicacao() {
-		return anoPublicacao;
-	}
-
-	public void setAnoPublicacao(Year anoPublicacao) {
-		this.anoPublicacao = anoPublicacao;
-	}
-	
 	public Estado getEstado() {
         return estado;
     }
@@ -102,6 +92,14 @@ public class Livro implements Serializable{
     public void setEstado(Estado estado) {
         this.estado = estado;
     }
+    
+    public ImageIcon getCapa() {
+		return capa;
+	}
+
+	public void setCapa(ImageIcon capa) {
+		this.capa = capa;
+	}
 
     public void adicionarLivroNaListaDoAutor(Livro livro) {
         if (livro.getAutor() != null) {

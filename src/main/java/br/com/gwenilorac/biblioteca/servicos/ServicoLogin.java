@@ -1,4 +1,4 @@
-package br.com.gwenilorac.biblioteca.controller;
+package br.com.gwenilorac.biblioteca.servicos;
 
 import javax.persistence.EntityManager;
 

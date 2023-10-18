@@ -17,8 +17,8 @@ import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-import br.com.gwenilorac.biblioteca.controller.ServicoLogin;
 import br.com.gwenilorac.biblioteca.model.Usuario;
+import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 
 @SuppressWarnings("serial")
 public class LoginFrm extends JDialog{

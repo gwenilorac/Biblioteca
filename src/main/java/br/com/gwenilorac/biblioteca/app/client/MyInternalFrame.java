@@ -23,7 +23,7 @@ public class MyInternalFrame extends JInternalFrame{
 		setPreferredSize(new Dimension(600, 400));
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		pack();
-		
+		setLocation(100,100);
 		setVisible(true);
 	}
 	    
