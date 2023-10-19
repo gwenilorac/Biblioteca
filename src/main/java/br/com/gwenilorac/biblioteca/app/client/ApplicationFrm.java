@@ -35,12 +35,10 @@ public class ApplicationFrm extends JFrame {
 	private PresentationModel<Usuario> model;
 	private JDesktopPane jDesktopPane;
 	private JTextField textField;
+	private JTextField tfBusca;
 	private JPasswordField passField;
 	private JButton btnSalvar;
-	private JTextField titleField = new JTextField(20);
-	private JTextField authorField = new JTextField(20);
-	private JTextField isbnField = new JTextField(20);
-	private JButton addButton = new JButton("Adicionar Livro");
+	private JButton btnBusca;
 
 	public ApplicationFrm() {
 		initModel();
@@ -59,6 +57,9 @@ public class ApplicationFrm extends JFrame {
 
 		btnSalvar = new JButton("Salvar");
 		btnSalvar.addActionListener(bs -> actionSalvar());
+		
+		btnBusca = new JButton("Buscar");
+		btnBusca.addActionListener(bb -> realizarBusca(tfBusca.getText()));
 	}
 
 	private void actionSalvar() {
@@ -89,9 +90,8 @@ public class ApplicationFrm extends JFrame {
 		menu.add(generos);
 		menu.add(adicionarLivro);
 
-		JTextField busca = new JTextField("Faça sua busca aqui", 30);
-		busca.setMaximumSize(textField.getPreferredSize());
-		busca.addActionListener(e -> realizarBusca(busca.getText()));
+		tfBusca = new JTextField("Faça sua busca aqui", 30);
+		tfBusca.setMaximumSize(textField.getPreferredSize());
 
 		JMenu user = new JMenu("User");
 		JMenuItem userItem1 = new JMenuItem("Livros Emprestados");
@@ -104,7 +104,8 @@ public class ApplicationFrm extends JFrame {
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(menu);
 		menubar.add(Box.createHorizontalGlue());
-		menubar.add(busca);
+		menubar.add(tfBusca);
+		menubar.add(btnBusca);
 		menubar.add(Box.createHorizontalGlue());
 		menubar.add(user);
 

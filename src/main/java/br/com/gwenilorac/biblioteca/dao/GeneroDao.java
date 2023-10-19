@@ -28,10 +28,14 @@ public class GeneroDao {
 	}
 	
 	public Genero buscarGeneroPorNome(String nome) {
-	    String jpql = "SELECT g FROM Genero g WHERE g.nome = :nome";
-	    return em.createQuery(jpql, Genero.class)
-	             .setParameter("nome", nome)
-	             .getSingleResult();
+		try {
+			String jpql = "SELECT g FROM Genero g WHERE g.nome = :nome";
+			return em.createQuery(jpql, Genero.class)
+					.setParameter("nome", nome)
+					.getSingleResult();
+		} catch(Exception e) {
+			return null;
+		}
 	}
 	
 }

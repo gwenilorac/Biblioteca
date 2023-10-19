@@ -51,13 +51,23 @@ private EntityManager em;
 			return em.createQuery(jpql, Usuario.class)
 					.setParameter("nome", nome)
 					.setParameter("senha", senha)
-					.getSingleResult();
+					.getResultList().get(0);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
 
+	public boolean buscarEmailCadastrado(String email) {
+		try {
+		String jpql = "SELECT u FROM Usuario u WHERE u.email = :email";
+		return em.createQuery(jpql, Usuario.class)
+				.setParameter("email", email)
+				.getResultList().get(0) != null;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
 	public Usuario buscarUsuarioPorNome(String nome) {
 	    String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome";
 	    return em.createQuery(jpql, Usuario.class)

@@ -8,42 +8,42 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 public class ServicoLogin {
 
-    private static Usuario usuarioLogado;
-    private static boolean isUsuario;
+	private static Usuario usuarioLogado;
+	private static boolean isUsuario;
 
-    public static boolean validaUsuario(Usuario usuario) {
-        EntityManager em = JPAUtil.getEntityManager();
-        UsuarioDao usuarioDao = new UsuarioDao(em);
+	public static boolean validaUsuario(Usuario usuario) {
+		EntityManager em = JPAUtil.getEntityManager();
+		UsuarioDao usuarioDao = new UsuarioDao(em);
 
-        String nome = usuario.getNome();
-        String senha = usuario.getSenha();
-        		
-        Usuario credenciais = usuarioDao.buscarCredenciais(nome, senha);
+		String nome = usuario.getNome();
+		String senha = usuario.getSenha();
 
-        if (credenciais != null) {
-            usuarioLogado = usuario;
-            System.out.println("Usuario valido!");
-            return true;
-        }
-        System.out.println("Usuario invalido!");
-        return false;
-    }
+		Usuario credenciais = usuarioDao.buscarCredenciais(nome, senha);
 
-    public static void logout() {
-        usuarioLogado = null;
-    }
+		if (credenciais == null) {
+			System.out.println("Usuario invalido!");
+			return false;
+		} else {
+			usuarioLogado = usuario;
+			System.out.println("Usuario valido!");
+			return true;
+		}
+	}
 
-    public static boolean isUsuarioLogado() {
-        return usuarioLogado != null;
-    }
+	public static void logout() {
+		usuarioLogado = null;
+	}
 
-    public static boolean isUsuario() {
-    	return isUsuario;
-    }
+	public static boolean isUsuarioLogado() {
+		return usuarioLogado != null;
+	}
 
-    public static Usuario getUsuarioLogado() {
-        return usuarioLogado;
-    }
+	public static boolean isUsuario() {
+		return isUsuario;
+	}
+
+	public static Usuario getUsuarioLogado() {
+		return usuarioLogado;
+	}
 
 }
-
