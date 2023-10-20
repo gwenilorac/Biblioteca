@@ -14,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "usuarios")
@@ -37,6 +38,7 @@ public class Usuario implements Serializable{
 	@OneToMany	
 	private List<Livro> livrosEmprestados;
 	
+	@Transient
 	private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 	
 	public void addPropertyChangeListener(PropertyChangeListener l) {

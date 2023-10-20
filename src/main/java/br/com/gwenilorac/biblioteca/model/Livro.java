@@ -1,7 +1,6 @@
 package br.com.gwenilorac.biblioteca.model;
 
 import java.io.Serializable;
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,10 +13,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.swing.ImageIcon;
+
+import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
 
 
 @Entity
@@ -41,17 +41,19 @@ public class Livro implements Serializable{
     @Column(nullable = false)
     private Estado estado = Estado.DISPONIVEL;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "genero_id")
     private Genero genero;
 	
-	private ImageIcon capa;
+	@Lob
+	@Column(name = "capa", columnDefinition = "bytea")
+	private byte[] capa;
 	
 	@Deprecated
 	public Livro() {
 	}
 
-	public Livro(String titulo, Autor autor, Genero genero) {
+	public Livro(String titulo, Autor autor, Genero genero, byte[] capa) {
 		this.titulo = titulo;
 		this.autor = autor;
 		this.genero = genero;
@@ -93,15 +95,15 @@ public class Livro implements Serializable{
         this.estado = estado;
     }
     
-    public ImageIcon getCapa() {
+    public byte[] getCapa() {
 		return capa;
 	}
 
-	public void setCapa(ImageIcon capa) {
+	public void setCapa(byte[] capa) {
 		this.capa = capa;
 	}
 
-    public void adicionarLivroNaListaDoAutor(Livro livro) {
+	public void adicionarLivroNaListaDoAutor(Livro livro) {
         if (livro.getAutor() != null) {
             List<Livro> livrosDoAutor = livro.getAutor().getLivrosDoAutor();
 

@@ -40,14 +40,14 @@ public class populaBD {
 		Autor SaintExupéry = new Autor("Saint-Exupéry");
 		Autor Esopo = new Autor("Esopo");
 
-		Livro Coraline = new Livro("Coraline", NeilGaiman, terror, Year.of(2002));
-		Livro Carrie = new Livro("Carrie", StephenKing, terror, Year.of(1974));
-		Livro Misery = new Livro("Misery", StephenKing, terror, Year.of(1987));
-		Livro ContoDeFadas = new Livro("Conto de fadas", StephenKing, terror, Year.of(2022));
-		Livro MazeRunner = new Livro("Maze Runner", JamesDashner, aventura, Year.of(2009));
-		Livro OPequenoPríncipe = new Livro("O Pequeno Príncipe", SaintExupéry, fabula, Year.of(1977));
-		Livro OLeãoEORato = new Livro("O Leão e o Rato", Esopo, fabula, Year.of(1980));
-		Livro ACigarraEAFormiga = new Livro("A Cigarra e a Formiga", Esopo, fabula, Year.of(1980));
+		Livro Coraline = new Livro("Coraline", NeilGaiman, terror);
+		Livro Carrie = new Livro("Carrie", StephenKing, terror);
+		Livro Misery = new Livro("Misery", StephenKing, terror);
+		Livro ContoDeFadas = new Livro("Conto de fadas", StephenKing, terror);
+		Livro MazeRunner = new Livro("Maze Runner", JamesDashner, aventura);
+		Livro OPequenoPríncipe = new Livro("O Pequeno Príncipe", SaintExupéry, fabula);
+		Livro OLeãoEORato = new Livro("O Leão e o Rato", Esopo, fabula);
+		Livro ACigarraEAFormiga = new Livro("A Cigarra e a Formiga", Esopo, fabula);
 		
 		Emprestimo emprestimo = new Emprestimo(Misery, Caroline);
 		emprestimo.pegarLivroEmprestado();

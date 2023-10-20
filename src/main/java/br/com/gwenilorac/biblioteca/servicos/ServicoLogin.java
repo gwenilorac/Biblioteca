@@ -20,13 +20,14 @@ public class ServicoLogin {
         		
         Usuario credenciais = usuarioDao.buscarCredenciais(nome, senha);
 
-        if (credenciais != null) {
-            usuarioLogado = usuario;
-            System.out.println("Usuario valido!");
-            return true;
-        }
-        System.out.println("Usuario invalido!");
-        return false;
+        if (credenciais == null) {
+			System.out.println("Usuario invalido!");
+			return false;
+		} else {
+			usuarioLogado = usuario;
+			System.out.println("Usuario valido!");
+			return true;
+		}
     }
 
     public static void logout() {

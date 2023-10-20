@@ -24,25 +24,31 @@ public class LivroDao {
 		this.em.merge(livro);
 	}
 	
-	public void remover(Livro livro) {
+	public boolean remover(Livro livro) {
 		if(livro.getEstado() == Estado.DISPONIVEL) {
 			this.em.remove(livro);
 			System.out.println("Livro excluido com sucesso!");
+			return true;
 		}  else {
 			System.out.println("Por favor devolver livros emprestados!");
+			return false;
         }
 	}
 
-	public List<Livro> buscarTodos() {
+	public List<Livro> buscarTodosLivros() {
 		String jpql = "SELECT l FROM Livro l";
 		return em.createQuery(jpql, Livro.class).getResultList();
 	}
 	
 	public Livro buscarLivroPorTitulo(String titulo) {
+		try {
 		String jpql = "SELECT l FROM Livro l WHERE l.titulo = :titulo";
 		return em.createQuery(jpql, Livro.class)
 				.setParameter("titulo", titulo)
 				.getSingleResult();
+		} catch (Exception e){
+			return null;
+		}
 	}
 	
 	public List<Livro> buscarPorNomeDaCategoria(String nome) {

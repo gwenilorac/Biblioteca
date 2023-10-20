@@ -23,65 +23,68 @@ public class Emprestimo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Livro livro;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
-    private Usuario usuario;
-	
+	private Usuario usuario;
+
 	private LocalDate dataEmprestimo;
 	private LocalDate dataDevolucao;
-	
+
 	@OneToMany
 	private List<Emprestimo> emprestimos = new ArrayList<Emprestimo>();
-	
+
 //	@OneToMany
 //	List<Livro> listaDeLivrosMaisEmprestados = obterLivrosMaisEmprestados();
-	
-	@Deprecated
-	public Emprestimo() {}
 
-    public Emprestimo(Livro livro, Usuario usuario) {
-        this.livro = livro;
-        this.usuario = usuario;
-        this.dataEmprestimo = LocalDate.now();
-        this.dataDevolucao = LocalDate.now().plusWeeks(4);
-    }
-    
-    public Emprestimo(Usuario usuario) {
-    	this.usuario = usuario;
+	@Deprecated
+	public Emprestimo() {
 	}
 
-	public void pegarLivroEmprestado() {
-        if (livro.getEstado() == Estado.DISPONIVEL) {
-            livro.setEstado(Estado.INDISPONIVEL);
-            usuario.adicionarLivroEmprestado(livro);
-            System.out.println("Livro emprestado com sucesso!");
-            System.out.println("Data da Devolucao do Livro: " + dataDevolucao);
-        } else {
-            System.out.println("O livro não está disponível para empréstimo.");
-        }
-    }
+	public Emprestimo(Livro livro, Usuario usuario) {
+		this.livro = livro;
+		this.usuario = usuario;
+		this.dataEmprestimo = LocalDate.now();
+		this.dataDevolucao = LocalDate.now().plusWeeks(4);
+	}
 
-    public void devolverLivro() {
-    	if (livro.getEstado() == Estado.INDISPONIVEL) {
-            livro.setEstado(Estado.DISPONIVEL);
-            usuario.removerLivroEmprestado(livro);
-            System.out.println("Livro devolvido com sucesso!");
-            System.out.println("Data devolução: " + LocalDate.now());
-        } else {
-            System.out.println("O livro não está emprestado ou já foi devolvido.");
-        }
-    }
-    
-    public void DevolucaoParaExclusaoConta() {
-    	for (Livro livro : usuario.getLivrosEmprestados()) {
-    		this.livro = livro;
+	public Emprestimo(Usuario usuario) {
+		this.usuario = usuario;
+	}
+
+	public boolean pegarLivroEmprestado() {
+		if (livro.getEstado() == Estado.DISPONIVEL) {
+			livro.setEstado(Estado.INDISPONIVEL);
+			usuario.adicionarLivroEmprestado(livro);
+			System.out.println("Livro emprestado com sucesso!");
+			System.out.println("Data da Devolucao do Livro: " + dataDevolucao);
+			return true;
+		} else {
+			System.out.println("O livro não está disponível para empréstimo.");
+			return false;
 		}
-    	devolverLivro();
-    	System.out.println("Livros devolvidos com sucesso!");
-    }
+	}
+
+	public void devolverLivro() {
+		if (livro.getEstado() == Estado.INDISPONIVEL) {
+			livro.setEstado(Estado.DISPONIVEL);
+			usuario.removerLivroEmprestado(livro);
+			System.out.println("Livro devolvido com sucesso!");
+			System.out.println("Data devolução: " + LocalDate.now());
+		} else {
+			System.out.println("O livro não está emprestado ou já foi devolvido.");
+		}
+	}
+
+	public void DevolucaoParaExclusaoConta() {
+		for (Livro livro : usuario.getLivrosEmprestados()) {
+			this.livro = livro;
+		}
+		devolverLivro();
+		System.out.println("Livros devolvidos com sucesso!");
+	}
 
 	public Livro getLivro() {
 		return livro;
@@ -114,17 +117,16 @@ public class Emprestimo {
 	public void setDataDevolucao(LocalDate dataDevolucao) {
 		this.dataDevolucao = dataDevolucao;
 	}
-	
-    public List<Livro> obterLivrosMaisEmprestados() {
-        Map<Livro, Long> contagemEmprestimosPorLivro = emprestimos.stream()
-                .collect(Collectors.groupingBy(Emprestimo::getLivro, Collectors.counting()));
 
-        List<Livro> livrosMaisEmprestados = contagemEmprestimosPorLivro.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+	public List<Livro> obterLivrosMaisEmprestados() {
+		Map<Livro, Long> contagemEmprestimosPorLivro = emprestimos.stream()
+				.collect(Collectors.groupingBy(Emprestimo::getLivro, Collectors.counting()));
 
-        return livrosMaisEmprestados;
-    }
+		List<Livro> livrosMaisEmprestados = contagemEmprestimosPorLivro.entrySet().stream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(Map.Entry::getKey)
+				.collect(Collectors.toList());
+
+		return livrosMaisEmprestados;
+	}
 
 }

@@ -26,9 +26,13 @@ public class AutorDao {
 	}
 	
 	public Autor buscarAutorPorNome(String nome) {
-	    String jpql = "SELECT a FROM Autor a WHERE a.nome = :nome";
-	    return em.createQuery(jpql, Autor.class)
-	             .setParameter("nome", nome)
-	             .getSingleResult();
+		try {
+			String jpql = "SELECT a FROM Autor a WHERE a.nome = :nome";
+			return em.createQuery(jpql, Autor.class)
+					.setParameter("nome", nome)
+					.getSingleResult();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }

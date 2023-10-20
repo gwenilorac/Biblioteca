@@ -14,7 +14,7 @@ public class ServicoBusca {
 		EntityManager em = JPAUtil.getEntityManager();
 		LivroDao livroDao = new LivroDao(em);
 
-		if (termoBusca != null && termoBusca.isEmpty()) {
+		if (termoBusca != null && termoBusca.isEmpty() && termoBusca == " ") {
 			Livro buscarLivroPorTitulo = livroDao.buscarLivroPorTitulo(termoBusca);
 			List<Livro> buscarPorNomeAutor = livroDao.buscarPorNomeAutor(termoBusca);
 			if (buscarLivroPorTitulo != null) {

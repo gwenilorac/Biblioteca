@@ -10,13 +10,13 @@
 
 		<properties>
 			<property name="javax.persistence.jdbc.driver"
-				value="com.mysql.cj.jdbc.Driver" />
+				value="org.postgresql.Driver" />
 			<property name="javax.persistence.jdbc.url"
-				value="jdbc:mysql://localhost/biblioteca_jpa?serverTimezone=UTC" />
+				value="jdbc:postgresql://10.1.1.30:5410/carolineProjeto" />
 			<property name="javax.persistence.jdbc.user"
-				value="caroline" />
+				value="antara" />
 			<property name="javax.persistence.jdbc.password"
-				value="123456" />
+				value="antara" />
 
 			<property name="hibernate.dialect"
 				value="org.hibernate.dialect.MySQL5InnoDBDialect" />

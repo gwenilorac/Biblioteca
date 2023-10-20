@@ -39,10 +39,14 @@ private EntityManager em;
 	}
 	
 	public Usuario buscarPorNome(String nome) {
-		String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome";
-		return em.createQuery(jpql, Usuario.class)
-				.setParameter("nome", nome)
-				.getSingleResult();
+		try {
+			String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome";
+			return em.createQuery(jpql, Usuario.class)
+					.setParameter("nome", nome)
+					.getSingleResult();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public Usuario buscarCredenciais(String nome, String senha) {
@@ -53,16 +57,30 @@ private EntityManager em;
 					.setParameter("senha", senha)
 					.getSingleResult();
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
+		}
+	}
+	
+	public boolean buscarEmailCadastrado(String email) {
+		try {
+		String jpql = "SELECT u FROM Usuario u WHERE u.email = :email";
+		return em.createQuery(jpql, Usuario.class)
+				.setParameter("email", email)
+				.getResultList().get(0) != null;
+		} catch (Exception e) {
+			return false;
 		}
 	}
 
 	public Usuario buscarUsuarioPorNome(String nome) {
-	    String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome";
-	    return em.createQuery(jpql, Usuario.class)
-	             .setParameter("nome", nome)
-	             .getSingleResult();
+		try {
+			String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome";
+			return em.createQuery(jpql, Usuario.class)
+					.setParameter("nome", nome)
+					.getSingleResult();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 	
 	public List<Livro> buscarLivrosEmprestadosPorUsuario(Usuario usuario) {
