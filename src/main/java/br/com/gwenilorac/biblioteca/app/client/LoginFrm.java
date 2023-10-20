@@ -57,7 +57,7 @@ public class LoginFrm extends JDialog{
 	private void actionLogin() {
 		if (!isValid(model.getBean())) return;
 		
-		if (ServicoLogin.validaUsuario(model.getBean())) {
+		if (ServicoLogin.validaUsuario(model.getBean()) == true) {
 			login = true;
 			dispose();
 		} else {

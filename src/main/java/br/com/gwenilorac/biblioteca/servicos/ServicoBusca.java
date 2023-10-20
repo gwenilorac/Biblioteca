@@ -15,13 +15,15 @@ public class ServicoBusca {
 		LivroDao livroDao = new LivroDao(em);
 
 		if (termoBusca != null && termoBusca.isEmpty() && termoBusca == " ") {
-			Livro buscarLivroPorTitulo = livroDao.buscarLivroPorTitulo(termoBusca);
-			List<Livro> buscarPorNomeAutor = livroDao.buscarPorNomeAutor(termoBusca);
-			if (buscarLivroPorTitulo != null) {
-				return buscarLivroPorTitulo;
-			}
-			if (buscarPorNomeAutor != null) {
-				return buscarLivroPorTitulo;
+			if (termoBusca != null && !termoBusca.isEmpty() && termoBusca == " ") {
+				Livro buscarLivroPorTitulo = livroDao.buscarLivroPorTitulo(termoBusca);
+				List<Livro> buscarPorNomeAutor = livroDao.buscarPorNomeAutor(termoBusca);
+				if (buscarLivroPorTitulo != null) {
+					return buscarLivroPorTitulo;
+				}
+				if (buscarPorNomeAutor != null) {
+					return buscarLivroPorTitulo;
+				}
 			}
 		}
 		return null;

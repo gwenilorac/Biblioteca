@@ -63,7 +63,6 @@ public class ApplicationFrm extends JFrame {
 
 		btnSalvar = new JButton("Salvar");
 		btnSalvar.addActionListener(bs -> actionSalvar());
-
 		btnBusca = new JButton("Buscar");
 		btnBusca.addActionListener(bb -> realizarBusca(tfBusca.getText()));
 	}

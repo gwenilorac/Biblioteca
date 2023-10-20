@@ -55,7 +55,7 @@ private EntityManager em;
 			return em.createQuery(jpql, Usuario.class)
 					.setParameter("nome", nome)
 					.setParameter("senha", senha)
-					.getSingleResult();
+					.getResultList().get(0);
 		} catch (Exception e) {
 			return null;
 		}
@@ -71,7 +71,7 @@ private EntityManager em;
 			return false;
 		}
 	}
-
+	
 	public Usuario buscarUsuarioPorNome(String nome) {
 		try {
 			String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome";
