@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.postgresql.core.Oid;
+
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
 
 import br.com.gwenilorac.biblioteca.dao.AutorDao;

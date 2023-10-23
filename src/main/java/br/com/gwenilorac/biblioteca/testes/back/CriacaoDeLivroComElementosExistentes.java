@@ -21,7 +21,7 @@ public class CriacaoDeLivroComElementosExistentes {
 		Autor StephenKing = autorDao.buscarAutorPorNome("Stephen King");
         Genero terror = generoDao.buscarGeneroPorNome("TERROR");
         
-        Livro OLivroDoCemitério = new Livro("O Livro do Cemitério", StephenKing, terror);
+        Livro OLivroDoCemitério = new Livro("O Livro do Cemitério", StephenKing, terror, null);
 		
 	}
 

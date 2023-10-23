@@ -3,9 +3,7 @@ package br.com.gwenilorac.biblioteca.app.client;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseMotionListener;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -22,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
@@ -45,6 +44,7 @@ public class ApplicationFrm extends JFrame {
 	private JPasswordField passField;
 	private JButton btnSalvar;
 	private JButton btnBusca;
+	private JButton btnCapas;
 
 	public ApplicationFrm() {
 		initModel();
@@ -65,6 +65,7 @@ public class ApplicationFrm extends JFrame {
 		btnSalvar.addActionListener(bs -> actionSalvar());
 		btnBusca = new JButton("Buscar");
 		btnBusca.addActionListener(bb -> realizarBusca(tfBusca.getText()));
+
 	}
 
 	private void actionSalvar() {
@@ -127,7 +128,7 @@ public class ApplicationFrm extends JFrame {
 
 	private void abrirFormularioAdicionarLivro() {
 
-		AddBookForm addBookForm = new AddBookForm();
+		AdicionarLivroFrm addBookForm = new AdicionarLivroFrm();
 		JInternalFrame internalFrame = new JInternalFrame("Adicionar Livro", true, true, true, true);
 		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		internalFrame.add(addBookForm);
@@ -153,26 +154,39 @@ public class ApplicationFrm extends JFrame {
 
 	private Component exibirCapasDosLivros() {
 		List<Livro> livros = ServicoLivro.pegarLivros();
+		JInternalFrame internalFrame = new JInternalFrame();
+		BasicInternalFrameUI ui = (BasicInternalFrameUI) internalFrame.getUI();
+		Component northPane = ui.getNorthPane();
+		MouseMotionListener[] motionListeners = (MouseMotionListener[]) northPane
+				.getListeners(MouseMotionListener.class);
+
+		for (MouseMotionListener listener : motionListeners)
+			northPane.removeMouseMotionListener(listener);
+
 		JPanel panelCapas = new JPanel();
-		panelCapas.setLayout(new FlowLayout());
 
 		for (Livro livro : livros) {
 			byte[] imagemIcon = livro.getCapa();
 			ImageIcon icon = new ImageIcon(imagemIcon);
-			JButton botaoCapa = new JButton();
-			botaoCapa.setIcon(icon);
-			botaoCapa.setPreferredSize(new Dimension(100, 150));
-			botaoCapa.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					abrirDetalhesDoLivro(livro);
-				}
-			});
-			panelCapas.add(botaoCapa);
+			btnCapas = new JButton();
+			btnCapas.setIcon(icon);
+			btnCapas.setPreferredSize(new Dimension(100, 150));
+			btnCapas.addActionListener(bc -> abrirDetalhesDoLivro(livro));
+			panelCapas.add(btnCapas);
+			panelCapas.setVisible(true);
 		}
+
+		internalFrame.getContentPane().setPreferredSize(new Dimension(1285, 645));
+		internalFrame.add(panelCapas);
+		internalFrame.setVisible(true);
+		internalFrame.pack();
+		internalFrame.toFront();
+
+		jDesktopPane.add(internalFrame);
+
 		return panelCapas;
 	}
-
+	
 	private void abrirDetalhesDoLivro(Livro livro) {
 		DetalhesLivroInternalFrame detalhesDoLivro = new DetalhesLivroInternalFrame(livro);
 		JInternalFrame internalFrame = new JInternalFrame(livro.getTitulo(), true, true, true, true);
@@ -204,6 +218,7 @@ public class ApplicationFrm extends JFrame {
 		return builder.getPanel();
 
 	}
+}
 
 //	private void abrirLivrosEmprestados() {
 //		MyInternalFrame livrosEmprestadosFrm = new MyInternalFrame("LIVROS EMPRESTADOS");
@@ -214,5 +229,3 @@ public class ApplicationFrm extends JFrame {
 //		MyInternalFrame frame = new MyInternalFrame("FRAME TESTE");
 //		jDesktopPane.add(frame);
 //	}
-
-}

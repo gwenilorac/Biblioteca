@@ -1,5 +1,6 @@
 package br.com.gwenilorac.biblioteca.model;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +14,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
+import org.hibernate.annotations.Type;
 
 
 @Entity
@@ -45,11 +45,10 @@ public class Livro implements Serializable{
     @JoinColumn(name = "genero_id")
     private Genero genero;
 	
-	@Lob
-	@Column(name = "capa", columnDefinition = "bytea")
+	@Type(type="org.hibernate.type.BinaryType")
+	@Column(name = "capa")
 	private byte[] capa;
 	
-	@Deprecated
 	public Livro() {
 	}
 
@@ -58,6 +57,7 @@ public class Livro implements Serializable{
 		this.autor = autor;
 		this.genero = genero;
 		this.estado = Estado.DISPONIVEL;
+		this.capa = capa;
 		
 		this.adicionarLivroNaListaDoAutor(this);
 
