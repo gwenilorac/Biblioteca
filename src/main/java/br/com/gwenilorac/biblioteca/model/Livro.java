@@ -115,5 +115,15 @@ public class Livro implements Serializable{
             livrosDoAutor.add(livro);
         }
     }
+	
+	  @Override
+	    public String toString() {
+	        return "Livro{" + 
+	                "Titulo = " + titulo + '\'' + 
+	                "Autor = " + autor + '\'' +
+	                "Genero = " + genero + '\'' +
+	                '}';
+	    }
+
     
 }

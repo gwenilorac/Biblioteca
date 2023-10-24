@@ -1,10 +1,13 @@
 package br.com.gwenilorac.biblioteca.app.client;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Image;
 
 import javax.persistence.EntityManager;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -29,41 +32,39 @@ public class DetalhesLivroInternalFrame extends JPanel {
 
 	public DetalhesLivroInternalFrame(Livro livro) {
 		this.livro = livro;
-
+		
 		setLayout(new BorderLayout());
-
+		setPreferredSize(new Dimension(400, 250));
+		Dimension d = getSize();
+		setLocation((d.width - getSize().width) / 2, (d.height - getSize().height) / 2);
+		
 		byte[] imagemIcon = livro.getCapa();
 		ImageIcon icon = new ImageIcon(imagemIcon);
-		JLabel capaLabel = new JLabel(icon);
+		Image img = icon.getImage().getScaledInstance(150, 200, java.awt.Image.SCALE_SMOOTH);
+		ImageIcon newIcon = new ImageIcon(img);
+		JLabel capaLabel = new JLabel(newIcon);
 		add(capaLabel, BorderLayout.WEST);
 
 		JPanel detalhesPanel = new JPanel();
+		detalhesPanel.setPreferredSize(new Dimension(400, 300));
 		detalhesPanel.setLayout(new BoxLayout(detalhesPanel, BoxLayout.Y_AXIS));
-		add(detalhesPanel, BorderLayout.CENTER);
-
 		detalhesPanel.add(new JLabel("Nome:" + livro.getTitulo()));
 		detalhesPanel.add(new JLabel("Autor:" + livro.getAutor()));
 		detalhesPanel.add(new JLabel("Gênero:" + livro.getGenero()));
-
+		add(detalhesPanel, BorderLayout.CENTER);
+		
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout());
 		btnPegarEmprestado = new JButton("Pegar Emprestado");
-		btnPegarEmprestado.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				pegarLivroEmprestado();
-			}
-		});
-		detalhesPanel.add(btnPegarEmprestado);
-
+		btnPegarEmprestado.addActionListener(pe -> pegarLivroEmprestado());
+		panel.add(btnPegarEmprestado);
 		btnRemover = new JButton("Remover");
-		btnRemover.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				removerLivro();
-			}
-		});
-		detalhesPanel.add(btnRemover);
+		btnRemover.addActionListener(rm -> removerLivro());
+		panel.add(btnRemover);
+		add(panel, BorderLayout.PAGE_END);
+		
 	}
-
+	
 	private void pegarLivroEmprestado() {
 		Usuario usuario = ServicoLogin.getUsuarioLogado();
 		Emprestimo emprestimo = new Emprestimo(livro, usuario);

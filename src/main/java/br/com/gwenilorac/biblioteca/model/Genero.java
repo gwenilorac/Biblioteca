@@ -14,21 +14,22 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "generos")
-public class Genero implements Serializable{
-	
+public class Genero implements Serializable {
+
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String nome;
-	
+
 	@OneToMany(mappedBy = "genero", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Livro> livrosDoGenero = new ArrayList<>();
-	
+	private List<Livro> livrosDoGenero = new ArrayList<>();
+
 	@Deprecated
-	public Genero(){}
-	
+	public Genero() {
+	}
+
 	public Genero(String nome) {
 		this.nome = nome;
 	}
@@ -40,6 +41,10 @@ public class Genero implements Serializable{
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return nome;
+	}
+
 }

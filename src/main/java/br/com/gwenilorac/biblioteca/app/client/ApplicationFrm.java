@@ -2,7 +2,10 @@ package br.com.gwenilorac.biblioteca.app.client;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.ComponentOrientation;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.event.MouseMotionListener;
 import java.util.List;
 
@@ -129,10 +132,12 @@ public class ApplicationFrm extends JFrame {
 	private void abrirFormularioAdicionarLivro() {
 
 		AdicionarLivroFrm addBookForm = new AdicionarLivroFrm();
-		JInternalFrame internalFrame = new JInternalFrame("Adicionar Livro", true, true, true, true);
+		JInternalFrame internalFrame = new JInternalFrame("Adicionar Livro", false, true, false, false);
 		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		internalFrame.add(addBookForm);
 		internalFrame.setSize(400, 300);
+		Dimension d = jDesktopPane.getSize();
+		internalFrame.setLocation((d.width - internalFrame.getSize().width) / 2, (d.height - internalFrame.getSize().height) / 2);
 		internalFrame.setVisible(true);
 		internalFrame.pack();
 
@@ -153,43 +158,57 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private Component exibirCapasDosLivros() {
+		
 		List<Livro> livros = ServicoLivro.pegarLivros();
+		
+		FlowLayout layout = new FlowLayout();
+		
 		JInternalFrame internalFrame = new JInternalFrame();
+		internalFrame.setLayout(layout);
+		internalFrame.getContentPane().setPreferredSize(new Dimension(1285, 645));
+		internalFrame.setVisible(true);
+		internalFrame.pack();
+		
 		BasicInternalFrameUI ui = (BasicInternalFrameUI) internalFrame.getUI();
 		Component northPane = ui.getNorthPane();
 		MouseMotionListener[] motionListeners = (MouseMotionListener[]) northPane
 				.getListeners(MouseMotionListener.class);
-
 		for (MouseMotionListener listener : motionListeners)
 			northPane.removeMouseMotionListener(listener);
 
 		JPanel panelCapas = new JPanel();
-
+//		panelCapas.setLayout(layout);
+		
 		for (Livro livro : livros) {
+			btnCapas = new JButton();
+			btnCapas.setLayout(layout);
+			btnCapas.setSize(150, 200);
+			
 			byte[] imagemIcon = livro.getCapa();
 			ImageIcon icon = new ImageIcon(imagemIcon);
-			btnCapas = new JButton();
-			btnCapas.setIcon(icon);
-			btnCapas.setPreferredSize(new Dimension(100, 150));
+			Image img = icon.getImage().getScaledInstance(btnCapas.getWidth(), btnCapas.getHeight(), java.awt.Image.SCALE_SMOOTH);
+			ImageIcon newIcon = new ImageIcon(img);
+			
+			btnCapas.setIcon(newIcon);
+			btnCapas.setVisible(true);
 			btnCapas.addActionListener(bc -> abrirDetalhesDoLivro(livro));
 			panelCapas.add(btnCapas);
-			panelCapas.setVisible(true);
 		}
-
-		internalFrame.getContentPane().setPreferredSize(new Dimension(1285, 645));
+		
+		btnCapas.setComponentOrientation(
+                ComponentOrientation.LEFT_TO_RIGHT);
+		
 		internalFrame.add(panelCapas);
-		internalFrame.setVisible(true);
-		internalFrame.pack();
-		internalFrame.toFront();
-
+		internalFrame.add(btnCapas);
+		
 		jDesktopPane.add(internalFrame);
 
 		return panelCapas;
 	}
-	
+
 	private void abrirDetalhesDoLivro(Livro livro) {
 		DetalhesLivroInternalFrame detalhesDoLivro = new DetalhesLivroInternalFrame(livro);
-		JInternalFrame internalFrame = new JInternalFrame(livro.getTitulo(), true, true, true, true);
+		JInternalFrame internalFrame = new JInternalFrame(livro.getTitulo(), false, true, false, false);
 		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		internalFrame.add(detalhesDoLivro);
 		internalFrame.setSize(400, 300);

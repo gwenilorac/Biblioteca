@@ -48,9 +48,7 @@ public class Autor implements Serializable{
 
     @Override
     public String toString() {
-        return "Autor{" + 
-                "nome='" + nome + '\'' + 
-                '}';
+        return nome;
     }
 
     public List<Livro> getLivrosDoAutor() {
