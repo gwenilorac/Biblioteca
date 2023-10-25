@@ -1,10 +1,10 @@
 package br.com.gwenilorac.biblioteca.model;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -33,7 +33,7 @@ public class Livro implements Serializable{
 	@Column(nullable = false)
 	private String titulo;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "autor_id")
     private Autor autor;
 	
@@ -41,7 +41,7 @@ public class Livro implements Serializable{
     @Column(nullable = false)
     private Estado estado = Estado.DISPONIVEL;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "genero_id")
     private Genero genero;
 	
@@ -125,5 +125,4 @@ public class Livro implements Serializable{
 	                '}';
 	    }
 
-    
 }

@@ -2,11 +2,13 @@ package br.com.gwenilorac.biblioteca.app.client;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseMotionListener;
+import java.beans.PropertyVetoException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -16,20 +18,27 @@ import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
-import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+import br.com.gwenilorac.biblioteca.dao.AutorDao;
+import br.com.gwenilorac.biblioteca.dao.GeneroDao;
+import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Usuario;
@@ -47,7 +56,9 @@ public class ApplicationFrm extends JFrame {
 	private JPasswordField passField;
 	private JButton btnSalvar;
 	private JButton btnBusca;
-	private JButton btnCapas;
+	private JButton btnUser;
+	private JTextField txtNome;
+	private JTextField txtEmail;
 
 	public ApplicationFrm() {
 		initModel();
@@ -68,6 +79,8 @@ public class ApplicationFrm extends JFrame {
 		btnSalvar.addActionListener(bs -> actionSalvar());
 		btnBusca = new JButton("Buscar");
 		btnBusca.addActionListener(bb -> realizarBusca(tfBusca.getText()));
+		btnUser = new JButton("User");
+		btnUser.addActionListener(bu -> abrirFuncoesUsuario());
 
 	}
 
@@ -94,7 +107,6 @@ public class ApplicationFrm extends JFrame {
 
 		JMenu menu = new JMenu("Menu");
 		JMenuItem generos = new JMenuItem("Generos");
-//		generos.addActionListener(evt -> abrirInternalFrame());
 		JMenuItem adicionarLivro = new JMenuItem("Adicionar Livro");
 		adicionarLivro.addActionListener(al -> abrirFormularioAdicionarLivro());
 		menu.add(generos);
@@ -103,21 +115,13 @@ public class ApplicationFrm extends JFrame {
 		tfBusca = new JTextField("Faça sua busca aqui", 30);
 		tfBusca.setMaximumSize(textField.getPreferredSize());
 
-		JMenu user = new JMenu("User");
-		JMenuItem userItem1 = new JMenuItem("Livros Emprestados");
-//		userItem1.addActionListener(le -> abrirLivrosEmprestados());
-		JMenuItem userItem2 = new JMenuItem("Editar Usuario");
-		userItem2.addActionListener(eu -> abrirEditarUsuario());
-		user.add(userItem1);
-		user.add(userItem2);
-
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(menu);
 		menubar.add(Box.createHorizontalGlue());
 		menubar.add(tfBusca);
 		menubar.add(btnBusca);
 		menubar.add(Box.createHorizontalGlue());
-		menubar.add(user);
+		menubar.add(btnUser);
 
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(800, 600));
@@ -126,6 +130,83 @@ public class ApplicationFrm extends JFrame {
 		setJMenuBar(menubar);
 		setVisible(true);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
+	}
+
+	private JInternalFrame abrirFuncoesUsuario() {
+		JPanel infoUsuarioPanel = criarInfoUsuarioPanel();
+		JPanel editarUsuarioPanel = criarEditarUsuarioPanel();
+		JList<Livro> livrosEmprestadosList = criarLivrosEmprestadosList();
+		JScrollPane livrosEmprestadosScrollPane = new JScrollPane(livrosEmprestadosList);
+		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane.addTab("Informações do Usuário", infoUsuarioPanel);
+		tabbedPane.addTab("Editar Usuário", editarUsuarioPanel);
+		tabbedPane.addTab("Livros Emprestados", livrosEmprestadosScrollPane);
+
+		JInternalFrame internalFrame = new JInternalFrame("Detalhes do Usuário", true, true, true, true);
+		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+		internalFrame.setPreferredSize(new Dimension(800, 600));
+		internalFrame.add(tabbedPane);
+		internalFrame.pack();
+		internalFrame.setVisible(true);
+
+		jDesktopPane.add(internalFrame);
+
+		internalFrame.toFront();
+
+		Dimension desktopSize = jDesktopPane.getSize();
+		Dimension jInternalFrameSize = internalFrame.getSize();
+		internalFrame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
+				(desktopSize.height - jInternalFrameSize.height) / 2);
+		return internalFrame;
+	}
+
+	private JList<Livro> criarLivrosEmprestadosList() {
+		return null;
+	}
+
+	private JPanel criarEditarUsuarioPanel() {
+		return null;
+	}
+
+	private JPanel criarInfoUsuarioPanel() {
+		JPanel editarPanel = new JPanel();
+		FormLayout layout = new FormLayout("right:max(50dlu;pref), 6dlu, pref, 6dlu, pref",
+				"pref, 6dlu, pref, 6dlu, pref, 6dlu, pref");
+		CellConstraints cc = new CellConstraints();
+		editarPanel.setLayout(layout);
+
+		JLabel lblNome = new JLabel("Nome: ");
+		JLabel lblEmail = new JLabel("Email: ");
+
+		txtNome = new JTextField(model.getBean().getNome());
+		txtEmail = new JTextField(model.getBean().getEmail());
+
+		JButton btnSalvar = new JButton("Salvar");
+		btnSalvar.addActionListener(this::salvarEdicao);
+
+		editarPanel.add(lblNome, cc.xy(1, 1));
+		editarPanel.add(txtNome, cc.xyw(3, 1, 3));
+		editarPanel.add(lblEmail, cc.xy(1, 3));
+		editarPanel.add(txtEmail, cc.xyw(3, 3, 3));
+		editarPanel.add(btnSalvar, cc.xy(3, 7));
+
+		return editarPanel;
+	}
+	
+	private void salvarEdicao(ActionEvent e) {
+		EntityManager em = JPAUtil.getEntityManager();
+		UsuarioDao usuarioDao = new UsuarioDao(em);
+
+		String novoNome = txtNome.getText();
+		String novoEmail = txtEmail.getText();
+
+		model.getBean().setNome(novoNome);
+		model.getBean().setEmail(novoEmail);
+
+		em.getTransaction().begin();
+		usuarioDao.atualizar(model.getBean());
+		em.getTransaction().commit();
+		em.close();
 
 	}
 
@@ -137,7 +218,8 @@ public class ApplicationFrm extends JFrame {
 		internalFrame.add(addBookForm);
 		internalFrame.setSize(400, 300);
 		Dimension d = jDesktopPane.getSize();
-		internalFrame.setLocation((d.width - internalFrame.getSize().width) / 2, (d.height - internalFrame.getSize().height) / 2);
+		internalFrame.setLocation((d.width - internalFrame.getSize().width) / 2,
+				(d.height - internalFrame.getSize().height) / 2);
 		internalFrame.setVisible(true);
 		internalFrame.pack();
 
@@ -157,18 +239,11 @@ public class ApplicationFrm extends JFrame {
 		}
 	}
 
-	private Component exibirCapasDosLivros() {
-		
+	private JInternalFrame exibirCapasDosLivros() {
 		List<Livro> livros = ServicoLivro.pegarLivros();
-		
-		FlowLayout layout = new FlowLayout();
-		
 		JInternalFrame internalFrame = new JInternalFrame();
-		internalFrame.setLayout(layout);
-		internalFrame.getContentPane().setPreferredSize(new Dimension(1285, 645));
-		internalFrame.setVisible(true);
-		internalFrame.pack();
-		
+		internalFrame.setLayout(new FlowLayout());
+
 		BasicInternalFrameUI ui = (BasicInternalFrameUI) internalFrame.getUI();
 		Component northPane = ui.getNorthPane();
 		MouseMotionListener[] motionListeners = (MouseMotionListener[]) northPane
@@ -176,34 +251,32 @@ public class ApplicationFrm extends JFrame {
 		for (MouseMotionListener listener : motionListeners)
 			northPane.removeMouseMotionListener(listener);
 
-		JPanel panelCapas = new JPanel();
-//		panelCapas.setLayout(layout);
-		
 		for (Livro livro : livros) {
-			btnCapas = new JButton();
-			btnCapas.setLayout(layout);
-			btnCapas.setSize(150, 200);
-			
-			byte[] imagemIcon = livro.getCapa();
-			ImageIcon icon = new ImageIcon(imagemIcon);
-			Image img = icon.getImage().getScaledInstance(btnCapas.getWidth(), btnCapas.getHeight(), java.awt.Image.SCALE_SMOOTH);
-			ImageIcon newIcon = new ImageIcon(img);
-			
-			btnCapas.setIcon(newIcon);
-			btnCapas.setVisible(true);
-			btnCapas.addActionListener(bc -> abrirDetalhesDoLivro(livro));
-			panelCapas.add(btnCapas);
+			JButton btnCapas = criarBotaoComImagem(livro.getCapa());
+			btnCapas.addActionListener(e -> abrirDetalhesDoLivro(livro));
+			internalFrame.add(btnCapas);
 		}
-		
-		btnCapas.setComponentOrientation(
-                ComponentOrientation.LEFT_TO_RIGHT);
-		
-		internalFrame.add(panelCapas);
-		internalFrame.add(btnCapas);
-		
-		jDesktopPane.add(internalFrame);
 
-		return panelCapas;
+		internalFrame.pack();
+
+		internalFrame.setVisible(true);
+
+		try {
+			internalFrame.setMaximum(true);
+		} catch (PropertyVetoException e) {
+			e.printStackTrace();
+		}
+
+		return internalFrame;
+	}
+
+	private JButton criarBotaoComImagem(byte[] imagemDados) {
+		ImageIcon icon = new ImageIcon(imagemDados);
+		Image img = icon.getImage().getScaledInstance(150, 200, Image.SCALE_SMOOTH);
+		ImageIcon novaIcone = new ImageIcon(img);
+		JButton botao = new JButton(novaIcone);
+		botao.setPreferredSize(new Dimension(150, 200));
+		return botao;
 	}
 
 	private void abrirDetalhesDoLivro(Livro livro) {
@@ -215,36 +288,14 @@ public class ApplicationFrm extends JFrame {
 		internalFrame.setVisible(true);
 		internalFrame.pack();
 
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (screenSize.width - internalFrame.getWidth()) / 2;
+		int y = (screenSize.height - internalFrame.getHeight()) / 2;
+		internalFrame.setLocation(x, y);
+
 		jDesktopPane.add(internalFrame);
 
 		internalFrame.toFront();
 	}
 
-	private JPanel abrirEditarUsuario() {
-		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
-		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-
-		builder.append("User:", textField);
-		builder.nextLine();
-
-		builder.append("Password:", passField);
-
-		JPanel jPanel = new JPanel();
-		jPanel.setLayout(layout);
-
-//		editarUsuarioFrm.add(jPanel);
-//		jDesktopPane.add(editarUsuarioFrm);
-		return builder.getPanel();
-
-	}
 }
-
-//	private void abrirLivrosEmprestados() {
-//		MyInternalFrame livrosEmprestadosFrm = new MyInternalFrame("LIVROS EMPRESTADOS");
-//		jDesktopPane.add(livrosEmprestadosFrm);
-//	}
-//
-//	private void abrirInternalFrame() {
-//		MyInternalFrame frame = new MyInternalFrame("FRAME TESTE");
-//		jDesktopPane.add(frame);
-//	}
