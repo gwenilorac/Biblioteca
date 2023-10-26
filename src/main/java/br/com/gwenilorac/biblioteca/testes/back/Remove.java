@@ -25,7 +25,7 @@ public class Remove {
 		AutorDao autorDao = new AutorDao(em);
 		GeneroDao generoDao = new GeneroDao(em);
 
-		Usuario rafaela = usuarioDao.buscarPorNome("Rafaela");
+		Usuario rafaela = usuarioDao.buscarUsuarioPorNome("Rafaela");
 		Emprestimo emprestimo = new Emprestimo(rafaela);
 		emprestimo.DevolucaoParaExclusaoConta();
 		usuarioDao.remover(rafaela);

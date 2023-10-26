@@ -84,7 +84,9 @@ public class Usuario implements Serializable{
 	}
 
 	public void setEmail(String email) {
+		Object old = this.email;
 		this.email = email;
+		changeSupport.firePropertyChange("email", old, this.email);
 	}
 
 	public void setLivrosEmprestados(List<Livro> livrosEmprestados) {

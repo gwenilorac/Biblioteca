@@ -8,12 +8,12 @@ public class Main {
 		
 //		CadastroFrm cadastroFrm = new CadastroFrm(); 
 		
-//		LoginFrm loginFrm = new LoginFrm();
+		LoginFrm loginFrm = new LoginFrm();
 		
-//		if (loginFrm.isOK()) {
+		if (loginFrm.isOK()) {
 			new ApplicationFrm();
-//		}
-//		System.out.println("TESTE");
+		}
+		System.out.println("TESTE");
 	}
 
 }

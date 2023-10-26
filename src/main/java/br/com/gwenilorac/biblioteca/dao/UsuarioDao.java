@@ -38,17 +38,6 @@ private EntityManager em;
 				.getResultList();
 	}
 	
-	public Usuario buscarPorNome(String nome) {
-		try {
-			String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome";
-			return em.createQuery(jpql, Usuario.class)
-					.setParameter("nome", nome)
-					.getSingleResult();
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
 	public Usuario buscarCredenciais(String nome, String senha) {
 		try {
 			String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome AND u.senha = :senha";

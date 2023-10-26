@@ -33,6 +33,7 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -57,8 +58,6 @@ public class ApplicationFrm extends JFrame {
 	private JButton btnSalvar;
 	private JButton btnBusca;
 	private JButton btnUser;
-	private JTextField txtNome;
-	private JTextField txtEmail;
 
 	public ApplicationFrm() {
 		initModel();
@@ -75,29 +74,11 @@ public class ApplicationFrm extends JFrame {
 		textField = BasicComponentFactory.createTextField(model.getModel("nome"));
 		passField = BasicComponentFactory.createPasswordField(model.getModel("senha"));
 
-		btnSalvar = new JButton("Salvar");
-		btnSalvar.addActionListener(bs -> actionSalvar());
 		btnBusca = new JButton("Buscar");
 		btnBusca.addActionListener(bb -> realizarBusca(tfBusca.getText()));
 		btnUser = new JButton("User");
 		btnUser.addActionListener(bu -> abrirFuncoesUsuario());
 
-	}
-
-	private void actionSalvar() {
-
-		String text = textField.getText();
-		String pass = passField.getText();
-		EntityManager em = JPAUtil.getEntityManager();
-		UsuarioDao usuarioDao = new UsuarioDao(em);
-		if (!(textField == null)) {
-			model.getBean().setNome(text);
-		}
-		if (!(passField == null)) {
-			model.getBean().setSenha(pass);
-		}
-		usuarioDao.atualizar(model.getBean());
-		return;
 	}
 
 	private void initLayout() {
@@ -133,19 +114,11 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private JInternalFrame abrirFuncoesUsuario() {
-		JPanel infoUsuarioPanel = criarInfoUsuarioPanel();
-		JPanel editarUsuarioPanel = criarEditarUsuarioPanel();
-		JList<Livro> livrosEmprestadosList = criarLivrosEmprestadosList();
-		JScrollPane livrosEmprestadosScrollPane = new JScrollPane(livrosEmprestadosList);
-		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.addTab("Informações do Usuário", infoUsuarioPanel);
-		tabbedPane.addTab("Editar Usuário", editarUsuarioPanel);
-		tabbedPane.addTab("Livros Emprestados", livrosEmprestadosScrollPane);
-
+		FuncoesUsuario funcoesUser = new FuncoesUsuario();
 		JInternalFrame internalFrame = new JInternalFrame("Detalhes do Usuário", true, true, true, true);
 		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-		internalFrame.setPreferredSize(new Dimension(800, 600));
-		internalFrame.add(tabbedPane);
+		internalFrame.add(funcoesUser);
+		internalFrame.setPreferredSize(new Dimension(600, 400));
 		internalFrame.pack();
 		internalFrame.setVisible(true);
 
@@ -157,61 +130,11 @@ public class ApplicationFrm extends JFrame {
 		Dimension jInternalFrameSize = internalFrame.getSize();
 		internalFrame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
 				(desktopSize.height - jInternalFrameSize.height) / 2);
+		
 		return internalFrame;
 	}
 
-	private JList<Livro> criarLivrosEmprestadosList() {
-		return null;
-	}
-
-	private JPanel criarEditarUsuarioPanel() {
-		return null;
-	}
-
-	private JPanel criarInfoUsuarioPanel() {
-		JPanel editarPanel = new JPanel();
-		FormLayout layout = new FormLayout("right:max(50dlu;pref), 6dlu, pref, 6dlu, pref",
-				"pref, 6dlu, pref, 6dlu, pref, 6dlu, pref");
-		CellConstraints cc = new CellConstraints();
-		editarPanel.setLayout(layout);
-
-		JLabel lblNome = new JLabel("Nome: ");
-		JLabel lblEmail = new JLabel("Email: ");
-
-		txtNome = new JTextField(model.getBean().getNome());
-		txtEmail = new JTextField(model.getBean().getEmail());
-
-		JButton btnSalvar = new JButton("Salvar");
-		btnSalvar.addActionListener(this::salvarEdicao);
-
-		editarPanel.add(lblNome, cc.xy(1, 1));
-		editarPanel.add(txtNome, cc.xyw(3, 1, 3));
-		editarPanel.add(lblEmail, cc.xy(1, 3));
-		editarPanel.add(txtEmail, cc.xyw(3, 3, 3));
-		editarPanel.add(btnSalvar, cc.xy(3, 7));
-
-		return editarPanel;
-	}
-	
-	private void salvarEdicao(ActionEvent e) {
-		EntityManager em = JPAUtil.getEntityManager();
-		UsuarioDao usuarioDao = new UsuarioDao(em);
-
-		String novoNome = txtNome.getText();
-		String novoEmail = txtEmail.getText();
-
-		model.getBean().setNome(novoNome);
-		model.getBean().setEmail(novoEmail);
-
-		em.getTransaction().begin();
-		usuarioDao.atualizar(model.getBean());
-		em.getTransaction().commit();
-		em.close();
-
-	}
-
 	private void abrirFormularioAdicionarLivro() {
-
 		AdicionarLivroFrm addBookForm = new AdicionarLivroFrm();
 		JInternalFrame internalFrame = new JInternalFrame("Adicionar Livro", false, true, false, false);
 		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);

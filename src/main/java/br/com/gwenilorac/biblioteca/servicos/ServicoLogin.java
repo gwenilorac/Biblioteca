@@ -16,6 +16,7 @@ public class ServicoLogin {
 		UsuarioDao usuarioDao = new UsuarioDao(em);
 
 		String nome = usuario.getNome();
+		String email = usuario.getEmail();
 		String senha = usuario.getSenha();
 
 		Usuario credenciais = usuarioDao.buscarCredenciais(nome, senha);

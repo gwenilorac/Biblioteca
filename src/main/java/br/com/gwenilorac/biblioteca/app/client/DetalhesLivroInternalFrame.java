@@ -125,9 +125,9 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		CellConstraints cc = new CellConstraints();
 		editarPanel.setLayout(layout);
 
-		JLabel lblTitulo = new JLabel("Título:");
-		JLabel lblAutor = new JLabel("Autor:");
-		JLabel lblGenero = new JLabel("Gênero:");
+		JLabel lblTitulo = new JLabel("Título: ");
+		JLabel lblAutor = new JLabel("Autor: ");
+		JLabel lblGenero = new JLabel("Gênero: ");
 
 		txtTitulo = new JTextField(livro.getTitulo());
 		txtAutor = new JTextField(livro.getAutor().toString());
