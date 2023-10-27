@@ -1,4 +1,5 @@
 import br.com.gwenilorac.biblioteca.app.client.ApplicationFrm;
+import br.com.gwenilorac.biblioteca.app.client.CadastroFrm;
 import br.com.gwenilorac.biblioteca.app.client.LoginFrm;
 
 public class Main {

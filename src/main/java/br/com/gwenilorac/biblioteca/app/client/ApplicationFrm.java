@@ -55,7 +55,6 @@ public class ApplicationFrm extends JFrame {
 	private JTextField textField;
 	private JTextField tfBusca;
 	private JPasswordField passField;
-	private JButton btnSalvar;
 	private JButton btnBusca;
 	private JButton btnUser;
 
@@ -71,9 +70,8 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private void initComponents() {
-		textField = BasicComponentFactory.createTextField(model.getModel("nome"));
-		passField = BasicComponentFactory.createPasswordField(model.getModel("senha"));
-
+		tfBusca = new JTextField("Faça sua busca aqui", 30);
+		tfBusca.setMaximumSize(tfBusca.getPreferredSize());
 		btnBusca = new JButton("Buscar");
 		btnBusca.addActionListener(bb -> realizarBusca(tfBusca.getText()));
 		btnUser = new JButton("User");
@@ -92,9 +90,6 @@ public class ApplicationFrm extends JFrame {
 		adicionarLivro.addActionListener(al -> abrirFormularioAdicionarLivro());
 		menu.add(generos);
 		menu.add(adicionarLivro);
-
-		tfBusca = new JTextField("Faça sua busca aqui", 30);
-		tfBusca.setMaximumSize(textField.getPreferredSize());
 
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(menu);

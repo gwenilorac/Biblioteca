@@ -1,24 +1,24 @@
 package br.com.gwenilorac.biblioteca.app.client;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
 import javax.persistence.EntityManager;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.binding.PresentationModel;
+import com.jgoodies.binding.adapter.BasicComponentFactory;
 
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
-import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -26,135 +26,145 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 @SuppressWarnings("serial")
 public class FuncoesUsuario extends JPanel {
 
-	Usuario usuarioLogado = ServicoLogin.getUsuarioLogado();
+	private PresentationModel<Usuario> model;
+	private EntityManager em = JPAUtil.getEntityManager();
+	private UsuarioDao usuarioDao;
+	Usuario usuario = ServicoLogin.getUsuarioLogado();
 	private JTextField txtNome;
 	private JTextField txtEmail;
-	private JPanel infoPanel;
+	private JLabel lblNome;
+	private JLabel lblEmail;
+	private JButton btnSalvar;
+	private JButton btnRemover;
+	private JSeparator separator;
+	private String novoNome;
+	private String novoEmail;
 
 	public FuncoesUsuario() {
+		initModel();
+		initComponents();
+		initLayout();
+	}
+
+	private void initModel() {
+		model = new PresentationModel<>(usuario);
+	}
+
+	private void initComponents() {
+		txtNome = BasicComponentFactory.createTextField(model.getModel("nome"));
+		txtEmail = BasicComponentFactory.createTextField(model.getModel("email"));
+
+		lblNome = new JLabel("Nome: ");
+		txtNome = new JTextField(usuario.getNome());
+		txtNome.setPreferredSize(new Dimension(200, 30));
+
+		lblEmail = new JLabel("Email: ");
+		txtEmail = new JTextField(usuario.getEmail());
+		txtEmail.setPreferredSize(new Dimension(200, 30));
+
+		btnSalvar = new JButton("Salvar");
+		btnSalvar.addActionListener(this::salvarEdicao);
+		btnRemover = new JButton("Remover Usuario");
+		btnRemover.addActionListener(this::excluirUsuario);
+
+		separator = new JSeparator(JSeparator.HORIZONTAL);
+
+		usuarioDao = new UsuarioDao(em);
+
+		novoNome = txtNome.getText();
+		novoEmail = txtEmail.getText();
+
+	}
+
+	public void initLayout() {
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(400, 250));
 
-		JPanel infoUsuarioPanel = new JPanel(new BorderLayout());
-
-		JPanel infoPanel = criarInfoPanel();
-		JPanel editPanel = criarEditarUser();
+		JPanel editarUserPanel = criarEditarUser();
 		JPanel livrosEmprestadosPanel = criarLivrosEmprestadosList();
 
-		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.addTab("Informações Usuario", infoPanel);
-		tabbedPane.addTab("Editar Usuário", editPanel);
-		tabbedPane.addTab("Livros Emprestados", livrosEmprestadosPanel);
+		JPanel contentPanel = new JPanel(new BorderLayout());
+		contentPanel.add(editarUserPanel, BorderLayout.NORTH);
+		contentPanel.add(separator, BorderLayout.CENTER);
+		contentPanel.add(livrosEmprestadosPanel, BorderLayout.SOUTH);
 
-		infoUsuarioPanel.add(tabbedPane);
-
-		add(infoUsuarioPanel);
-
-	}
-
-	private JPanel criarInfoPanel() {
-		EntityManager em = JPAUtil.getEntityManager();
-		UsuarioDao usuarioDao = new UsuarioDao(em);
-		Usuario usuario = usuarioDao.buscarUsuarioPorNome(usuarioLogado.getNome());
-
-		infoPanel = new JPanel();
-		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-		infoPanel.add(new JLabel("Nome: " + usuario.getNome()));
-		infoPanel.add(new JLabel("Email: " + usuario.getEmail()));
-		return infoPanel;
+		add(contentPanel);
 	}
 
 	private JPanel criarEditarUser() {
-		EntityManager em = JPAUtil.getEntityManager();
-		UsuarioDao usuarioDao = new UsuarioDao(em);
-		Usuario usuario = usuarioDao.buscarUsuarioPorNome(usuarioLogado.getNome());
+		JPanel editarPanel = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+		
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.anchor = GridBagConstraints.WEST;
+		gbc.insets = new Insets(5, 5, 5, 5);
 
-		JPanel editarPanel = new JPanel();
-		FormLayout layout = new FormLayout("right:max(50dlu;pref), 6dlu, pref, 6dlu, pref",
-				"pref, 6dlu, pref, 6dlu, pref, 6dlu, pref");
-		CellConstraints cc = new CellConstraints();
-		editarPanel.setLayout(layout);
-
-		JLabel lblNome = new JLabel("Nome: ");
-		JLabel lblEmail = new JLabel("Email: ");
-
-		txtNome = new JTextField(usuario.getNome());
-		txtEmail = new JTextField(usuario.getEmail());
-
-		JButton btnSalvar = new JButton("Salvar");
-		btnSalvar.addActionListener(this::salvarEdicao);
-
-		editarPanel.setVisible(true);
-		editarPanel.add(lblNome, cc.xy(1, 1));
-		editarPanel.add(txtNome, cc.xyw(3, 1, 3));
-		editarPanel.add(lblEmail, cc.xy(1, 3));
-		editarPanel.add(txtEmail, cc.xyw(3, 3, 3));
-		editarPanel.add(btnSalvar, cc.xy(3, 7));
+		editarPanel.add(lblNome, gbc);
+		gbc.gridx++;
+		editarPanel.add(txtNome, gbc);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		editarPanel.add(lblEmail, gbc);
+		gbc.gridx++;
+		editarPanel.add(txtEmail, gbc);
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.gridwidth = 2;
+		editarPanel.add(btnSalvar, gbc);
+		gbc.gridy++;
+		gbc.gridx = 0;
+		gbc.gridwidth = 1;
+		editarPanel.add(btnRemover, gbc);
 
 		return editarPanel;
 	}
 
-	private JPanel criarLivrosEmprestadosList() {
-		JLabel label = new JLabel("AINDA NAO IMPLEMENTADO");
-		add(label);
-		return null;
-	}
-
-	private void atualizarInformacoesTela() {
-		if (usuarioLogado != null) {
-			String nome = usuarioLogado.getNome();
-			String email = usuarioLogado.getEmail();
-
-			txtNome.setText(nome);
-			txtEmail.setText(email);
-
-			((JLabel) infoPanel.getComponent(0)).setText("Nome: " + nome);
-			((JLabel) infoPanel.getComponent(1)).setText("Email: " + email);
-
-			JOptionPane.showMessageDialog(this, "Informações atualizadas com sucesso!");
-		} else {
-			JOptionPane.showMessageDialog(this, "Usuario não encontrado no banco de dados.");
+	private void excluirUsuario(ActionEvent e) {
+		try {
+			if (model.getBean().getLivrosEmprestados() == null || model.getBean().getLivrosEmprestados().isEmpty()) {
+				em.getTransaction().begin();
+				usuarioDao.remover(model.getBean());
+				em.getTransaction().commit();
+				JOptionPane.showMessageDialog(this, "Usuário removido com sucesso!");
+				System.exit(0);
+			} else {
+				JOptionPane.showMessageDialog(this,
+						"Usuário não pode ser excluído, pois ainda tem livros emprestados. Devolva-os primeiro!");
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			JOptionPane.showMessageDialog(this, "Erro ao remover o usuário.");
 		}
 	}
 
 	private void salvarEdicao(ActionEvent e) {
-		EntityManager em = JPAUtil.getEntityManager();
-		UsuarioDao usuarioDao = new UsuarioDao(em);
 
-		String nome = usuarioLogado.getNome();
-		String email = usuarioLogado.getEmail();
-
-		String novoNome = txtNome.getText();
-		String novoEmail = txtEmail.getText();
-
-		try {
-			if (novoNome != null && novoNome != nome) {
-				usuarioLogado.setNome(novoNome);
+		if (novoNome.isEmpty() || novoEmail.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Nome e e-mail não podem estar vazios.");
+		} else if (novoNome.equals(model.getBean().getNome()) && novoEmail.equals(model.getBean().getEmail())) {
+			JOptionPane.showMessageDialog(this, "Nenhuma alteração feita.");
+		} else {
+			try {
 				em.getTransaction().begin();
-				usuarioDao.atualizar(usuarioLogado);
+				model.getBean().setNome(novoNome);
+				model.getBean().setEmail(novoEmail);
+				usuarioDao.atualizar(model.getBean());
 				em.getTransaction().commit();
-				em.close();
-				JOptionPane opitionPane = new JOptionPane("NOME ATUALIZADO COM SUCESSO!");
 
+				JOptionPane.showMessageDialog(this, "Informações atualizadas com sucesso!");
+			} catch (Exception ex) {
+				em.getTransaction().rollback();
+				ex.printStackTrace();
+				JOptionPane.showMessageDialog(this, "Erro ao atualizar as informações do usuário.");
 			}
-			if (novoEmail != null && novoEmail != email) {
-				usuarioLogado.setEmail(novoEmail);
-				em.getTransaction().begin();
-				usuarioDao.atualizar(usuarioLogado);
-				em.getTransaction().commit();
-				em.close();
-				JOptionPane opitionPane = new JOptionPane("EMAIL ATUALIZADO COM SUCESSO!");
-
-			} else {
-				JOptionPane opitionPane = new JOptionPane("NOME E/OU EMAIL JA EXISTES!");
-			}
-		} catch (Exception e) {
-			em.getTransaction().rollback();
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, "ERRO AO REMOVER O LIVRO!");
-		} finally {
-			em.close();
 		}
-		return;
+	}
+
+	private JPanel criarLivrosEmprestadosList() {
+		JPanel panel = new JPanel();
+		JLabel label = new JLabel("AINDA NAO IMPLEMENTADO");
+		panel.add(label);
+		return panel;
 	}
 }
