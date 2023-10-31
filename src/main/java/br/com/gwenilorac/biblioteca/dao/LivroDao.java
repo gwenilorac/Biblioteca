@@ -24,15 +24,8 @@ public class LivroDao {
 		this.em.merge(livro);
 	}
 	
-	public boolean remover(Livro livro) {
-		if(livro.getEstado() == Estado.DISPONIVEL) {
-			this.em.remove(livro);
-			System.out.println("Livro excluido com sucesso!");
-			return true;
-		}  else {
-			System.out.println("Por favor devolver livros emprestados!");
-			return false;
-        }
+	public void remover(Livro livro) {
+		this.em.remove(livro);
 	}
 
 	public List<Livro> buscarTodosLivros() {

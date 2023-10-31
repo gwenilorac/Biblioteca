@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.swing.BoxLayout;
@@ -22,17 +23,22 @@ import com.jgoodies.forms.layout.FormLayout;
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
+import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Autor;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
+import br.com.gwenilorac.biblioteca.model.Estado;
 import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Usuario;
+import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
 public class DetalhesLivroInternalFrame extends JPanel {
 
+	private EntityManager em = JPAUtil.getEntityManager();
+	private Usuario usuario = ServicoLogin.getUsuarioLogado();
 	private Livro livro;
 	private JTabbedPane tabbedPane;
 	private JTextField txtTitulo;
@@ -40,6 +46,7 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	private JTextField txtGenero;
 	private JButton btnRemover;
 	private JButton btnPegarEmprestado;
+	private JButton btnDevolverLivro;
 	private JButton btnAtualizar;
 	private JPanel infoPanel;
 
@@ -56,7 +63,7 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		ImageIcon newIcon = new ImageIcon(img);
 		JLabel capaLabel = new JLabel(newIcon);
 		detalhesPanel.add(capaLabel, BorderLayout.WEST);
-		
+
 		JPanel infoPanel = criarInfoPanel();
 		detalhesPanel.add(infoPanel, BorderLayout.CENTER);
 
@@ -69,9 +76,9 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		JPanel buttonPanel = new JPanel(new FlowLayout());
 
 		btnAtualizar = new JButton("Atualizar");
-        btnAtualizar.addActionListener(e -> atualizarInformacoes()); 
-        buttonPanel.add(btnAtualizar);
-		
+		btnAtualizar.addActionListener(e -> atualizarInformacoes());
+		buttonPanel.add(btnAtualizar);
+
 		btnRemover = new JButton("Remover");
 		btnRemover.addActionListener(e -> removerLivro());
 		buttonPanel.add(btnRemover);
@@ -79,43 +86,47 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		btnPegarEmprestado = new JButton("Pegar Emprestado");
 		btnPegarEmprestado.addActionListener(e -> pegarLivroEmprestado());
 		buttonPanel.add(btnPegarEmprestado);
+		
+		btnDevolverLivro = new JButton("Devolver Livro");
+		btnDevolverLivro.addActionListener(dl -> devolverLivro());
+		buttonPanel.add(btnDevolverLivro);
 
 		add(buttonPanel, BorderLayout.SOUTH);
 		add(tabbedPane, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.SOUTH);
 	}
-	
+
 	private void atualizarInformacoes() {
-	    EntityManager em = JPAUtil.getEntityManager();
-	    
-	    LivroDao livroDao = new LivroDao(em); 
-	    Livro livroAtualizado = livroDao.buscarLivroPorTitulo(livro.getTitulo());
+		LivroDao livroDao = new LivroDao(em);
+		Livro livroAtualizado = livroDao.buscarLivroPorTitulo(livro.getTitulo());
 
-	    if (livroAtualizado != null) {
-	        livro = livroAtualizado;
+		if (livroAtualizado != null) {
+			livro = livroAtualizado;
 
-	        txtTitulo.setText(livro.getTitulo());
-	        txtAutor.setText(livro.getAutor().getNome()); 
-	        txtGenero.setText(livro.getGenero().getNome()); 
-	        
-	        ((JLabel)infoPanel.getComponent(0)).setText("Nome: " + livro.getTitulo());
-	        ((JLabel)infoPanel.getComponent(1)).setText("Autor: " + livro.getAutor().getNome());
-	        ((JLabel)infoPanel.getComponent(2)).setText("Gênero: " + livro.getGenero().getNome());
+			txtTitulo.setText(livro.getTitulo());
+			txtAutor.setText(livro.getAutor().getNome());
+			txtGenero.setText(livro.getGenero().getNome());
 
-	        JOptionPane.showMessageDialog(this, "Informações atualizadas com sucesso!");
-	    } else {
-	        JOptionPane.showMessageDialog(this, "Livro não encontrado no banco de dados.");
-	    }
-	    em.close(); 
+			((JLabel) infoPanel.getComponent(0)).setText("Nome: " + livro.getTitulo());
+			((JLabel) infoPanel.getComponent(1)).setText("Autor: " + livro.getAutor().getNome());
+			((JLabel) infoPanel.getComponent(2)).setText("Gênero: " + livro.getGenero().getNome());
+			((JLabel) infoPanel.getComponent(3)).setText("Estado: " + livro.getEstado());
+
+			JOptionPane.showMessageDialog(this, "INFORMAÇÕES ATUALIZADAS COM SUCESSO!");
+		} else {
+			JOptionPane.showMessageDialog(this, "NÃO FOI POSSIVEL ATUALIZAR DADOS DO LIVRO!");
+		}
+		em.close();
 	}
 
 	private JPanel criarInfoPanel() {
-	    infoPanel = new JPanel();
-	    infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-	    infoPanel.add(new JLabel("Nome: " + livro.getTitulo()));
-	    infoPanel.add(new JLabel("Autor: " + livro.getAutor().getNome()));
-	    infoPanel.add(new JLabel("Gênero: " + livro.getGenero().getNome()));
-	    return infoPanel;
+		infoPanel = new JPanel();
+		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+		infoPanel.add(new JLabel("Nome: " + livro.getTitulo()));
+		infoPanel.add(new JLabel("Autor: " + livro.getAutor().getNome()));
+		infoPanel.add(new JLabel("Gênero: " + livro.getGenero().getNome()));
+		infoPanel.add(new JLabel("Estado: " + livro.getEstado()));
+		return infoPanel;
 	}
 
 	private JPanel criarEditarPanel() {
@@ -152,7 +163,6 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	}
 
 	private void salvarEdicao(ActionEvent e) {
-		EntityManager em = JPAUtil.getEntityManager();
 		GeneroDao generoDao = new GeneroDao(em);
 		AutorDao autorDao = new AutorDao(em);
 		LivroDao livroDao = new LivroDao(em);
@@ -176,40 +186,56 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	}
 
 	private void pegarLivroEmprestado() {
-		Usuario usuario = ServicoLogin.getUsuarioLogado();
-		Emprestimo emprestimo = new Emprestimo(livro, usuario);
-		boolean pegarLivroEmprestado = emprestimo.pegarLivroEmprestado();
-		if (pegarLivroEmprestado == true) {
+		LivroDao livroDao = new LivroDao(em);
+		Livro livroGerenciado = em.merge(livro);
+		em.getTransaction().begin();
+		List<Livro> livrosEmprestados = usuario.getLivrosEmprestados();
+		if (livrosEmprestados.size() <= 3) {
+			Emprestimo emprestimo = new Emprestimo(livro, usuario);
+			emprestimo.pegarLivroEmprestado();
+			livroDao.atualizar(livroGerenciado);
+			em.getTransaction().commit();
 			System.out.println("Livro emprestado: " + livro.getTitulo() + " por: " + usuario.getNome());
 			JOptionPane.showMessageDialog(this, "LIVRO EMPRESTADO COM SUCESSO!");
 		} else {
-			JOptionPane.showMessageDialog(this, "LIVRO NÃO DISPONÍVEL PARA EMPRÉSTIMO!");
-		}
+			JOptionPane.showMessageDialog(this, "LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO!");
+		} 
+		em.close();
+	}
+	
+	private void devolverLivro() {
+		LivroDao livroDao = new LivroDao(em);
+		Livro livroGerenciado = em.merge(livro);
+		em.getTransaction().begin();
+		List<Livro> livrosEmprestados = usuario.getLivrosEmprestados();
+		if (livrosEmprestados.size() <= 3) {
+			Emprestimo emprestimo = new Emprestimo(livro, usuario);
+			emprestimo.devolverLivro();
+			livroDao.atualizar(livroGerenciado);
+			em.getTransaction().commit();
+			System.out.println("Livro devolvido: " + livro.getTitulo() + " por: " + usuario.getNome());
+			JOptionPane.showMessageDialog(this, "LIVRO DEVOLVIDO COM SUCESSO!");
+		} else {
+			JOptionPane.showMessageDialog(this, "LIVRO NÃO ESTÁ EMPRESTADO OU JA FOI DEVOLVIDO!");
+		} 
+		em.close();
 	}
 
 	private void removerLivro() {
-	    int confirmacao = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja remover o livro?", "Confirmação", JOptionPane.YES_NO_OPTION);
-	    
-	    if (confirmacao == JOptionPane.YES_OPTION) {
-	        EntityManager em = JPAUtil.getEntityManager();
-	        LivroDao livroDao = new LivroDao(em);
+		int confirmacao = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja remover o livro?", "Confirmação",
+				JOptionPane.YES_NO_OPTION);
 
-	        Livro livroGerenciado = em.merge(livro);
-	        em.getTransaction().begin();
-	        try {
-	            livroDao.remover(livroGerenciado);
-	            em.getTransaction().commit();
-	            System.out.println("Livro removido: " + livro.getTitulo());
-	            JOptionPane.showMessageDialog(this, "LIVRO REMOVIDO COM SUCESSO!");
-	            this.getParent().remove(this); 
-	        } catch (Exception e) {
-	            em.getTransaction().rollback();
-	            e.printStackTrace(); 
-	            JOptionPane.showMessageDialog(this, "ERRO AO REMOVER O LIVRO!");
-	        } finally {
-	            em.close();
-	        }
-	    }
+		if (confirmacao == JOptionPane.YES_OPTION) {
+			if (ServicoLivro.removerLivro(livro) == true) {
+				System.out.println("Livro removido: " + livro.getTitulo());
+				JOptionPane.showMessageDialog(this, "LIVRO REMOVIDO COM SUCESSO!");
+			} else {
+				em.getTransaction().rollback();
+				JOptionPane.showMessageDialog(this, "ERRO AO REMOVER O LIVRO!"
+						+ "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER");
+			}
+			em.close();
+		} 
+
 	}
-
 }

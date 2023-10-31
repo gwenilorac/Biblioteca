@@ -36,7 +36,7 @@ public class Usuario implements Serializable{
     private String senha;
 
 	@OneToMany	
-	private List<Livro> livrosEmprestados;
+	private List<Livro> livrosEmprestados = new ArrayList<Livro>();
 	
 	@Transient
 	private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);

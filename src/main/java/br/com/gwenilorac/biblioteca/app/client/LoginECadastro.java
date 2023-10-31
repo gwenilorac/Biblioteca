@@ -3,8 +3,10 @@ package br.com.gwenilorac.biblioteca.app.client;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -57,9 +59,8 @@ public class LoginECadastro extends JDialog {
 		JPanel panel = new JPanel();
 
 		panel.setLayout(new BorderLayout());
-		panel.add(createMainForm(), BorderLayout.CENTER);
-		panel.add(createButtonPanel(), BorderLayout.SOUTH);
-		
+		panel.add(createMainForm());
+
 		add(panel);
 		setPreferredSize(new Dimension(300, 200));
 		setLocationRelativeTo(null);
@@ -69,15 +70,16 @@ public class LoginECadastro extends JDialog {
 		setVisible(true);
 	}
 
-	private Component createButtonPanel() {
-		JPanel panel = new JPanel();
-		
-		panel.add(btnLogin);
-		panel.add(btnCadastro);
-		return panel;
-	}
+//	private Component createButtonPanel() {
+//		JPanel panel = new JPanel();
+//		panel.setLayout(new FlowLayout());
+//		
+//		panel.add(btnLogin);
+//		panel.add(btnCadastro);
+//		return panel;
+//	}
 
-	private Component createMainForm() {
+	private JPanel createMainForm() {
 		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 		
@@ -91,18 +93,6 @@ public class LoginECadastro extends JDialog {
 		builder.append(btnCadastro);
 		
 		return builder.getPanel();
-		
-//		
-//		JPanel panel = new JPanel(new BorderLayout());
-//		JLabel login = new JLabel("BEM VINDO DE VOLTA!");
-//		JLabel cadastro = new JLabel("JUNTE-SE A GENTE!");
-//		
-//		panel.add(login);
-//		panel.add(btnLogin);
-//		panel.add(cadastro);
-//		panel.add(btnLogin);
-//		
-//		return panel;
 
 	}
 
