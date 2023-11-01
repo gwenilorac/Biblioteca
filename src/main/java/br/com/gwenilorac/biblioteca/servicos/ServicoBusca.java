@@ -14,16 +14,12 @@ public class ServicoBusca {
 		EntityManager em = JPAUtil.getEntityManager();
 		LivroDao livroDao = new LivroDao(em);
 
-		if (termoBusca != null && termoBusca.isEmpty() && termoBusca == " ") {
-			if (termoBusca != null && !termoBusca.isEmpty() && termoBusca == " ") {
+		if (termoBusca == null && termoBusca.isEmpty() && termoBusca == " ") {
+			return null;
+			} else {
 				Livro buscarLivroPorTitulo = livroDao.buscarLivroPorTitulo(termoBusca);
-				List<Livro> buscarPorNomeAutor = livroDao.buscarPorNomeAutor(termoBusca);
 				if (buscarLivroPorTitulo != null) {
 					return buscarLivroPorTitulo;
-				}
-				if (buscarPorNomeAutor != null) {
-					return buscarLivroPorTitulo;
-				}
 			}
 		}
 		return null;

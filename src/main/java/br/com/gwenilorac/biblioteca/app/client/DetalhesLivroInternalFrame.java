@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
@@ -54,15 +55,19 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		this.livro = livro;
 
 		setLayout(new BorderLayout());
-		setPreferredSize(new Dimension(400, 250));
+		setPreferredSize(new Dimension(520, 250));
 
 		JPanel detalhesPanel = new JPanel(new BorderLayout());
+		
 		byte[] imagemIcon = livro.getCapa();
 		ImageIcon icon = new ImageIcon(imagemIcon);
 		Image img = icon.getImage().getScaledInstance(150, 200, Image.SCALE_SMOOTH);
 		ImageIcon newIcon = new ImageIcon(img);
 		JLabel capaLabel = new JLabel(newIcon);
-		detalhesPanel.add(capaLabel, BorderLayout.WEST);
+		detalhesPanel.add(capaLabel, BorderLayout.LINE_START);
+		
+		JSeparator separator = new JSeparator(JSeparator.VERTICAL);
+		detalhesPanel.add(separator);
 
 		JPanel infoPanel = criarInfoPanel();
 		detalhesPanel.add(infoPanel, BorderLayout.CENTER);
@@ -91,18 +96,11 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		btnDevolverLivro.addActionListener(dl -> devolverLivro());
 		buttonPanel.add(btnDevolverLivro);
 
-		add(buttonPanel, BorderLayout.SOUTH);
 		add(tabbedPane, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.SOUTH);
 	}
 
 	private void atualizarInformacoes() {
-		LivroDao livroDao = new LivroDao(em);
-		Livro livroAtualizado = livroDao.buscarLivroPorTitulo(livro.getTitulo());
-
-		if (livroAtualizado != null) {
-			livro = livroAtualizado;
-
 			txtTitulo.setText(livro.getTitulo());
 			txtAutor.setText(livro.getAutor().getNome());
 			txtGenero.setText(livro.getGenero().getNome());
@@ -113,15 +111,11 @@ public class DetalhesLivroInternalFrame extends JPanel {
 			((JLabel) infoPanel.getComponent(3)).setText("Estado: " + livro.getEstado());
 
 			JOptionPane.showMessageDialog(this, "INFORMAÇÕES ATUALIZADAS COM SUCESSO!");
-		} else {
-			JOptionPane.showMessageDialog(this, "NÃO FOI POSSIVEL ATUALIZAR DADOS DO LIVRO!");
-		}
-		em.close();
 	}
 
 	private JPanel criarInfoPanel() {
 		infoPanel = new JPanel();
-		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.PAGE_AXIS));
 		infoPanel.add(new JLabel("Nome: " + livro.getTitulo()));
 		infoPanel.add(new JLabel("Autor: " + livro.getAutor().getNome()));
 		infoPanel.add(new JLabel("Gênero: " + livro.getGenero().getNome()));
@@ -187,13 +181,12 @@ public class DetalhesLivroInternalFrame extends JPanel {
 
 	private void pegarLivroEmprestado() {
 		LivroDao livroDao = new LivroDao(em);
-		Livro livroGerenciado = em.merge(livro);
+//		Livro livroGerenciado = em.merge(livro);
 		em.getTransaction().begin();
-		List<Livro> livrosEmprestados = usuario.getLivrosEmprestados();
-		if (livrosEmprestados.size() <= 3) {
+		if (livro.getEstado() == Estado.DISPONIVEL) {
 			Emprestimo emprestimo = new Emprestimo(livro, usuario);
 			emprestimo.pegarLivroEmprestado();
-			livroDao.atualizar(livroGerenciado);
+			livroDao.atualizar(livro);
 			em.getTransaction().commit();
 			System.out.println("Livro emprestado: " + livro.getTitulo() + " por: " + usuario.getNome());
 			JOptionPane.showMessageDialog(this, "LIVRO EMPRESTADO COM SUCESSO!");
@@ -204,11 +197,11 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	}
 	
 	private void devolverLivro() {
+		EntityManager em = JPAUtil.getEntityManager();
 		LivroDao livroDao = new LivroDao(em);
 		Livro livroGerenciado = em.merge(livro);
 		em.getTransaction().begin();
-		List<Livro> livrosEmprestados = usuario.getLivrosEmprestados();
-		if (livrosEmprestados.size() <= 3) {
+		if (livro.getEstado() == Estado.INDISPONIVEL) {
 			Emprestimo emprestimo = new Emprestimo(livro, usuario);
 			emprestimo.devolverLivro();
 			livroDao.atualizar(livroGerenciado);

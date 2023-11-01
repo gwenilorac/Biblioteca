@@ -57,6 +57,7 @@ public class ApplicationFrm extends JFrame {
 	private JPasswordField passField;
 	private JButton btnBusca;
 	private JButton btnUser;
+	private JInternalFrame internalFrame;
 
 	public ApplicationFrm() {
 		initModel();
@@ -110,7 +111,7 @@ public class ApplicationFrm extends JFrame {
 
 	private JInternalFrame abrirFuncoesUsuario() {
 		FuncoesUsuario funcoesUser = new FuncoesUsuario();
-		JInternalFrame internalFrame = new JInternalFrame("Detalhes do Usuário", true, true, true, true);
+		internalFrame = new JInternalFrame("Detalhes do Usuário", true, true, true, true);
 		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		internalFrame.add(funcoesUser);
 		internalFrame.setPreferredSize(new Dimension(600, 400));
@@ -121,25 +122,21 @@ public class ApplicationFrm extends JFrame {
 
 		internalFrame.toFront();
 
-		Dimension desktopSize = jDesktopPane.getSize();
-		Dimension jInternalFrameSize = internalFrame.getSize();
-		internalFrame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
-				(desktopSize.height - jInternalFrameSize.height) / 2);
+		centralizarPanel();
 		
 		return internalFrame;
 	}
 
 	private void abrirFormularioAdicionarLivro() {
 		AdicionarLivroFrm addBookForm = new AdicionarLivroFrm();
-		JInternalFrame internalFrame = new JInternalFrame("Adicionar Livro", false, true, false, false);
+		internalFrame = new JInternalFrame("Adicionar Livro", false, true, false, false);
 		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		internalFrame.add(addBookForm);
 		internalFrame.setSize(400, 300);
-		Dimension d = jDesktopPane.getSize();
-		internalFrame.setLocation((d.width - internalFrame.getSize().width) / 2,
-				(d.height - internalFrame.getSize().height) / 2);
 		internalFrame.setVisible(true);
 		internalFrame.pack();
+		
+		centralizarPanel();
 
 		jDesktopPane.add(internalFrame);
 
@@ -151,7 +148,6 @@ public class ApplicationFrm extends JFrame {
 			JOptionPane.showMessageDialog(this, "NÃO EXISTE!");
 			return null;
 		} else {
-			@SuppressWarnings("unchecked")
 			List<Livro> resultados = (List<Livro>) ServicoBusca.busca(termoBusca);
 			return (Livro) resultados;
 		}
@@ -199,21 +195,25 @@ public class ApplicationFrm extends JFrame {
 
 	private void abrirDetalhesDoLivro(Livro livro) {
 		DetalhesLivroInternalFrame detalhesDoLivro = new DetalhesLivroInternalFrame(livro);
-		JInternalFrame internalFrame = new JInternalFrame(livro.getTitulo(), false, true, false, false);
+		internalFrame = new JInternalFrame(livro.getTitulo(), false, true, false, false);
 		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		internalFrame.add(detalhesDoLivro);
 		internalFrame.setSize(400, 300);
 		internalFrame.setVisible(true);
 		internalFrame.pack();
 
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		int x = (screenSize.width - internalFrame.getWidth()) / 2;
-		int y = (screenSize.height - internalFrame.getHeight()) / 2;
-		internalFrame.setLocation(x, y);
+		centralizarPanel();
 
 		jDesktopPane.add(internalFrame);
 
 		internalFrame.toFront();
+	}
+	
+	private void centralizarPanel() {
+		Dimension desktopSize = jDesktopPane.getSize();
+		Dimension jInternalFrameSize = internalFrame.getSize();
+		internalFrame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
+				(desktopSize.height - jInternalFrameSize.height) / 2);
 	}
 
 }

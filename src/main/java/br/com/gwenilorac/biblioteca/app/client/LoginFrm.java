@@ -21,18 +21,18 @@ import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 
 @SuppressWarnings("serial")
-public class LoginFrm extends JDialog{
-	
+public class LoginFrm extends JDialog {
+
 	private PresentationModel<Usuario> model;
-	
+
 	private JTextField tfUserName;
-	
+
 	private JPasswordField passField;
-	
+
 	private JButton btnLogin;
-	
+
 	private boolean login = false;
-	
+
 	public LoginFrm() {
 		initModel();
 		initComponets();
@@ -47,7 +47,7 @@ public class LoginFrm extends JDialog{
 	private void initComponets() {
 		tfUserName = BasicComponentFactory.createTextField(model.getModel("nome"));
 		passField = BasicComponentFactory.createPasswordField(model.getModel("senha"));
-		
+
 		btnLogin = new JButton("Login");
 		btnLogin.setMnemonic(KeyEvent.VK_ENTER);
 		btnLogin.addActionListener(evt -> actionLogin());
@@ -55,11 +55,13 @@ public class LoginFrm extends JDialog{
 	}
 
 	private void actionLogin() {
-		if (!isValid(model.getBean())) return;
-		
+		if (!isValid(model.getBean()))return;
+
 		if (ServicoLogin.validaUsuario(model.getBean()) == true) {
 			login = true;
 			dispose();
+			System.out.println("TESTE");
+			new ApplicationFrm();
 		} else {
 			JOptionPane.showMessageDialog(this, "USUARIO INVALIDO!");
 			login = false;
@@ -70,7 +72,8 @@ public class LoginFrm extends JDialog{
 		if (bean.getNome() == null) {
 			JOptionPane.showMessageDialog(this, "FALTA INFORMAR O NOME");
 			return false;
-		} if (bean.getSenha() == null) {		
+		}
+		if (bean.getSenha() == null) {
 			JOptionPane.showMessageDialog(this, "FALTA INFORMAR A SENHA");
 			return false;
 		} else {
@@ -83,14 +86,14 @@ public class LoginFrm extends JDialog{
 		panel.setLayout(new BorderLayout());
 		panel.add(createMainForm(), BorderLayout.CENTER);
 		panel.add(createButtonPanel(), BorderLayout.SOUTH);
-		
+
 		add(panel);
 		setModal(true);
 		setPreferredSize(new Dimension(300, 200));
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		pack();
-		
+
 		setVisible(true);
 	}
 
@@ -103,12 +106,12 @@ public class LoginFrm extends JDialog{
 	private Component createMainForm() {
 		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-		
+
 		builder.append("User:", tfUserName);
 		builder.nextLine();
-		
+
 		builder.append("Password:", passField);
-		
+
 		return builder.getPanel();
 	}
 

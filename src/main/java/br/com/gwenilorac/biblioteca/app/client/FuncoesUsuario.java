@@ -3,10 +3,8 @@ package br.com.gwenilorac.biblioteca.app.client;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -14,9 +12,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
@@ -25,7 +22,6 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
-import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -49,6 +45,7 @@ public class FuncoesUsuario extends JPanel {
 	private JPanel livrosEmprestadosPanel;
 	private JList list;
 	private DefaultListModel listModel;
+	private JTable table;
 
 	public FuncoesUsuario() {
 		initModel();
@@ -83,16 +80,14 @@ public class FuncoesUsuario extends JPanel {
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(400, 250));
 
-		editarUserPanel = criarEditarUser();
-		livrosEmprestadosPanel = criarLivrosEmprestadosList();
+		JPanel infoPanel = criarEditarUser();
+		JPanel livrosPanel = criarLivrosEmprestadosList();
+		
+		add(infoPanel, BorderLayout.NORTH);
+		add(separator, BorderLayout.CENTER);
+		add(livrosPanel, BorderLayout.CENTER);
 
-		JPanel contentPanel = new JPanel();
-		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-		contentPanel.add(editarUserPanel, BorderLayout.NORTH);
-		contentPanel.add(separator, BorderLayout.CENTER);
-		contentPanel.add(livrosEmprestadosPanel, BorderLayout.SOUTH);
-
-		add(contentPanel);
+		setVisible(true);
 	}
 
 	private JPanel criarEditarUser() {
@@ -128,6 +123,7 @@ public class FuncoesUsuario extends JPanel {
 			ex.printStackTrace();
 			JOptionPane.showMessageDialog(this, "Erro ao remover o usuário.");
 		}
+		em.close();
 	}
 
 	private void salvarEdicao(ActionEvent e) {
@@ -150,41 +146,29 @@ public class FuncoesUsuario extends JPanel {
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(this, "Erro ao atualizar as informações do usuário.");
 			}
+			em.close();
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private JPanel criarLivrosEmprestadosList() {
 		JPanel panel = new JPanel();
-		
-		Usuario usuarioGerenciado = em.merge(usuario);
-        em.getTransaction().begin();
-		List<Livro> livrosEmprestadosPorUsuario = usuarioDao.buscarLivrosEmprestadosPorUsuario(usuarioGerenciado);
+		panel.setPreferredSize(new Dimension(20, 20));
 
-		listModel = new DefaultListModel<String>();
-		listModel.addElement("Jane Doe");
-		listModel.addElement("John Smith");
-		listModel.addElement("Kathy Green");
+		String[] columnNames = { "First Name", "Last Name", "Sport", "# of Years", "Vegetarian" };
 
-		list = new JList<String>(listModel); 
-		list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		list.setLayoutOrientation(JList.VERTICAL);
-		list.setVisibleRowCount(-1);
-		
-		for (Livro livro : livrosEmprestadosPorUsuario) {
-			System.out.println(livro.getTitulo());
-			String titulo = livro.getTitulo();
-			listModel.addElement(titulo);
-		}
+		Object[][] data = { { "Kathy", "Smith", "Snowboarding", new Integer(5), new Boolean(false) },
+				{ "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
+				{ "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
+				{ "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
+				{ "Joe", "Brown", "Pool", new Integer(10), new Boolean(false) } };
 
-		JScrollPane listScroller = new JScrollPane(list);
-		listScroller.setPreferredSize(new Dimension(300, 150));
+		table = new JTable(data, columnNames);
 
-		panel.add(listScroller);
-		
-		em.getTransaction().commit();
-		em.close();
-		
+		JScrollPane scrollPane = new JScrollPane(table);
+		table.setFillsViewportHeight(true);
+
+		panel.add(scrollPane);
+
 		return panel;
 
 	}
