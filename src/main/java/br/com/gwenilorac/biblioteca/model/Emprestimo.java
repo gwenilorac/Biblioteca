@@ -20,6 +20,8 @@ import javax.persistence.Table;
 @Table(name = "emprestimos")
 public class Emprestimo {
 
+	private static final int MAX_EMPRESTIMOS_PERMITIDOS = 3;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
@@ -30,7 +32,7 @@ public class Emprestimo {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Usuario usuario;
 
-	private LocalDate dataEmprestimo;
+	protected LocalDate dataEmprestimo;
 	private LocalDate dataDevolucao;
 
 	@OneToMany
@@ -54,17 +56,22 @@ public class Emprestimo {
 		this.usuario = usuario;
 	}
 
-	public boolean pegarLivroEmprestado() {
-		if (livro.getEstado() == Estado.DISPONIVEL) {
-			livro.setEstado(Estado.INDISPONIVEL);
-			usuario.adicionarLivroEmprestado(livro);
-			System.out.println("Livro emprestado com sucesso!");
-			System.out.println("Data da Devolucao do Livro: " + dataDevolucao);
-			return true;
-		} else {
-			System.out.println("O livro não está disponível para empréstimo.");
-			return false;
-		}
+	public boolean pegarLivroEmprestado(Livro livro) {
+	    if (usuario.getLivrosEmprestados().size() <= MAX_EMPRESTIMOS_PERMITIDOS) {
+	        if (livro.getEstado() == Estado.DISPONIVEL) {
+	            livro.setEstado(Estado.INDISPONIVEL);
+	            usuario.adicionarLivroEmprestado(livro);
+	            System.out.println("Livro emprestado com sucesso!");
+	            System.out.println("Data da Devolução do Livro: " + dataDevolucao);
+	            return true;
+	        } else {
+	            System.out.println("O livro não está disponível para empréstimo.");
+	            return false;
+	        }
+	    } else {
+	        System.out.println("Você já atingiu o limite máximo de livros emprestados.");
+	        return false;
+	    }
 	}
 
 	public void devolverLivro() {

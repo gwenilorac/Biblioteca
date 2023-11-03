@@ -30,7 +30,6 @@ public class AdicionarLivroFrm extends JPanel {
 	private JTextField generoField;
 	private JButton addButton;
 	private JButton selectCoverButton;
-
 	private File selectedCoverFile;
 
 	public AdicionarLivroFrm() {
@@ -118,14 +117,18 @@ public class AdicionarLivroFrm extends JPanel {
 	}
 
 	private void selecionarCapa() {
-		JFileChooser chooser = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
-		chooser.setFileFilter(filter);
-		int result = chooser.showOpenDialog(this);
-
-		if (result == JFileChooser.APPROVE_OPTION) {
-			selectedCoverFile = chooser.getSelectedFile();
-			System.out.println(selectedCoverFile.getName());
-		}
+		byte[] novaCapa = ImageUtils.editarCapa();
 	}
+
+//	private void selecionarCapa() {
+//		JFileChooser chooser = new JFileChooser();
+//		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
+//		chooser.setFileFilter(filter);
+//		int result = chooser.showOpenDialog(this);
+//
+//		if (result == JFileChooser.APPROVE_OPTION) {
+//			selectedCoverFile = chooser.getSelectedFile();
+//			System.out.println(selectedCoverFile.getName());
+//		}
+//	}
 }

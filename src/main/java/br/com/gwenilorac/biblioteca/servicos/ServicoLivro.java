@@ -55,7 +55,6 @@ public class ServicoLivro {
 		}
 
 		em.getTransaction().commit();
-		em.close();
 	}
 
 	public static List<Livro> pegarLivros() {
@@ -65,8 +64,10 @@ public class ServicoLivro {
 	
 	public static boolean removerLivro(Livro livro) {
 		if(livro.getEstado() == Estado.DISPONIVEL) {
+			em.getTransaction().begin();
 			livroDao.remover(livro);
 			System.out.println("Livro excluido com sucesso!");
+			em.getTransaction().commit();
 			return true;
 		}  else {
 			System.out.println("Por favor devolver livros emprestados!");

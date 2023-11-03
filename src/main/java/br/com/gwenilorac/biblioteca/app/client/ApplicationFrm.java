@@ -57,7 +57,9 @@ public class ApplicationFrm extends JFrame {
 	private JPasswordField passField;
 	private JButton btnBusca;
 	private JButton btnUser;
+	private JButton btnAtualizar;
 	private JInternalFrame internalFrame;
+
 
 	public ApplicationFrm() {
 		initModel();
@@ -77,7 +79,8 @@ public class ApplicationFrm extends JFrame {
 		btnBusca.addActionListener(bb -> realizarBusca(tfBusca.getText()));
 		btnUser = new JButton("User");
 		btnUser.addActionListener(bu -> abrirFuncoesUsuario());
-
+		btnAtualizar = new JButton("Recarregar");
+		btnAtualizar.addActionListener(ba -> atualizarTela());
 	}
 
 	private void initLayout() {
@@ -94,6 +97,7 @@ public class ApplicationFrm extends JFrame {
 
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(menu);
+		menubar.add(btnAtualizar);
 		menubar.add(Box.createHorizontalGlue());
 		menubar.add(tfBusca);
 		menubar.add(btnBusca);
@@ -142,6 +146,14 @@ public class ApplicationFrm extends JFrame {
 
 		internalFrame.toFront();
 	}
+	
+	private void atualizarTela() {
+        jDesktopPane.removeAll();
+        jDesktopPane.add(exibirCapasDosLivros());
+        revalidate();
+        repaint();
+    }
+
 
 	private Livro realizarBusca(String termoBusca) {
 		if (ServicoBusca.busca(termoBusca) == null) {

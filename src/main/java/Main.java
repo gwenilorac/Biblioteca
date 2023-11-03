@@ -1,11 +1,9 @@
-import br.com.gwenilorac.biblioteca.app.client.ApplicationFrm;
-import br.com.gwenilorac.biblioteca.app.client.LoginECadastro;
-import br.com.gwenilorac.biblioteca.app.client.LoginFrm;
+import br.com.gwenilorac.biblioteca.app.client.TelaInicialFrm;
 
 public class Main {
 
 	public static void main(String[] args) {
-		LoginECadastro loginEcadastro = new LoginECadastro();
+		TelaInicialFrm login = new TelaInicialFrm();
 
 	}
 }

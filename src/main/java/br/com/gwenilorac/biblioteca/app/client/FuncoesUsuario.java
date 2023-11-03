@@ -3,6 +3,7 @@ package br.com.gwenilorac.biblioteca.app.client;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.swing.DefaultListModel;
@@ -14,6 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
@@ -22,6 +24,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
+import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -44,8 +47,11 @@ public class FuncoesUsuario extends JPanel {
 	private JPanel editarUserPanel;
 	private JPanel livrosEmprestadosPanel;
 	private JList list;
-	private DefaultListModel listModel;
 	private JTable table;
+	private JList<String> livroList;
+	private static DefaultListModel<String> listModel;
+	private List<Livro> livrosEmprestados;
+
 
 	public FuncoesUsuario() {
 		initModel();
@@ -73,6 +79,10 @@ public class FuncoesUsuario extends JPanel {
 
 		novoNome = txtNome.getText();
 		novoEmail = txtEmail.getText();
+		
+		livrosEmprestados = model.getBean().getLivrosEmprestados();
+		listModel = new DefaultListModel<>();
+		livroList = new JList<>(listModel);
 
 	}
 
@@ -80,12 +90,12 @@ public class FuncoesUsuario extends JPanel {
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(400, 250));
 
-		JPanel infoPanel = criarEditarUser();
-		JPanel livrosPanel = criarLivrosEmprestadosList();
-		
-		add(infoPanel, BorderLayout.NORTH);
+		JPanel infoPane = criarEditarUser();
+		livrosEmprestadosPanel = criarLivrosEmprestadosPanel(livrosEmprestados);
+
+		add(infoPane, BorderLayout.NORTH);
 		add(separator, BorderLayout.CENTER);
-		add(livrosPanel, BorderLayout.CENTER);
+		add(livrosEmprestadosPanel, BorderLayout.CENTER);
 
 		setVisible(true);
 	}
@@ -127,7 +137,6 @@ public class FuncoesUsuario extends JPanel {
 	}
 
 	private void salvarEdicao(ActionEvent e) {
-
 		if (novoNome.isEmpty() || novoEmail.isEmpty()) {
 			JOptionPane.showMessageDialog(this, "Nome e e-mail não podem estar vazios.");
 		} else if (novoNome.equals(model.getBean().getNome()) && novoEmail.equals(model.getBean().getEmail())) {
@@ -150,26 +159,22 @@ public class FuncoesUsuario extends JPanel {
 		}
 	}
 
-	private JPanel criarLivrosEmprestadosList() {
-		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(20, 20));
+	public JPanel criarLivrosEmprestadosPanel(List<Livro> livrosEmprestados) {
+	    for (Livro livro : livrosEmprestados) {
+	        String item = "Título: " + livro.getTitulo() + ", Autor: " + livro.getAutor();
+	        listModel.addElement(item);
+	    }
 
-		String[] columnNames = { "First Name", "Last Name", "Sport", "# of Years", "Vegetarian" };
+	    livroList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+	    livroList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+	    livroList.setVisibleRowCount(-1);
 
-		Object[][] data = { { "Kathy", "Smith", "Snowboarding", new Integer(5), new Boolean(false) },
-				{ "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
-				{ "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
-				{ "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
-				{ "Joe", "Brown", "Pool", new Integer(10), new Boolean(false) } };
+	    JScrollPane scrollPane = new JScrollPane(livroList);
+	    scrollPane.setPreferredSize(new Dimension(250, 80));
 
-		table = new JTable(data, columnNames);
+	    JPanel panel = new JPanel(new BorderLayout());
+	    panel.add(scrollPane, BorderLayout.CENTER);
 
-		JScrollPane scrollPane = new JScrollPane(table);
-		table.setFillsViewportHeight(true);
-
-		panel.add(scrollPane);
-
-		return panel;
-
+	    return panel;
 	}
 }
