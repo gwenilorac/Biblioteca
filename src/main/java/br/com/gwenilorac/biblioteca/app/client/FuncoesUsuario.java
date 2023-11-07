@@ -25,6 +25,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -48,10 +49,8 @@ public class FuncoesUsuario extends JPanel {
 	private JPanel livrosEmprestadosPanel;
 	private JList list;
 	private JTable table;
-	private JList<String> livroList;
+	private JList livroList;
 	private static DefaultListModel<String> listModel;
-	private List<Livro> livrosEmprestados;
-
 
 	public FuncoesUsuario() {
 		initModel();
@@ -80,10 +79,6 @@ public class FuncoesUsuario extends JPanel {
 		novoNome = txtNome.getText();
 		novoEmail = txtEmail.getText();
 		
-		livrosEmprestados = model.getBean().getLivrosEmprestados();
-		listModel = new DefaultListModel<>();
-		livroList = new JList<>(listModel);
-
 	}
 
 	public void initLayout() {
@@ -91,10 +86,10 @@ public class FuncoesUsuario extends JPanel {
 		setPreferredSize(new Dimension(400, 250));
 
 		JPanel infoPane = criarEditarUser();
-		livrosEmprestadosPanel = criarLivrosEmprestadosPanel(livrosEmprestados);
+		livrosEmprestadosPanel = criarLivrosEmprestadosPanel(usuarioDao.buscarLivrosEmprestados(model.getBean().getId()));
 
-		add(infoPane, BorderLayout.NORTH);
-		add(separator, BorderLayout.CENTER);
+		add(infoPane, BorderLayout.PAGE_START);
+//		add(separator, BorderLayout.CENTER);
 		add(livrosEmprestadosPanel, BorderLayout.CENTER);
 
 		setVisible(true);
@@ -119,7 +114,7 @@ public class FuncoesUsuario extends JPanel {
 
 	private void excluirUsuario(ActionEvent e) {
 		try {
-			if (model.getBean().getLivrosEmprestados() == null || model.getBean().getLivrosEmprestados().isEmpty()) {
+			if (usuarioDao.buscarLivrosEmprestados(model.getBean().getId()) == null || usuarioDao.buscarLivrosEmprestados(model.getBean().getId()).isEmpty()) {
 				em.getTransaction().begin();
 				usuarioDao.remover(model.getBean());
 				em.getTransaction().commit();
@@ -160,20 +155,23 @@ public class FuncoesUsuario extends JPanel {
 	}
 
 	public JPanel criarLivrosEmprestadosPanel(List<Livro> livrosEmprestados) {
+		listModel = new DefaultListModel<>();
 	    for (Livro livro : livrosEmprestados) {
-	        String item = "Título: " + livro.getTitulo() + ", Autor: " + livro.getAutor();
-	        listModel.addElement(item);
+	        listModel.addElement(livro.getTitulo());
 	    }
 
+	    livroList = new JList<>(listModel);
 	    livroList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-	    livroList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+	    livroList.setLayoutOrientation(JList.VERTICAL);
 	    livroList.setVisibleRowCount(-1);
 
 	    JScrollPane scrollPane = new JScrollPane(livroList);
 	    scrollPane.setPreferredSize(new Dimension(250, 80));
 
 	    JPanel panel = new JPanel(new BorderLayout());
-	    panel.add(scrollPane, BorderLayout.CENTER);
+	    panel.add(scrollPane);
+	    
+	    panel.setVisible(true);
 
 	    return panel;
 	}

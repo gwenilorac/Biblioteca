@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -35,8 +36,9 @@ public class Usuario implements Serializable{
 	@Column(nullable = false)
     private String senha;
 
-	@OneToMany	
-	private List<Livro> livrosEmprestados = new ArrayList<Livro>();
+//	@OneToMany	
+//	@JoinColumn(columnDefinition = "USUARIO_ID")
+//	private List<Emprestimo> livrosEmprestados = new ArrayList<Emprestimo>();
 	
 	@Transient
 	private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
@@ -56,7 +58,7 @@ public class Usuario implements Serializable{
 		this.nome = nome;
 		this.email = email;
 		this.senha = senha;
-		this.livrosEmprestados = new ArrayList<>();
+//		this.livrosEmprestados = new ArrayList<>();
 	}
 
 	public String getNome() {
@@ -88,30 +90,34 @@ public class Usuario implements Serializable{
 		this.email = email;
 		changeSupport.firePropertyChange("email", old, this.email);
 	}
-
-	public void setLivrosEmprestados(List<Livro> livrosEmprestados) {
-		this.livrosEmprestados = livrosEmprestados;
-	}
 	
-	public List<Livro> getLivrosEmprestados() {
-		return livrosEmprestados;
+	public Long getId() {
+		return id;
 	}
 
-	public void adicionarLivroEmprestado(Livro livro) {
-		if (livro != null) {
-			livrosEmprestados.add(livro);
-		} else {
-			throw new IllegalArgumentException("Livro não pode ser nulo.");
-		}
-	}
-
-	public void removerLivroEmprestado(Livro livro) {
-		if (livro != null) {
-			livrosEmprestados.remove(livro);
-		} else {
-			throw new IllegalArgumentException("Livro não pode ser nulo.");
-		}
-	}
+//	public void setLivrosEmprestados(List<Emprestimo> livrosEmprestados) {
+//		this.livrosEmprestados = livrosEmprestados;
+//	}
+//	
+//	public List<Emprestimo> getLivrosEmprestados() {
+//		return livrosEmprestados;
+//	}
+//
+//	public void adicionarLivroEmprestado(Livro livro) {
+//		if (livro != null) {
+//			livrosEmprestados.add(new Emprestimo(livro, this));
+//		} else {
+//			throw new IllegalArgumentException("Livro não pode ser nulo.");
+//		}
+//	}
+//
+//	public void removerLivroEmprestado(Livro livro) {
+//		if (livro != null) {
+//			livrosEmprestados.remove(livro);
+//		} else {
+//			throw new IllegalArgumentException("Livro não pode ser nulo.");
+//		}
+//	}
 
 	@Override
 	public int hashCode() {

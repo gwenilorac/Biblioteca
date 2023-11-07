@@ -1,5 +1,7 @@
 package br.com.gwenilorac.biblioteca.model;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Type;
 
@@ -37,10 +40,6 @@ public class Livro implements Serializable{
 	@JoinColumn(name = "autor_id")
     private Autor autor;
 	
-	@Enumerated(EnumType.STRING) 
-    @Column(nullable = false)
-    private Estado estado = Estado.DISPONIVEL;
-
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "genero_id")
     private Genero genero;
@@ -49,6 +48,17 @@ public class Livro implements Serializable{
 	@Column(name = "capa")
 	private byte[] capa;
 	
+	@Transient
+	private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+	
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		changeSupport.addPropertyChangeListener(l);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		changeSupport.removePropertyChangeListener(l);
+	}
+	
 	public Livro() {
 	}
 
@@ -56,7 +66,6 @@ public class Livro implements Serializable{
 		this.titulo = titulo;
 		this.autor = autor;
 		this.genero = genero;
-		this.estado = Estado.DISPONIVEL;
 		this.capa = capa;
 		
 		this.adicionarLivroNaListaDoAutor(this);
@@ -68,7 +77,9 @@ public class Livro implements Serializable{
 	}
 
 	public void setTitulo(String titulo) {
+		Object old = this.titulo;
 		this.titulo = titulo;
+		changeSupport.firePropertyChange("titulo", old, this.titulo);
 	}
 
 	public Autor getAutor() {
@@ -76,7 +87,10 @@ public class Livro implements Serializable{
 	}
 
 	public void setAutor(Autor autor) {
+		Object old = this.autor;
 		this.autor = autor;
+		changeSupport.firePropertyChange("autor", old, this.autor);
+		
 	}
 
 	public Genero getGenero() {
@@ -84,25 +98,21 @@ public class Livro implements Serializable{
 	}
 
 	public void setGenero(Genero genero) {
+		Object old = this.genero;
 		this.genero = genero;
+		changeSupport.firePropertyChange("genero", old, this.genero);
 	}
 
-	public Estado getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Estado estado) {
-        this.estado = estado;
-    }
-    
     public byte[] getCapa() {
 		return capa;
 	}
 
 	public void setCapa(byte[] capa) {
+		Object old = this.capa;
 		this.capa = capa;
+		changeSupport.firePropertyChange("capa", old, this.capa);
 	}
-
+	
 	public void adicionarLivroNaListaDoAutor(Livro livro) {
         if (livro.getAutor() != null) {
             List<Livro> livrosDoAutor = livro.getAutor().getLivrosDoAutor();

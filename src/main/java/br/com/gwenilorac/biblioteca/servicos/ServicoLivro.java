@@ -1,20 +1,17 @@
 package br.com.gwenilorac.biblioteca.servicos;
 
 import java.util.List;
-
 import javax.persistence.EntityManager;
-
 import org.postgresql.core.Oid;
-
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
-
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.model.Autor;
-import br.com.gwenilorac.biblioteca.model.Estado;
+import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 public class ServicoLivro {
@@ -63,7 +60,7 @@ public class ServicoLivro {
 	}
 	
 	public static boolean removerLivro(Livro livro) {
-		if(livro.getEstado() == Estado.DISPONIVEL) {
+		if(Emprestimo.getStatus() == StatusEmprestimo.ENCERRADO) {
 			em.getTransaction().begin();
 			livroDao.remover(livro);
 			System.out.println("Livro excluido com sucesso!");

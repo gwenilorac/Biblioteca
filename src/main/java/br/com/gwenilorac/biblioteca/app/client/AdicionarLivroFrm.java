@@ -117,18 +117,14 @@ public class AdicionarLivroFrm extends JPanel {
 	}
 
 	private void selecionarCapa() {
-		byte[] novaCapa = ImageUtils.editarCapa();
-	}
+		JFileChooser chooser = new JFileChooser();
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
+		chooser.setFileFilter(filter);
+		int result = chooser.showOpenDialog(this);
 
-//	private void selecionarCapa() {
-//		JFileChooser chooser = new JFileChooser();
-//		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
-//		chooser.setFileFilter(filter);
-//		int result = chooser.showOpenDialog(this);
-//
-//		if (result == JFileChooser.APPROVE_OPTION) {
-//			selectedCoverFile = chooser.getSelectedFile();
-//			System.out.println(selectedCoverFile.getName());
-//		}
-//	}
+		if (result == JFileChooser.APPROVE_OPTION) {
+			selectedCoverFile = chooser.getSelectedFile();
+			System.out.println(selectedCoverFile.getName());
+		}
+	}
 }

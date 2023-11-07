@@ -7,20 +7,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import br.com.gwenilorac.biblioteca.dao.LivroDao;
+import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
+import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
+import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @Entity
 @Table(name = "emprestimos")
 public class Emprestimo {
-
-	private static final int MAX_EMPRESTIMOS_PERMITIDOS = 3;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,15 +38,13 @@ public class Emprestimo {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Usuario usuario;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private static StatusEmprestimo status = StatusEmprestimo.ENCERRADO;
+
 	protected LocalDate dataEmprestimo;
 	private LocalDate dataDevolucao;
-
-	@OneToMany
-	private List<Emprestimo> emprestimos = new ArrayList<Emprestimo>();
-
-//	@OneToMany
-//	List<Livro> listaDeLivrosMaisEmprestados = obterLivrosMaisEmprestados();
-
+	
 	@Deprecated
 	public Emprestimo() {
 	}
@@ -50,34 +54,34 @@ public class Emprestimo {
 		this.usuario = usuario;
 		this.dataEmprestimo = LocalDate.now();
 		this.dataDevolucao = LocalDate.now().plusWeeks(4);
+		Emprestimo.status = StatusEmprestimo.ENCERRADO;
 	}
 
 	public Emprestimo(Usuario usuario) {
 		this.usuario = usuario;
 	}
 
-	public boolean pegarLivroEmprestado(Livro livro) {
-	    if (usuario.getLivrosEmprestados().size() <= MAX_EMPRESTIMOS_PERMITIDOS) {
-	        if (livro.getEstado() == Estado.DISPONIVEL) {
-	            livro.setEstado(Estado.INDISPONIVEL);
-	            usuario.adicionarLivroEmprestado(livro);
-	            System.out.println("Livro emprestado com sucesso!");
-	            System.out.println("Data da Devolução do Livro: " + dataDevolucao);
-	            return true;
-	        } else {
-	            System.out.println("O livro não está disponível para empréstimo.");
-	            return false;
-	        }
-	    } else {
-	        System.out.println("Você já atingiu o limite máximo de livros emprestados.");
-	        return false;
-	    }
+	public boolean pegarLivroEmprestado() {
+		EntityManager em = JPAUtil.getEntityManager();
+		LivroDao livroDao = new LivroDao(em);
+		List<Livro> livroEstaEncerrado = livroDao.buscarLivrosIndisponiveis();
+		if (livroEstaEncerrado.contains(livro)) {
+			setStatus(StatusEmprestimo.ABERTO);
+			System.out.println("Livro emprestado com sucesso!");
+			System.out.println("Data da Devolução do Livro: " + dataDevolucao);
+			return true;
+		} else {
+			System.out.println("O livro não está disponível para empréstimo.");
+			return false;
+		}
 	}
 
 	public void devolverLivro() {
-		if (livro.getEstado() == Estado.INDISPONIVEL) {
-			livro.setEstado(Estado.DISPONIVEL);
-			usuario.removerLivroEmprestado(livro);
+		EntityManager em = JPAUtil.getEntityManager();
+		LivroDao livroDao = new LivroDao(em);
+		List<Livro> livroEstaAberto = livroDao.buscarLivrosDisponiveis();
+		if (livroEstaAberto.contains(livro)) {
+			setStatus(StatusEmprestimo.ENCERRADO);
 			System.out.println("Livro devolvido com sucesso!");
 			System.out.println("Data devolução: " + LocalDate.now());
 		} else {
@@ -86,10 +90,12 @@ public class Emprestimo {
 	}
 
 	public void DevolucaoParaExclusaoConta() {
-		for (Livro livro : usuario.getLivrosEmprestados()) {
-			this.livro = livro;
+		EntityManager em = JPAUtil.getEntityManager();
+		UsuarioDao usuarioDao = new UsuarioDao(em);
+		List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
+		for (int i = 0; i < livrosEmprestados.size(); i++) {
+			devolverLivro();
 		}
-		devolverLivro();
 		System.out.println("Livros devolvidos com sucesso!");
 	}
 
@@ -125,15 +131,12 @@ public class Emprestimo {
 		this.dataDevolucao = dataDevolucao;
 	}
 
-	public List<Livro> obterLivrosMaisEmprestados() {
-		Map<Livro, Long> contagemEmprestimosPorLivro = emprestimos.stream()
-				.collect(Collectors.groupingBy(Emprestimo::getLivro, Collectors.counting()));
+	public static StatusEmprestimo getStatus() {
+		return status;
+	}
 
-		List<Livro> livrosMaisEmprestados = contagemEmprestimosPorLivro.entrySet().stream()
-				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).map(Map.Entry::getKey)
-				.collect(Collectors.toList());
-
-		return livrosMaisEmprestados;
+	public static void setStatus(StatusEmprestimo status) {
+		Emprestimo.status = status;
 	}
 
 }

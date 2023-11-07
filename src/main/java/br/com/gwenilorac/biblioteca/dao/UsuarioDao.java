@@ -4,6 +4,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 
 
@@ -24,7 +25,7 @@ private EntityManager em;
 	}
 	
 	public void remover(Usuario usuario) {
-		if(usuario.getLivrosEmprestados().isEmpty()) {
+		if(buscarLivrosEmprestados(usuario.getId()) == null) {
 			this.em.remove(usuario);
 			System.out.println("Usuario excluido com sucesso!");
 		} else {
@@ -85,5 +86,21 @@ private EntityManager em;
 	        query.setMaxResults(quantidade);
 	        return query.getResultList();
 	    }
+	 
+	 @SuppressWarnings("unchecked")
+		public List<Livro> buscarLivrosEmprestados(Long idUsuario) {
+			StringBuilder hql = new StringBuilder();
+			hql.append("select livr ");
+			hql.append("from Emprestimo empr ");
+			hql.append("inner join empr.livro livr ");
+			hql.append("inner join empr.usuario user ");
+			hql.append("where empr.status = :status ");
+			hql.append("and user.id = :idUsuario ");
+			return em.createQuery(hql.toString())
+					.setParameter("status", StatusEmprestimo.ABERTO)
+					.setParameter("idUsuario", idUsuario)
+					.getResultList();
+					
+		}
 	
 }

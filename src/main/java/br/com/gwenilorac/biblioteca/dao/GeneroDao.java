@@ -2,7 +2,6 @@ package br.com.gwenilorac.biblioteca.dao;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import br.com.gwenilorac.biblioteca.model.Estado;
 import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.model.Livro;
 
