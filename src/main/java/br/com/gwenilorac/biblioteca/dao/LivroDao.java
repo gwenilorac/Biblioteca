@@ -61,51 +61,21 @@ public class LivroDao {
 				.getResultList();
 	}
 	
-	@SuppressWarnings("unchecked")
-	public List<Livro> buscarLivrosDisponiveis() {
-		StringBuilder hql = new StringBuilder();
-		hql.append("SELECT livr ");
-		hql.append("FROM Emprestimo empr ");
-		hql.append("INNER JOIN empr.livro livr ");
-		hql.append("WHERE empr.status = :status ");
-		return em.createQuery(hql.toString())
-				.setParameter("status", StatusEmprestimo.ENCERRADO)
-				.getResultList();
-				
-	}
-	
-//	@SuppressWarnings("unchecked")
-//	public List<Livro> buscarLivrosIndisponiveis() {
-//		StringBuilder hql = new StringBuilder();
-//		hql.append("SELECT livr ");
-//		hql.append("FROM Emprestimo empr ");
-//		hql.append("INNER JOIN empr.livro livr ");
-//		hql.append("WHERE empr.status = :status ");
-//		return em.createQuery(hql.toString())
-//				.setParameter("status", StatusEmprestimo.ABERTO)
-//				.getResultList();
-//				
-//	}
-	
-	@SuppressWarnings("unchecked")
-	public List<Livro> buscarLivrosIndisponiveis() {
-		StringBuilder hql = new StringBuilder();
-		hql.append("SELECT e.livro ");
-		hql.append("FROM Emprestimo e ");
-		hql.append("INNER JOIN empr.livro livr ");
-		hql.append("WHERE e.status = :status ");
-		return em.createQuery(hql.toString())
-				.setParameter("status", StatusEmprestimo.ABERTO)
-				.getResultList();
-				
-	}
-	
-//	SELECT p FROM Pedido p JOIN FETCH p.clienteID_Cliente
 	
 	public List<Livro> buscarLivrosMaisEmprestados() {
 	    String jpql = "SELECT e.livro FROM Emprestimo e GROUP BY e.livro ORDER BY COUNT(e) DESC";
 	    TypedQuery<Livro> query = em.createQuery(jpql, Livro.class);
 	    return query.getResultList();
 	}
+
+	public boolean isLivroDisponivel(Livro livro) {
+	    String jpql = "SELECT COUNT(e) FROM Emprestimo e WHERE e.livro = :livro AND e.status = :status";
+	    Long count = em.createQuery(jpql, Long.class)
+	                  .setParameter("livro", livro)
+	                  .setParameter("status", StatusEmprestimo.ENCERRADO)
+	                  .getSingleResult();
+	    return count == 0; 
+	}
+
 	
 }
