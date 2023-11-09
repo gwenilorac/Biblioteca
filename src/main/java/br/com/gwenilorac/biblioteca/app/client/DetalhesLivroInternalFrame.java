@@ -30,6 +30,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
+import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
@@ -37,6 +38,7 @@ import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 import br.com.gwenilorac.biblioteca.model.Usuario;
+import br.com.gwenilorac.biblioteca.servicos.ServicoEmprestimo;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -45,8 +47,6 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 public class DetalhesLivroInternalFrame extends JPanel {
 
 	private Usuario usuario = ServicoLogin.getUsuarioLogado();
-	private PresentationModel<Usuario> UserModel;
-	private PresentationModel<Livro> LivroModel;
 	private Livro livro;
 	private Emprestimo emprestimo;
 	private JPanel detalhesPanel;
@@ -79,12 +79,9 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	}
 
 	private void initModel() {
-		UserModel = new PresentationModel<>(usuario);
-		LivroModel = new PresentationModel<>(livro);
 	}
 
 	private void initComponents() {
-		emprestimo = new Emprestimo(LivroModel.getBean(), UserModel.getBean());
 	}
 
 	public void initLayout() {
@@ -143,7 +140,7 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	private JPanel criarCapaPanel() {
 		capaPanel = new JPanel();
 
-		imagemIcon = LivroModel.getBean().getCapa();
+		imagemIcon = livro.getCapa();
 		icon = new ImageIcon(imagemIcon);
 		img = icon.getImage().getScaledInstance(150, 200, Image.SCALE_SMOOTH);
 		newIcon = new ImageIcon(img);
@@ -156,9 +153,9 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	private JPanel criarInfoPanel() {
 		infoPanel = new JPanel();
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.PAGE_AXIS));
-		infoPanel.add(new JLabel("Nome: " + LivroModel.getBean().getTitulo()));
-		infoPanel.add(new JLabel("Autor: " + LivroModel.getBean().getAutor().getNome()));
-		infoPanel.add(new JLabel("Gênero: " + LivroModel.getBean().getGenero().getNome()));
+		infoPanel.add(new JLabel("Nome: " + livro.getTitulo()));
+		infoPanel.add(new JLabel("Autor: " + livro.getAutor().getNome()));
+		infoPanel.add(new JLabel("Gênero: " + livro.getGenero().getNome()));
 
 		return infoPanel;
 	}
@@ -175,9 +172,9 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		JLabel lblGenero = new JLabel("Gênero: ");
 		JLabel lblCapa = new JLabel("Capa: ");
 
-		txtTitulo = new JTextField(LivroModel.getBean().getTitulo());
-		txtAutor = new JTextField(LivroModel.getBean().getAutor().toString());
-		txtGenero = new JTextField(LivroModel.getBean().getGenero().toString());
+		txtTitulo = new JTextField(livro.getTitulo());
+		txtAutor = new JTextField(livro.getAutor().toString());
+		txtGenero = new JTextField(livro.getGenero().toString());
 
 		btnEditarCapa = new JButton("Editar Capa");
 		btnEditarCapa.addActionListener(e -> editarCapa());
@@ -250,14 +247,14 @@ public class DetalhesLivroInternalFrame extends JPanel {
 			}
 		}
 
-		LivroModel.getBean().setTitulo(novoTitulo);
-		LivroModel.getBean().getAutor().setNome(novoAutor);
-		LivroModel.getBean().getGenero().setNome(novoGenero);
+		livro.setTitulo(novoTitulo);
+		livro.getAutor().setNome(novoAutor);
+		livro.getGenero().setNome(novoGenero);
 
 		em.getTransaction().begin();
-		generoDao.atualizar(LivroModel.getBean().getGenero());
-		autorDao.atualizar(LivroModel.getBean().getAutor());
-		livroDao.atualizar(LivroModel.getBean());
+		generoDao.atualizar(livro.getGenero());
+		autorDao.atualizar(livro.getAutor());
+		livroDao.atualizar(livro);
 		em.getTransaction().commit();
 		em.close();
 
@@ -265,56 +262,34 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	}
 
 	private void pegarLivroEmprestado() {
-		EntityManager em = JPAUtil.getEntityManager();
-		UsuarioDao usuarioDao = new UsuarioDao(em);
-		LivroDao livroDao = new LivroDao(em);
-	    List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(UserModel.getBean().getId());
-
-	    if (livrosEmprestados.size() < 3) {
-	        boolean pegarLivroEmprestado = emprestimo.pegarLivroEmprestado();
-
-	        em.getTransaction().begin();
-	        if (pegarLivroEmprestado) {
-	            livroDao.atualizar(LivroModel.getBean());
-	            em.getTransaction().commit();
-	            System.out.println("Livro emprestado: " + LivroModel.getBean().getTitulo() + " por: " + UserModel.getBean().getNome());
-	            JOptionPane.showMessageDialog(this, "LIVRO EMPRESTADO COM SUCESSO!");
-	        } else {
-	            JOptionPane.showMessageDialog(this, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.");
-	            em.getTransaction().rollback();
-	        }
-	    } else {
-	        JOptionPane.showMessageDialog(this, "VOCÊ ATINGIU O LIMITE DE TRÊS LIVROS EMPRESTADOS.");
-	        em.getTransaction().rollback();
-	    }
+		emprestimo = EmprestimoDoLivro();
+		ServicoEmprestimo servicoEmprestimo = new ServicoEmprestimo();
+		boolean pegarLivroEmprestado = servicoEmprestimo.pegarLivroEmprestado(emprestimo);
+		if (pegarLivroEmprestado) {
+			JOptionPane.showMessageDialog(this, "LIVRO EMPRESTADO COM SUCESSO!");
+		} else {
+			JOptionPane.showMessageDialog(this, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.|"
+					+ "\nOU SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
+		}
 	}
 
 	private void devolverLivro() {
-		EntityManager em = JPAUtil.getEntityManager();
-		LivroDao livroDao = new LivroDao(em);
-	    livroDao = new LivroDao(em);
-	    em.getTransaction().begin();
-	    Livro livroGerenciado = em.merge(LivroModel.getBean());
-	    if (emprestimo.getStatus() == StatusEmprestimo.ABERTO) {
-	        emprestimo.devolverLivro();
-	        livroDao.atualizar(livroGerenciado);
-	        em.getTransaction().commit();
-	        System.out.println("Livro devolvido: " + LivroModel.getBean().getTitulo() + " por: " + UserModel.getBean().getNome());
-	        JOptionPane.showMessageDialog(this, "LIVRO DEVOLVIDO COM SUCESSO!");
-	    } else {
-	        JOptionPane.showMessageDialog(this, "LIVRO NÃO ESTÁ EMPRESTADO OU JA FOI DEVOLVIDO!");
-	        em.getTransaction().rollback();
-	    }
+		ServicoEmprestimo servicoEmprestimo = new ServicoEmprestimo();
+		boolean devolverLivro = servicoEmprestimo.devolverLivro(emprestimo);
+		if (devolverLivro) {
+			JOptionPane.showMessageDialog(this, "LIVRO DEVOLVIDO COM SUCESSO!");
+		} else {
+			JOptionPane.showMessageDialog(this, "LIVRO NÃO ESTÁ EMPRESTADO OU JA FOI DEVOLVIDO!");
+		}
 	}
-
 
 	private void removerLivro() {
 		int confirmacao = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja remover o livro?", "Confirmação",
 				JOptionPane.YES_NO_OPTION);
 
 		if (confirmacao == JOptionPane.YES_OPTION) {
-			if (ServicoLivro.removerLivro(LivroModel.getBean()) == true) {
-				System.out.println("Livro removido: " + LivroModel.getBean().getTitulo());
+			if (ServicoLivro.removerLivro(livro) == true) {
+				System.out.println("Livro removido: " + livro.getTitulo());
 				JOptionPane.showMessageDialog(this, "LIVRO REMOVIDO COM SUCESSO!");
 			} else {
 				JOptionPane.showMessageDialog(this,
@@ -322,5 +297,21 @@ public class DetalhesLivroInternalFrame extends JPanel {
 			}
 		}
 	}
-
+	
+	private Emprestimo EmprestimoDoLivro() {
+		EntityManager em = JPAUtil.getEntityManager();
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro); 
+		
+		if(emprestimoDoLivro == null) {
+			em.getTransaction().begin();
+			Emprestimo emprestimo = new Emprestimo(livro, usuario);
+			emprestimoDao.cadastrar(emprestimo);
+			em.getTransaction().commit();
+			em.close();
+			return emprestimo;
+		} else {
+			return emprestimoDoLivro;
+		}
+	}
 }

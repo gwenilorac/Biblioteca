@@ -13,8 +13,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -27,7 +29,7 @@ public class Emprestimo {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY)
 	private Livro livro;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -52,17 +54,13 @@ public class Emprestimo {
 		this.status = StatusEmprestimo.ENCERRADO;
 	}
 
-	public Emprestimo(Usuario usuario) {
-		this.usuario = usuario;
-	}
-
 	public boolean pegarLivroEmprestado() {
 	    EntityManager em = JPAUtil.getEntityManager();
-	    LivroDao livroDao = new LivroDao(em);
+	    EmprestimoDao emprestimoDao = new EmprestimoDao(em);
 
 	    em.getTransaction().begin();
 
-	    if (livroDao.isLivroDisponivel(livro)) {
+	    if (emprestimoDao.isLivroDisponivel(livro)) {
 	        setStatus(StatusEmprestimo.ABERTO);
 	        System.out.println("Livro emprestado com sucesso!");
 	        System.out.println("Data da Devolução do Livro: " + dataDevolucao);
@@ -75,22 +73,23 @@ public class Emprestimo {
 	    }
 	}
 
-
-	public void devolverLivro() {
+	public boolean devolverLivro() {
 		EntityManager em = JPAUtil.getEntityManager();
-		LivroDao livroDao = new LivroDao(em);
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
 		
         em.getTransaction().begin();
 		
-		if (livroDao.isLivroDisponivel(livro) == false) {
+		if (emprestimoDao.isLivroDisponivel(livro) == false) {
 			setStatus(StatusEmprestimo.ENCERRADO);
 			System.out.println("Livro devolvido com sucesso!");
 			System.out.println("Data devolução: " + LocalDate.now());
 			em.getTransaction().commit();
+			return true;
 		} else {
 			System.out.println("O livro não está emprestado ou já foi devolvido.");
 			 em.getTransaction().rollback();
 		}
+		return false;
 	}
 
 	public void DevolucaoParaExclusaoConta() {

@@ -14,18 +14,23 @@ public class ServicoLogin {
 		UsuarioDao usuarioDao = new UsuarioDao(em);
 
 		String nome = usuario.getNome();
-		String email = usuario.getEmail();
 		String senha = usuario.getSenha();
+		
+		em.getTransaction().begin();
 
 		Usuario credenciais = usuarioDao.buscarCredenciais(nome, senha);
 
-		if (credenciais == null) {
-			System.out.println("Usuario invalido!");
-			return false;
-		} else {
+		if (credenciais != null) {
+			Usuario usuarioAtualizado = credenciais;
+			usuario = usuarioAtualizado;
 			usuarioLogado = usuario;
+			em.getTransaction().commit();
 			System.out.println("Usuario valido!");
 			return true;
+		} else {
+			System.out.println("Usuario invalido!");
+			em.getTransaction().rollback();
+			return false;
 		}
 	}
 

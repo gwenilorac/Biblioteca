@@ -1,10 +1,8 @@
 package br.com.gwenilorac.biblioteca.dao;
 
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
@@ -68,14 +66,4 @@ public class LivroDao {
 	    return query.getResultList();
 	}
 
-	public boolean isLivroDisponivel(Livro livro) {
-	    String jpql = "SELECT COUNT(e) FROM Emprestimo e WHERE e.livro = :livro AND e.status = :status";
-	    Long count = em.createQuery(jpql, Long.class)
-	                  .setParameter("livro", livro)
-	                  .setParameter("status", StatusEmprestimo.ENCERRADO)
-	                  .getSingleResult();
-	    return count == 0; 
-	}
-
-	
 }

@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 
+import javax.persistence.EntityManager;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -17,8 +18,11 @@ import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
+import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
+import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
+import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
 public class LoginFrm extends JDialog {

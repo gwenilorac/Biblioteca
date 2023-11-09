@@ -20,7 +20,7 @@ public class ServicoCadastro {
 
 		emailCadastrado = usuarioDao.buscarEmailCadastrado(email);
 
-		if (emailCadastrado == true) {
+		if (emailCadastrado) {
 			return false;
 		} else {
 			Usuario NewUsuario = new Usuario(nome, email, senha);

@@ -5,6 +5,7 @@ import javax.persistence.EntityManager;
 import org.postgresql.core.Oid;
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
+import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.model.Autor;
@@ -20,6 +21,7 @@ public class ServicoLivro {
 	private static LivroDao livroDao = new LivroDao(em);
 	private static GeneroDao generoDao = new GeneroDao(em);
 	private static AutorDao autorDao = new AutorDao(em);
+	private static EmprestimoDao emprestimoDao = new EmprestimoDao(em);
 
 	public static void adicionarLivro(String titulo, String autor, String genero, byte[] capa) {
 
@@ -60,42 +62,17 @@ public class ServicoLivro {
 	}
 	
 	public static boolean removerLivro(Livro livro) {
-		if(Emprestimo.getStatus() == StatusEmprestimo.ENCERRADO) {
+		if(emprestimoDao.isLivroDisponivel(livro)) {
 			em.getTransaction().begin();
 			livroDao.remover(livro);
 			System.out.println("Livro excluido com sucesso!");
 			em.getTransaction().commit();
 			return true;
 		}  else {
-			System.out.println("Por favor devolver livros emprestados!");
+			System.out.println("Por favor devolver livro emprestado!");
 			return false;
         }
 	}
 	
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

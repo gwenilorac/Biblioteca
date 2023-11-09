@@ -45,11 +45,13 @@ import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoBusca;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
+import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
 public class ApplicationFrm extends JFrame {
 
+	private Usuario usuario = ServicoLogin.getUsuarioLogado();
 	private PresentationModel<Usuario> model;
 	private JDesktopPane jDesktopPane;
 	private JTextField textField;
@@ -68,7 +70,6 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private void initModel() {
-		Usuario usuario = new Usuario();
 		model = new PresentationModel<Usuario>(usuario);
 	}
 
@@ -78,7 +79,7 @@ public class ApplicationFrm extends JFrame {
 		btnBusca = new JButton("Buscar");
 		btnBusca.addActionListener(bb -> realizarBusca(tfBusca.getText()));
 		btnUser = new JButton("User");
-		btnUser.addActionListener(bu -> abrirFuncoesUsuario());
+		btnUser.addActionListener(bu -> abrirInfoUsuario());
 		btnAtualizar = new JButton("Recarregar");
 		btnAtualizar.addActionListener(ba -> atualizarTela());
 	}
@@ -113,8 +114,8 @@ public class ApplicationFrm extends JFrame {
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 	}
 
-	private JInternalFrame abrirFuncoesUsuario() {
-		FuncoesUsuario funcoesUser = new FuncoesUsuario();
+	private JInternalFrame abrirInfoUsuario() {
+		InfoUsuario funcoesUser = new InfoUsuario();
 		internalFrame = new JInternalFrame("Detalhes do Usuário", true, true, true, true);
 		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		internalFrame.add(funcoesUser);

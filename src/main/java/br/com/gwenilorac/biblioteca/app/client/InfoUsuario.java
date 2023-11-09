@@ -31,7 +31,7 @@ import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
-public class FuncoesUsuario extends JPanel {
+public class InfoUsuario extends JPanel {
 
 	private PresentationModel<Usuario> model;
 	private EntityManager em = JPAUtil.getEntityManager();
@@ -52,7 +52,7 @@ public class FuncoesUsuario extends JPanel {
 	private JList livroList;
 	private static DefaultListModel<String> listModel;
 
-	public FuncoesUsuario() {
+	public InfoUsuario() {
 		initModel();
 		initComponents();
 		initLayout();

@@ -89,10 +89,10 @@ private EntityManager em;
 		
 	 public List<Livro> buscarLivrosEmprestados(Long idUsuario) {
 		    StringBuilder hql = new StringBuilder();
-		    hql.append("select empr.livro ");
-		    hql.append("from Emprestimo empr ");
-		    hql.append("where empr.status = :status ");
-		    hql.append("and empr.usuario.id = :idUsuario ");
+		    hql.append("SELECT empr.livro ");
+		    hql.append("FROM Emprestimo empr ");
+		    hql.append("WHERE empr.status = :status ");
+		    hql.append("AND empr.usuario.id = :idUsuario ");
 
 		    return em.createQuery(hql.toString(), Livro.class)
 		            .setParameter("status", StatusEmprestimo.ABERTO)
