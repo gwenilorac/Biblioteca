@@ -54,9 +54,7 @@ public class ApplicationFrm extends JFrame {
 	private Usuario usuario = ServicoLogin.getUsuarioLogado();
 	private PresentationModel<Usuario> model;
 	private JDesktopPane jDesktopPane;
-	private JTextField textField;
 	private JTextField tfBusca;
-	private JPasswordField passField;
 	private JButton btnBusca;
 	private JButton btnUser;
 	private JButton btnAtualizar;
@@ -90,11 +88,9 @@ public class ApplicationFrm extends JFrame {
 		jDesktopPane.add(exibirCapasDosLivros());
 
 		JMenu menu = new JMenu("Menu");
-		JMenuItem generos = new JMenuItem("Generos");
-		JMenuItem adicionarLivro = new JMenuItem("Adicionar Livro");
-		adicionarLivro.addActionListener(al -> abrirFormularioAdicionarLivro());
-		menu.add(generos);
-		menu.add(adicionarLivro);
+		JMenuItem editarLivro = new JMenuItem("Editar Livro");
+		editarLivro.addActionListener(al -> livrosPanel());
+		menu.add(editarLivro);
 
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(menu);
@@ -112,6 +108,12 @@ public class ApplicationFrm extends JFrame {
 		setJMenuBar(menubar);
 		setVisible(true);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
+	}
+
+	private Object livrosPanel() {
+		LivrosGUI livrosGui = new LivrosGUI();
+		
+		return livrosGui;
 	}
 
 	private JInternalFrame abrirInfoUsuario() {

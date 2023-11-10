@@ -62,6 +62,7 @@ public class Emprestimo {
 
 	    if (emprestimoDao.isLivroDisponivel(livro)) {
 	        setStatus(StatusEmprestimo.ABERTO);
+	        getLivro().setEstado(Estado.INDISPONÍVEL);
 	        System.out.println("Livro emprestado com sucesso!");
 	        System.out.println("Data da Devolução do Livro: " + dataDevolucao);
 	        em.getTransaction().commit();
@@ -81,6 +82,7 @@ public class Emprestimo {
 		
 		if (emprestimoDao.isLivroDisponivel(livro) == false) {
 			setStatus(StatusEmprestimo.ENCERRADO);
+			getLivro().setEstado(Estado.DISPONÍVEL);
 			System.out.println("Livro devolvido com sucesso!");
 			System.out.println("Data devolução: " + LocalDate.now());
 			em.getTransaction().commit();
@@ -88,8 +90,8 @@ public class Emprestimo {
 		} else {
 			System.out.println("O livro não está emprestado ou já foi devolvido.");
 			 em.getTransaction().rollback();
+			 return false;
 		}
-		return false;
 	}
 
 	public void DevolucaoParaExclusaoConta() {

@@ -1,12 +1,12 @@
 package br.com.gwenilorac.biblioteca.dao;
 
+import java.util.Collections;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import br.com.gwenilorac.biblioteca.model.Emprestimo;
+
 import br.com.gwenilorac.biblioteca.model.Livro;
-import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
-import br.com.gwenilorac.biblioteca.model.Usuario;
 
 public class LivroDao {
 
@@ -34,6 +34,17 @@ public class LivroDao {
 				.getResultList();
 	}
 	
+	public List<Livro> buscarLivros(String palavraChave) {
+	    try {
+	        String jpql = "SELECT l FROM Livro l WHERE LOWER(l.titulo) LIKE :palavraChave";
+	        return em.createQuery(jpql, Livro.class)
+	                .setParameter("palavraChave", "%" + palavraChave.toLowerCase() + "%")
+	                .getResultList();
+	    } catch (Exception e) {
+	        return Collections.emptyList();
+	    }
+	}
+	
 	public Livro buscarLivroPorTitulo(String titulo) {
 		try {
 		String jpql = "SELECT l FROM Livro l WHERE l.titulo = :titulo";
@@ -44,6 +55,8 @@ public class LivroDao {
 			return null;
 		}
 	}
+
+
 	
 	public List<Livro> buscarPorNomeDaCategoria(String nome) {
 		String jpql = "SELECT l FROM Livro l WHERE l.genero.nome = :nome";

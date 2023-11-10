@@ -36,7 +36,7 @@ public class TelaInicialFrm extends JDialog {
         btnLogin.setPreferredSize(new Dimension(80, 30));
         loginPanel.add(labelLogin);
         loginPanel.add(btnLogin);
-        loginPanel.setAlignmentX(LEFT_ALIGNMENT); // Alinha o painel à esquerda
+        loginPanel.setAlignmentX(LEFT_ALIGNMENT);
 
         cadastroPanel = new JPanel();
         cadastroPanel.setLayout(new BoxLayout(cadastroPanel, BoxLayout.PAGE_AXIS));
@@ -46,10 +46,10 @@ public class TelaInicialFrm extends JDialog {
         btnCadastro.setPreferredSize(new Dimension(90, 30));
         cadastroPanel.add(labelCadastro);
         cadastroPanel.add(btnCadastro);
-        cadastroPanel.setAlignmentX(RIGHT_ALIGNMENT); // Alinha o painel à direita
+        cadastroPanel.setAlignmentX(RIGHT_ALIGNMENT); 
 
         JSeparator separator = new JSeparator(JSeparator.VERTICAL);
-        separator.setPreferredSize(new Dimension(20, 100)); // Define a largura e altura do separador
+        separator.setPreferredSize(new Dimension(20, 100)); 
 
         JPanel contentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         contentPanel.add(loginPanel);
@@ -62,7 +62,7 @@ public class TelaInicialFrm extends JDialog {
 
     private void initLayout() {
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        setPreferredSize(new Dimension(400, 150)); // Ajuste a largura do JDialog conforme necessário
+        setPreferredSize(new Dimension(400, 150)); 
         setLocationRelativeTo(null);
         pack();
         setVisible(true);

@@ -2,12 +2,16 @@ package br.com.gwenilorac.biblioteca.app.client;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -16,6 +20,8 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
@@ -25,7 +31,6 @@ import com.jgoodies.forms.layout.FormLayout;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Livro;
-import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -51,6 +56,15 @@ public class InfoUsuario extends JPanel {
 	private JTable table;
 	private JList livroList;
 	private static DefaultListModel<String> listModel;
+	private JButton btnDevolverLivro;
+	private JPanel infoPanel;
+	private JPanel detalhesPanel;
+	private JPanel capaPanel;
+	private byte[] imagemIcon;
+	private ImageIcon icon;
+	private Image img;
+	private ImageIcon newIcon;
+	private JLabel capaLabel;
 
 	public InfoUsuario() {
 		initModel();
@@ -70,6 +84,7 @@ public class InfoUsuario extends JPanel {
 		btnSalvar.addActionListener(this::salvarEdicao);
 		btnRemover = new JButton("Remover Usuario");
 		btnRemover.addActionListener(this::excluirUsuario);
+		btnDevolverLivro = new JButton("Devolver Livro");
 
 		separator = new JSeparator(JSeparator.HORIZONTAL);
 
@@ -79,6 +94,9 @@ public class InfoUsuario extends JPanel {
 		novoNome = txtNome.getText();
 		novoEmail = txtEmail.getText();
 		
+		infoPanel = new JPanel();
+		detalhesPanel = new JPanel();
+
 	}
 
 	public void initLayout() {
@@ -86,11 +104,12 @@ public class InfoUsuario extends JPanel {
 		setPreferredSize(new Dimension(400, 250));
 
 		JPanel infoPane = criarEditarUser();
-		livrosEmprestadosPanel = criarLivrosEmprestadosPanel(usuarioDao.buscarLivrosEmprestados(model.getBean().getId()));
+		livrosEmprestadosPanel = criarLivrosEmprestadosPanel(
+				usuarioDao.buscarLivrosEmprestados(model.getBean().getId()));
 
-		add(infoPane, BorderLayout.PAGE_START);
+		add(infoPane, BorderLayout.LINE_START);
 //		add(separator, BorderLayout.CENTER);
-		add(livrosEmprestadosPanel, BorderLayout.CENTER);
+		add(livrosEmprestadosPanel, BorderLayout.AFTER_LAST_LINE);
 
 		setVisible(true);
 	}
@@ -114,7 +133,8 @@ public class InfoUsuario extends JPanel {
 
 	private void excluirUsuario(ActionEvent e) {
 		try {
-			if (usuarioDao.buscarLivrosEmprestados(model.getBean().getId()) == null || usuarioDao.buscarLivrosEmprestados(model.getBean().getId()).isEmpty()) {
+			if (usuarioDao.buscarLivrosEmprestados(model.getBean().getId()) == null
+					|| usuarioDao.buscarLivrosEmprestados(model.getBean().getId()).isEmpty()) {
 				em.getTransaction().begin();
 				usuarioDao.remover(model.getBean());
 				em.getTransaction().commit();
@@ -155,24 +175,68 @@ public class InfoUsuario extends JPanel {
 	}
 
 	public JPanel criarLivrosEmprestadosPanel(List<Livro> livrosEmprestados) {
-		listModel = new DefaultListModel<>();
+	    listModel = new DefaultListModel<>();
 	    for (Livro livro : livrosEmprestados) {
 	        listModel.addElement(livro.getTitulo());
 	    }
 
 	    livroList = new JList<>(listModel);
-	    livroList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+	    livroList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	    livroList.setLayoutOrientation(JList.VERTICAL);
 	    livroList.setVisibleRowCount(-1);
+	    livroList.addListSelectionListener(new ListSelectionListener() {
+	        @Override
+	        public void valueChanged(ListSelectionEvent e) {
+	            if (!e.getValueIsAdjusting()) {
+	                int selectedIndex = livroList.getSelectedIndex();
+	                if (selectedIndex != -1) {
+	                    String tituloSelecionado = (String) livroList.getSelectedValue();
+	                    Livro livroSelecionado = livroDao.buscarLivroPorTitulo(tituloSelecionado);
+
+	                    if (livroSelecionado != null) {
+	                    	DetalhesLivro(livroSelecionado);
+	                        System.out.println("Livro Selecionado: " + livroSelecionado.getTitulo());
+	                    }
+	                }
+	            }
+	        }
+	    });
 
 	    JScrollPane scrollPane = new JScrollPane(livroList);
 	    scrollPane.setPreferredSize(new Dimension(250, 80));
 
 	    JPanel panel = new JPanel(new BorderLayout());
 	    panel.add(scrollPane);
-	    
-	    panel.setVisible(true);
 
 	    return panel;
+	}
+	
+	public JPanel DetalhesLivro(Livro livro) {
+		setLayout(new BorderLayout());
+		setPreferredSize(new Dimension(520, 250));
+		
+		detalhesPanel = new JPanel(new BorderLayout());
+		
+		capaPanel = new JPanel();
+		imagemIcon = livro.getCapa();
+		icon = new ImageIcon(imagemIcon);
+		img = icon.getImage().getScaledInstance(150, 200, Image.SCALE_SMOOTH);
+		newIcon = new ImageIcon(img);
+		capaLabel = new JLabel(newIcon);
+		capaPanel.add(capaLabel);
+		
+		infoPanel = new JPanel();
+		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.PAGE_AXIS));
+		infoPanel.add(new JLabel("Nome: " + livro.getTitulo()));
+		infoPanel.add(new JLabel("Autor: " + livro.getAutor().getNome()));
+		infoPanel.add(new JLabel("Gênero: " + livro.getGenero().getNome()));
+
+		detalhesPanel.add(capaPanel);
+		detalhesPanel.add(infoPanel);
+		
+		
+		
+		return detalhesPanel;
+
 	}
 }

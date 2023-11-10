@@ -48,6 +48,10 @@ public class Livro implements Serializable{
 	@Column(name = "capa")
 	private byte[] capa;
 	
+	@Enumerated(EnumType.STRING) 
+    @Column(nullable = false)
+    private Estado estado = Estado.DISPONÍVEL;
+	
 	@Transient
 	private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 	
@@ -111,6 +115,14 @@ public class Livro implements Serializable{
 		Object old = this.capa;
 		this.capa = capa;
 		changeSupport.firePropertyChange("capa", old, this.capa);
+	}
+	
+	public Estado getEstado() {
+		return estado;
+	}
+
+	public void setEstado(Estado estado) {
+		this.estado = estado;
 	}
 	
 	public void adicionarLivroNaListaDoAutor(Livro livro) {

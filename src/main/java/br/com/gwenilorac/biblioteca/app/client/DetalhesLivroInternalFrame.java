@@ -262,24 +262,46 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	}
 
 	private void pegarLivroEmprestado() {
-		emprestimo = EmprestimoDoLivro();
-		ServicoEmprestimo servicoEmprestimo = new ServicoEmprestimo();
-		boolean pegarLivroEmprestado = servicoEmprestimo.pegarLivroEmprestado(emprestimo);
-		if (pegarLivroEmprestado) {
-			JOptionPane.showMessageDialog(this, "LIVRO EMPRESTADO COM SUCESSO!");
+		EntityManager em = JPAUtil.getEntityManager();
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro); 
+		
+		if(emprestimoDoLivro == null) {
+			em.getTransaction().begin();
+			Emprestimo Novoemprestimo = new Emprestimo(livro, usuario);
+			emprestimoDao.cadastrar(Novoemprestimo);
+			emprestimo = Novoemprestimo;
+			em.getTransaction().commit();
+			em.close();
+			return;
 		} else {
-			JOptionPane.showMessageDialog(this, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.|"
-					+ "\nOU SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
+			ServicoEmprestimo servicoEmprestimo = new ServicoEmprestimo();
+			boolean pegarLivroEmprestado = servicoEmprestimo.pegarLivroEmprestado(emprestimoDoLivro);
+			if (pegarLivroEmprestado) {
+				JOptionPane.showMessageDialog(this, "LIVRO EMPRESTADO COM SUCESSO!");
+			} else {
+				JOptionPane.showMessageDialog(this, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.|"
+						+ "\nOU SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
+			}
+			return;
 		}
 	}
 
 	private void devolverLivro() {
-		ServicoEmprestimo servicoEmprestimo = new ServicoEmprestimo();
-		boolean devolverLivro = servicoEmprestimo.devolverLivro(emprestimo);
-		if (devolverLivro) {
-			JOptionPane.showMessageDialog(this, "LIVRO DEVOLVIDO COM SUCESSO!");
+		EntityManager em = JPAUtil.getEntityManager();
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
+		
+		if(emprestimoDoLivro != null) {
+			ServicoEmprestimo servicoEmprestimo = new ServicoEmprestimo();
+			boolean devolverLivro = servicoEmprestimo.devolverLivro(emprestimoDoLivro);
+			if (devolverLivro) {
+				JOptionPane.showMessageDialog(this, "LIVRO DEVOLVIDO COM SUCESSO!");
+			} else {
+				JOptionPane.showMessageDialog(this, "LIVRO NÃO ESTÁ EMPRESTADO OU JA FOI DEVOLVIDO!");
+			}
 		} else {
-			JOptionPane.showMessageDialog(this, "LIVRO NÃO ESTÁ EMPRESTADO OU JA FOI DEVOLVIDO!");
+			JOptionPane.showMessageDialog(this, "NÃO EXISTE EMPRESTIMO COM ESSE LIVRO!");
 		}
 	}
 
@@ -298,20 +320,4 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		}
 	}
 	
-	private Emprestimo EmprestimoDoLivro() {
-		EntityManager em = JPAUtil.getEntityManager();
-		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro); 
-		
-		if(emprestimoDoLivro == null) {
-			em.getTransaction().begin();
-			Emprestimo emprestimo = new Emprestimo(livro, usuario);
-			emprestimoDao.cadastrar(emprestimo);
-			em.getTransaction().commit();
-			em.close();
-			return emprestimo;
-		} else {
-			return emprestimoDoLivro;
-		}
-	}
 }
