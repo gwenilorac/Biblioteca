@@ -3,9 +3,11 @@ package br.com.gwenilorac.biblioteca.app.client;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 
 import javax.persistence.EntityManager;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -28,32 +30,31 @@ public class TelaInicialFrm extends JDialog {
     }
 
     private void initComponents() {
-        loginPanel = new JPanel();
-        loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.PAGE_AXIS));
-        JLabel labelLogin = new JLabel("BEM VINDO DE VOLTA!");
+        
+    	loginPanel = new JPanel();
+        loginPanel.setLayout(new FlowLayout());
+        loginPanel.setBorder(BorderFactory.createTitledBorder("BEM VINDO DE VOLTA!"));
+//        JLabel labelLogin = new JLabel("BEM VINDO DE VOLTA!");
         JButton btnLogin = new JButton("Login");
         btnLogin.addActionListener(this::openLoginForm);
         btnLogin.setPreferredSize(new Dimension(80, 30));
-        loginPanel.add(labelLogin);
+//        loginPanel.add(labelLogin);
         loginPanel.add(btnLogin);
         loginPanel.setAlignmentX(LEFT_ALIGNMENT);
-
+        
         cadastroPanel = new JPanel();
-        cadastroPanel.setLayout(new BoxLayout(cadastroPanel, BoxLayout.PAGE_AXIS));
-        JLabel labelCadastro = new JLabel("JUNTE-SE A NOS!");
+        cadastroPanel.setLayout(new FlowLayout());
+        cadastroPanel.setBorder(BorderFactory.createTitledBorder("JUNTE-SE A NOS!"));
+//        JLabel labelCadastro = new JLabel("JUNTE-SE A NOS!");
         JButton btnCadastro = new JButton("Cadastro");
         btnCadastro.addActionListener(this::openCadastroForm);
-        btnCadastro.setPreferredSize(new Dimension(90, 30));
-        cadastroPanel.add(labelCadastro);
+        btnCadastro.setPreferredSize(new Dimension(100, 30));
+//        cadastroPanel.add(labelCadastro);
         cadastroPanel.add(btnCadastro);
         cadastroPanel.setAlignmentX(RIGHT_ALIGNMENT); 
 
-        JSeparator separator = new JSeparator(JSeparator.VERTICAL);
-        separator.setPreferredSize(new Dimension(20, 100)); 
-
-        JPanel contentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel contentPanel = new JPanel(new GridLayout(1, 1));
         contentPanel.add(loginPanel);
-        contentPanel.add(separator);
         contentPanel.add(cadastroPanel);
 
         setLayout(new BorderLayout());
@@ -62,7 +63,7 @@ public class TelaInicialFrm extends JDialog {
 
     private void initLayout() {
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        setPreferredSize(new Dimension(400, 150)); 
+        setPreferredSize(new Dimension(400, 100)); 
         setLocationRelativeTo(null);
         pack();
         setVisible(true);

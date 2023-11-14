@@ -9,6 +9,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseMotionListener;
 import java.beans.PropertyVetoException;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -134,25 +135,9 @@ public class ApplicationFrm extends JFrame {
 		return internalFrame;
 	}
 
-	private void abrirFormularioAdicionarLivro() {
-		AdicionarLivroFrm addBookForm = new AdicionarLivroFrm();
-		internalFrame = new JInternalFrame("Adicionar Livro", false, true, false, false);
-		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-		internalFrame.add(addBookForm);
-		internalFrame.setSize(400, 300);
-		internalFrame.setVisible(true);
-		internalFrame.pack();
-		
-		centralizarPanel();
-
-		jDesktopPane.add(internalFrame);
-
-		internalFrame.toFront();
-	}
-	
 	private void atualizarTela() {
-        jDesktopPane.removeAll();
-        jDesktopPane.add(exibirCapasDosLivros());
+		jDesktopPane.removeAll();
+		jDesktopPane.add(exibirCapasDosLivros());
         revalidate();
         repaint();
     }
@@ -169,6 +154,7 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private JInternalFrame exibirCapasDosLivros() {
+		
 		List<Livro> livros = ServicoLivro.pegarLivros();
 		JInternalFrame internalFrame = new JInternalFrame();
 		internalFrame.setLayout(new FlowLayout());

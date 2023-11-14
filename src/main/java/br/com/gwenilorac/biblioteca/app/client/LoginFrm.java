@@ -93,7 +93,7 @@ public class LoginFrm extends JDialog {
 
 		add(panel);
 		setModal(true);
-		setPreferredSize(new Dimension(300, 200));
+		setPreferredSize(new Dimension(300, 150));
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		pack();
@@ -108,6 +108,8 @@ public class LoginFrm extends JDialog {
 	}
 
 	private Component createMainForm() {
+		JPanel loginPanel = new JPanel();
+		
 		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 
@@ -115,8 +117,12 @@ public class LoginFrm extends JDialog {
 		builder.nextLine();
 
 		builder.append("Password:", passField);
+		
+		JPanel formPanel = builder.getPanel();
+		
+		loginPanel.add(formPanel);
 
-		return builder.getPanel();
+		return loginPanel;
 	}
 
 	public boolean isOK() {

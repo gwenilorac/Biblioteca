@@ -15,11 +15,14 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
+import javax.persistence.PreRemove;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -33,6 +36,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
+import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -41,6 +45,7 @@ import br.com.gwenilorac.biblioteca.dao.AutorDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
@@ -48,6 +53,7 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 public class LivrosGUI extends JFrame {
 
 	private EntityManager em = JPAUtil.getEntityManager();
+	private PresentationModel<Livro> model;
 	private LivroDao livroDao;
 	private JTextField textFieldPesquisa;
 	private JTable tableLivros;
@@ -63,25 +69,36 @@ public class LivrosGUI extends JFrame {
 	private JLabel capaLabel;
 	private Livro livroSelecionado;
 	private File selectedCoverFile;
+	private Container contentPane;
 
 	public LivrosGUI() {
+		initModel();
+		initComponents();
+		initLayout();
+	}
 
-		JPanel panelPesquisarLivros = criarPanelPesquisarLivros();
+	private void initModel() {
+		Livro livro = new Livro();
+		model = new PresentationModel<Livro>(livro);
+	}
 
-		JPanel panelDadosLivros = criarPanelDadosLivro();
+	private void initComponents() {
 
-		JPanel panelBotoes = criarPanelBotoes();
+	}
 
-		Container contentPane = getContentPane();
+	public void initLayout() {
+		contentPane = getContentPane();
 		contentPane.setLayout(new GridLayout(3, 1));
-		contentPane.add(panelPesquisarLivros);
-		contentPane.add(panelDadosLivros);
-		contentPane.add(panelBotoes);
+		contentPane.add(criarPanelPesquisarLivros());
+		contentPane.add(criarPanelDadosLivro());
+		contentPane.add(criarPanelBotoes());
 
 		setPreferredSize(new Dimension(900, 900));
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
+		setExtendedState(MAXIMIZED_BOTH);
+		
 	}
 
 	private JPanel criarPanelPesquisarLivros() {
@@ -104,8 +121,7 @@ public class LivrosGUI extends JFrame {
 				tableModel.setRowCount(0);
 
 				for (Livro livro : livrosEncontrados) {
-					Object[] rowData = { livro.getCapa(), livro.getTitulo(), livro.getAutor(), livro.getGenero(),
-							livro.getEstado() };
+					Object[] rowData = { livro.getTitulo(), livro.getAutor(), livro.getGenero(), livro.getEstado() };
 					tableModel.addRow(rowData);
 				}
 
@@ -119,7 +135,7 @@ public class LivrosGUI extends JFrame {
 
 								imagemIcon = livroSelecionado.getCapa();
 								icon = new ImageIcon(imagemIcon);
-								img = icon.getImage().getScaledInstance(200, 250, Image.SCALE_SMOOTH);
+								img = icon.getImage().getScaledInstance(150, 190, Image.SCALE_SMOOTH);
 								newIcon = new ImageIcon(img);
 								capaLabel = new JLabel(newIcon);
 								lblCapa.setIcon(newIcon);
@@ -138,13 +154,13 @@ public class LivrosGUI extends JFrame {
 		buscaPanel.add(textFieldPesquisa);
 		buscaPanel.add(btnBuscar);
 
-		String[] colunas = { "Capa", "Nome", "Autor", "Gênero", "Disponibilidade" };
+		String[] colunas = { "Nome", "Autor", "Gênero", "Disponibilidade" };
 		DefaultTableModel tableModel = new DefaultTableModel(colunas, 0);
 		tableLivros = new JTable(tableModel) {
-		    @Override
-		    public boolean isCellEditable(int row, int column) {
-		        return false;
-		    }
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
 		};
 		JScrollPane scrollPane = new JScrollPane(tableLivros);
 		scrollPane.setPreferredSize(new Dimension(400, 150));
@@ -195,17 +211,21 @@ public class LivrosGUI extends JFrame {
 		btnExcluir.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int confirmacao = JOptionPane.showConfirmDialog(null,
-                        "Tem certeza que deseja remover o livro?", "Confirmação", JOptionPane.YES_NO_OPTION);
+				if (livroSelecionado != null) {
+					int confirmacao = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja remover o livro?", "Confirmação",
+							JOptionPane.YES_NO_OPTION);
 
-				if (confirmacao == JOptionPane.YES_OPTION) {
-					if (ServicoLivro.removerLivro(livroSelecionado) == true) {
-						System.out.println("Livro removido: " + livroSelecionado.getTitulo());
-						JOptionPane.showMessageDialog(null, "LIVRO REMOVIDO COM SUCESSO!");
-					} else {
-						JOptionPane.showMessageDialog(null,
-								"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER");
+					if (confirmacao == JOptionPane.YES_OPTION) {
+						if (ServicoLivro.removerLivro(livroSelecionado) == true) {
+							System.out.println("Livro removido: " + livroSelecionado.getTitulo());
+							JOptionPane.showMessageDialog(null, "LIVRO REMOVIDO COM SUCESSO!");
+						} else {
+							JOptionPane.showMessageDialog(null,
+									"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER");
+						}
 					}
+				} else {
+					JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO!");
 				}
 			}
 		});
@@ -214,7 +234,23 @@ public class LivrosGUI extends JFrame {
 		btnAdicionar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				AdicionarLivroFrm adicionarLivro = new AdicionarLivroFrm();
+				AdicionarLivroFrm addBookForm = new AdicionarLivroFrm();
+				
+				JInternalFrame internalFrame = new JInternalFrame("Adicionar Livro", false, true, false, false);
+				internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+				internalFrame.add(addBookForm);
+				internalFrame.setSize(400, 300);
+				internalFrame.setVisible(true);
+				internalFrame.pack();
+
+				Dimension desktopSize = contentPane.getSize();
+				Dimension jInternalFrameSize = internalFrame.getSize();
+				internalFrame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
+						(desktopSize.height - jInternalFrameSize.height) / 2);
+				
+				contentPane.add(internalFrame);
+
+				internalFrame.toFront();
 			}
 		});
 
@@ -223,27 +259,30 @@ public class LivrosGUI extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JFileChooser chooser = new JFileChooser();
-				FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
-				chooser.setFileFilter(filter);
-				int result = chooser.showOpenDialog(null);
+				if (livroSelecionado != null) {
+					JFileChooser chooser = new JFileChooser();
+					FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
+					chooser.setFileFilter(filter);
+					int result = chooser.showOpenDialog(null);
 
-				if (result == JFileChooser.APPROVE_OPTION) {
-					selectedCoverFile = chooser.getSelectedFile();
-					try {
-						BufferedImage originalImage = ImageIO.read(selectedCoverFile);
-						Image resizedImage = originalImage.getScaledInstance(150, 200, Image.SCALE_SMOOTH);
+					if (result == JFileChooser.APPROVE_OPTION) {
+						selectedCoverFile = chooser.getSelectedFile();
+						try {
+							BufferedImage originalImage = ImageIO.read(selectedCoverFile);
+							Image resizedImage = originalImage.getScaledInstance(150, 200, Image.SCALE_SMOOTH);
 
-						BufferedImage bufferedResizedImage = new BufferedImage(150, 200, BufferedImage.TYPE_INT_RGB);
-						bufferedResizedImage.getGraphics().drawImage(resizedImage, 0, 0, null);
+							BufferedImage bufferedResizedImage = new BufferedImage(150, 200, BufferedImage.TYPE_INT_RGB);
+							bufferedResizedImage.getGraphics().drawImage(resizedImage, 0, 0, null);
 
-						ImageIcon novaCapaIcon = new ImageIcon(bufferedResizedImage);
-						
-						JOptionPane.showMessageDialog(null,
-								"CAPA EDITADA COM SUCESSO!");
-					} catch (IOException e1) {
-						e1.printStackTrace();
+							ImageIcon novaCapaIcon = new ImageIcon(bufferedResizedImage);
+							
+							JOptionPane.showMessageDialog(null, "CAPA EDITADA COM SUCESSO!");
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
 					}
+				} else {
+					JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO!");
 				}
 			}
 		});
@@ -252,29 +291,43 @@ public class LivrosGUI extends JFrame {
 		btnAlterar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				EntityManager em = JPAUtil.getEntityManager();
-				GeneroDao generoDao = new GeneroDao(em);
-				AutorDao autorDao = new AutorDao(em);
-				LivroDao livroDao = new LivroDao(em);
+				if (livroSelecionado != null) {
+					EntityManager em = JPAUtil.getEntityManager();
+					GeneroDao generoDao = new GeneroDao(em);
+					AutorDao autorDao = new AutorDao(em);
+					LivroDao livroDao = new LivroDao(em);
 
-				String novoTitulo = textFieldNome.getText();
-				String novoAutor = textFieldAutor.getText();
-				String novoGenero = textFieldGenero.getText();
+					String novoTitulo = textFieldNome.getText();
+					String novoAutor = textFieldAutor.getText();
+					String novoGenero = textFieldGenero.getText();
 
-				if (selectedCoverFile != null) {
-					try {
-						BufferedImage originalImage = ImageIO.read(selectedCoverFile);
-						ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-						ImageIO.write(originalImage, "png", outputStream);
-						byte[] coverImageBytes = outputStream.toByteArray();
-						outputStream.close();
-						livroSelecionado.setCapa(coverImageBytes);
-						JOptionPane.showMessageDialog(null,
-								"ALTERAÇÕES SALVAS COM SUCESSO!");
-						
-					} catch (IOException ex) {
-						ex.printStackTrace();
+					if (selectedCoverFile != null) {
+						try {
+							BufferedImage originalImage = ImageIO.read(selectedCoverFile);
+							ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+							ImageIO.write(originalImage, "png", outputStream);
+							byte[] coverImageBytes = outputStream.toByteArray();
+							outputStream.close();
+							livroSelecionado.setCapa(coverImageBytes);
+
+						} catch (IOException ex) {
+							ex.printStackTrace();
+						}
 					}
+
+					livroSelecionado.setTitulo(novoTitulo);
+					livroSelecionado.getAutor().setNome(novoAutor);
+					livroSelecionado.getGenero().setNome(novoGenero);
+
+					em.getTransaction().begin();
+					generoDao.atualizar(livroSelecionado.getGenero());
+					autorDao.atualizar(livroSelecionado.getAutor());
+					livroDao.atualizar(livroSelecionado);
+					em.getTransaction().commit();
+					
+					JOptionPane.showMessageDialog(null, "ALTERAÇÕES SALVAS COM SUCESSO!");
+				} else {
+					JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO!");
 				}
 			}
 		});

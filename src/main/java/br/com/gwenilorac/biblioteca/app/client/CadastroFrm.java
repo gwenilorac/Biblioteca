@@ -55,7 +55,8 @@ public class CadastroFrm extends JDialog {
 	}
 
 	private void actionCadastro() {
-		if (!isValid(model.getBean()))return;
+		if (!isValid(model.getBean()))
+			return;
 
 		ServicoCadastro.cadastraUsuario(model.getBean());
 		cadastro = true;
@@ -67,7 +68,8 @@ public class CadastroFrm extends JDialog {
 			JOptionPane.showMessageDialog(this, "FALTA INFORMAR O NOME");
 			return false;
 		}
-		if (bean.getEmail() == null || bean.getEmail().isEmpty() || bean.getEmail() == " " || (!bean.getEmail().contains("@"))) {
+		if (bean.getEmail() == null || bean.getEmail().isEmpty() || bean.getEmail() == " "
+				|| (!bean.getEmail().contains("@"))) {
 			JOptionPane.showMessageDialog(this, "INSIRA UM EMAIL VALIDO");
 			return false;
 		}
@@ -91,7 +93,7 @@ public class CadastroFrm extends JDialog {
 
 		add(panel);
 		setModal(true);
-		setPreferredSize(new Dimension(300, 200));
+		setPreferredSize(new Dimension(300, 150));
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		pack();
@@ -106,6 +108,9 @@ public class CadastroFrm extends JDialog {
 	}
 
 	private Component createMainForm() {
+		
+		JPanel cadastroPanel = new JPanel();
+		
 		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 
@@ -117,7 +122,11 @@ public class CadastroFrm extends JDialog {
 
 		builder.append("Password:", passField);
 
-		return builder.getPanel();
+		JPanel formPanel = builder.getPanel();
+
+		cadastroPanel.add(formPanel);
+
+		return cadastroPanel;
 	}
 
 	public boolean isOK() {

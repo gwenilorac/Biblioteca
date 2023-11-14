@@ -10,13 +10,14 @@ import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.model.Autor;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
+import br.com.gwenilorac.biblioteca.model.Estado;
 import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 public class ServicoLivro {
-	
+
 	private static EntityManager em = JPAUtil.getEntityManager();
 	private static LivroDao livroDao = new LivroDao(em);
 	private static GeneroDao generoDao = new GeneroDao(em);
@@ -60,19 +61,28 @@ public class ServicoLivro {
 		List<Livro> todosLivros = livroDao.buscarTodosLivros();
 		return todosLivros;
 	}
-	
+
 	public static boolean removerLivro(Livro livro) {
-		if(emprestimoDao.isLivroDisponivel(livro)) {
+		if (livro.getEstado() == Estado.DISPONÍVEL) {
 			em.getTransaction().begin();
-			livroDao.remover(livro);
-			System.out.println("Livro excluido com sucesso!");
+			Emprestimo emprestimo = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
+			if (emprestimo != null) {
+				emprestimoDao.remover(emprestimo);
+				emprestimoDao.atualizar(emprestimo);
+				livroDao.remover(livro);
+				livroDao.atualizar(livro);
+				System.out.println("Livro excluido com sucesso!");
+			} else {
+				livroDao.remover(livro);
+				livroDao.atualizar(livro);
+				System.out.println("Livro excluido com sucesso!");
+			}
 			em.getTransaction().commit();
 			return true;
-		}  else {
+		} else {
 			System.out.println("Por favor devolver livro emprestado!");
 			return false;
-        }
+		}
 	}
-	
-	
+
 }

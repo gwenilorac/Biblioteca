@@ -56,13 +56,12 @@ public class Emprestimo {
 
 	public boolean pegarLivroEmprestado() {
 	    EntityManager em = JPAUtil.getEntityManager();
-	    EmprestimoDao emprestimoDao = new EmprestimoDao(em);
 
 	    em.getTransaction().begin();
 
-	    if (emprestimoDao.isLivroDisponivel(livro)) {
-	        setStatus(StatusEmprestimo.ABERTO);
-	        getLivro().setEstado(Estado.INDISPONÍVEL);
+	    if (status == StatusEmprestimo.ENCERRADO) {
+	        this.setStatus(StatusEmprestimo.ABERTO);
+	        this.livro.setEstado(Estado.INDISPONÍVEL);
 	        System.out.println("Livro emprestado com sucesso!");
 	        System.out.println("Data da Devolução do Livro: " + dataDevolucao);
 	        em.getTransaction().commit();

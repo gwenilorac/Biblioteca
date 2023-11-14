@@ -10,7 +10,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
 import javax.swing.BoxLayout;
@@ -24,11 +23,10 @@ import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
+import org.hibernate.event.spi.RefreshEvent;
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
-
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
 import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
@@ -38,7 +36,6 @@ import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 import br.com.gwenilorac.biblioteca.model.Usuario;
-import br.com.gwenilorac.biblioteca.servicos.ServicoEmprestimo;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -48,13 +45,11 @@ public class DetalhesLivroInternalFrame extends JPanel {
 
 	private Usuario usuario = ServicoLogin.getUsuarioLogado();
 	private Livro livro;
-	private Emprestimo emprestimo;
 	private JPanel detalhesPanel;
 	private JTabbedPane tabbedPane;
 	private JTextField txtTitulo;
 	private JTextField txtAutor;
 	private JTextField txtGenero;
-	private JButton btnRemover;
 	private JButton btnPegarEmprestado;
 	private JButton btnDevolverLivro;
 	private JButton btnAtualizar;
@@ -111,10 +106,6 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		btnAtualizar = new JButton("Atualizar");
 		btnAtualizar.addActionListener(e -> atualizarInformacoes());
 		buttonPanel.add(btnAtualizar);
-
-		btnRemover = new JButton("Remover");
-		btnRemover.addActionListener(e -> removerLivro());
-		buttonPanel.add(btnRemover);
 
 		btnPegarEmprestado = new JButton("Pegar Emprestado");
 		btnPegarEmprestado.addActionListener(e -> pegarLivroEmprestado());
@@ -264,24 +255,34 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	private void pegarLivroEmprestado() {
 		EntityManager em = JPAUtil.getEntityManager();
 		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro); 
-		
-		if(emprestimoDoLivro == null) {
-			em.getTransaction().begin();
-			Emprestimo Novoemprestimo = new Emprestimo(livro, usuario);
-			emprestimoDao.cadastrar(Novoemprestimo);
-			emprestimo = Novoemprestimo;
-			em.getTransaction().commit();
-			em.close();
-			return;
-		} else {
-			ServicoEmprestimo servicoEmprestimo = new ServicoEmprestimo();
-			boolean pegarLivroEmprestado = servicoEmprestimo.pegarLivroEmprestado(emprestimoDoLivro);
-			if (pegarLivroEmprestado) {
-				JOptionPane.showMessageDialog(this, "LIVRO EMPRESTADO COM SUCESSO!");
+		UsuarioDao usuarioDao = new UsuarioDao(em);
+		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
+		List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(ServicoLogin.getUsuarioLogado().getId());
+
+		if (livrosEmprestados.size() <= 3) {
+			if (emprestimoDoLivro == null) {
+				em.getTransaction().begin();
+				Emprestimo Novoemprestimo = new Emprestimo(livro, usuario);
+				emprestimoDao.cadastrar(Novoemprestimo);
+				boolean pegarLivroEmprestado = Novoemprestimo.pegarLivroEmprestado();
+				if (pegarLivroEmprestado) {
+					emprestimoDao.atualizar(Novoemprestimo);
+					JOptionPane.showMessageDialog(this, "LIVRO EMPRESTADO COM SUCESSO!");
+				} else {
+					JOptionPane.showMessageDialog(this, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.|"
+							+ "\nOU SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
+				}
+				em.getTransaction().commit();
+				return;
 			} else {
-				JOptionPane.showMessageDialog(this, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.|"
-						+ "\nOU SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
+				boolean pegarLivroEmprestado = emprestimoDoLivro.pegarLivroEmprestado();
+				if (pegarLivroEmprestado) {
+					emprestimoDao.atualizar(emprestimoDoLivro);
+					JOptionPane.showMessageDialog(this, "LIVRO EMPRESTADO COM SUCESSO!");
+				} else {
+					JOptionPane.showMessageDialog(this, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.|"
+							+ "\nOU SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
+				}
 			}
 			return;
 		}
@@ -291,11 +292,13 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		EntityManager em = JPAUtil.getEntityManager();
 		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
 		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
-		
-		if(emprestimoDoLivro != null) {
-			ServicoEmprestimo servicoEmprestimo = new ServicoEmprestimo();
-			boolean devolverLivro = servicoEmprestimo.devolverLivro(emprestimoDoLivro);
+
+		if (emprestimoDoLivro != null) {
+			em.getTransaction().begin();
+			boolean devolverLivro = emprestimoDoLivro.devolverLivro();
 			if (devolverLivro) {
+				emprestimoDao.atualizar(emprestimoDoLivro);
+				em.getTransaction().commit();
 				JOptionPane.showMessageDialog(this, "LIVRO DEVOLVIDO COM SUCESSO!");
 			} else {
 				JOptionPane.showMessageDialog(this, "LIVRO NÃO ESTÁ EMPRESTADO OU JA FOI DEVOLVIDO!");
@@ -305,19 +308,4 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		}
 	}
 
-	private void removerLivro() {
-		int confirmacao = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja remover o livro?", "Confirmação",
-				JOptionPane.YES_NO_OPTION);
-
-		if (confirmacao == JOptionPane.YES_OPTION) {
-			if (ServicoLivro.removerLivro(livro) == true) {
-				System.out.println("Livro removido: " + livro.getTitulo());
-				JOptionPane.showMessageDialog(this, "LIVRO REMOVIDO COM SUCESSO!");
-			} else {
-				JOptionPane.showMessageDialog(this,
-						"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER");
-			}
-		}
-	}
-	
 }
