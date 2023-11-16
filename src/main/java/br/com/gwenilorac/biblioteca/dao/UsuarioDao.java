@@ -1,5 +1,6 @@
 package br.com.gwenilorac.biblioteca.dao;
 
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -71,6 +72,17 @@ private EntityManager em;
 		} catch (Exception e) {
 			return null;
 		}
+	}
+	
+	public List<Usuario> buscarUsuarios(String palavraChave) {
+	    try {
+	        String jpql = "SELECT u FROM Usuario u WHERE LOWER(u.nome) LIKE :palavraChave";
+	        return em.createQuery(jpql, Usuario.class)
+	                .setParameter("palavraChave", "%" + palavraChave.toLowerCase() + "%")
+	                .getResultList();
+	    } catch (Exception e) {
+	        return Collections.emptyList();
+	    }
 	}
 	
 	public List<Livro> buscarLivrosEmprestadosPorUsuario(Usuario usuario) {

@@ -46,43 +46,37 @@ import com.lowagie.text.List;
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
+import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
+import br.com.gwenilorac.biblioteca.servicos.ServicoUsuario;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
-public class LivrosGUI extends JFrame {
+public class UsersGUI extends JFrame {
 
 	private EntityManager em = JPAUtil.getEntityManager();
 	private PresentationModel<Livro> model;
-	private LivroDao livroDao;
+	private UsuarioDao usuarioDao;
 	private JTextField textFieldPesquisa;
-	private JTable tableLivros;
-	private JLabel lblCapa;
+	private JTable tableUsers;
+	private JLabel lblFoto;
 	private JTextField textFieldNome;
-	private JTextField textFieldAutor;
-	private JTextField textFieldGenero;
-	private JLabel lblDisponibilidade;
-	private byte[] imagemIcon;
-	private ImageIcon icon;
-	private Image img;
-	private ImageIcon newIcon;
-	private JLabel capaLabel;
-	private Livro livroSelecionado;
+	private JTextField textFieldEmail;
+	private JTextField textFieldSenha;
+	private Usuario usuarioSelecionado;
 	private File selectedCoverFile;
 	private Container contentPane;
 	private JDialog dialog;
 
-	public LivrosGUI() {
+	public UsersGUI() {
 		initModel();
 		initComponents();
 		initLayout();
 	}
 
 	private void initModel() {
-		Livro livro = new Livro();
-		model = new PresentationModel<Livro>(livro);
 	}
 
 	private void initComponents() {
@@ -92,8 +86,8 @@ public class LivrosGUI extends JFrame {
 	public void initLayout() {
 		contentPane = getContentPane();
 		contentPane.setLayout(new GridLayout(3, 1));
-		contentPane.add(criarPanelPesquisarLivros());
-		contentPane.add(criarPanelDadosLivro());
+		contentPane.add(criarPanelPesquisarUsers());
+		contentPane.add(criarPanelDadosUser());
 		contentPane.add(criarPanelBotoes());
 
 		setPreferredSize(new Dimension(900, 900));
@@ -104,10 +98,10 @@ public class LivrosGUI extends JFrame {
 
 	}
 
-	private JPanel criarPanelPesquisarLivros() {
+	private JPanel criarPanelPesquisarUsers() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
-		panel.setBorder(BorderFactory.createTitledBorder("Pesquisar Livros"));
+		panel.setBorder(BorderFactory.createTitledBorder("Pesquisar Usuarios"));
 
 		JPanel buscaPanel = new JPanel();
 		buscaPanel.setLayout(new FlowLayout());
@@ -117,35 +111,28 @@ public class LivrosGUI extends JFrame {
 		btnBuscar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				livroDao = new LivroDao(em);
-				java.util.List<Livro> livrosEncontrados = livroDao.buscarLivros(textFieldPesquisa.getText());
+				usuarioDao = new UsuarioDao(em);
+				java.util.List<Usuario> usuariosEncontrados = usuarioDao.buscarUsuarios(textFieldPesquisa.getText());
 
-				DefaultTableModel tableModel = (DefaultTableModel) tableLivros.getModel();
+				DefaultTableModel tableModel = (DefaultTableModel) tableUsers.getModel();
 				tableModel.setRowCount(0);
 
-				for (Livro livro : livrosEncontrados) {
-					Object[] rowData = { livro.getTitulo(), livro.getAutor(), livro.getGenero(), livro.getEstado() };
+				for (Usuario usuario : usuariosEncontrados) {
+					Object[] rowData = { usuario.getNome(), usuario.getEmail(), usuario.getSenha() };
 					tableModel.addRow(rowData);
 				}
 
-				tableLivros.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+				tableUsers.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 					@Override
 					public void valueChanged(ListSelectionEvent e) {
 						if (!e.getValueIsAdjusting()) {
-							int selectedRow = tableLivros.getSelectedRow();
+							int selectedRow = tableUsers.getSelectedRow();
 							if (selectedRow != -1) {
-								livroSelecionado = livrosEncontrados.get(selectedRow);
+								usuarioSelecionado = usuariosEncontrados.get(selectedRow);
 
-								imagemIcon = livroSelecionado.getCapa();
-								icon = new ImageIcon(imagemIcon);
-								img = icon.getImage().getScaledInstance(150, 190, Image.SCALE_SMOOTH);
-								newIcon = new ImageIcon(img);
-								capaLabel = new JLabel(newIcon);
-								lblCapa.setIcon(newIcon);
-								textFieldNome.setText(livroSelecionado.getTitulo());
-								textFieldAutor.setText(livroSelecionado.getAutor().toString());
-								textFieldGenero.setText(livroSelecionado.getGenero().toString());
-								lblDisponibilidade.setText(livroSelecionado.getEstado().toString());
+								textFieldNome.setText(usuarioSelecionado.getNome());
+								textFieldEmail.setText(usuarioSelecionado.getEmail());
+								textFieldSenha.setText(usuarioSelecionado.getSenha());
 							}
 						}
 					}
@@ -153,19 +140,19 @@ public class LivrosGUI extends JFrame {
 			}
 		});
 
-		buscaPanel.add(new JLabel("Pesquisar Livros:"));
+		buscaPanel.add(new JLabel("Pesquisar Usuarios:"));
 		buscaPanel.add(textFieldPesquisa);
 		buscaPanel.add(btnBuscar);
 
-		String[] colunas = { "Nome", "Autor", "Gênero", "Disponibilidade" };
+		String[] colunas = { "Nome", "Email", "Senha"};
 		DefaultTableModel tableModel = new DefaultTableModel(colunas, 0);
-		tableLivros = new JTable(tableModel) {
+		tableUsers = new JTable(tableModel) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		};
-		JScrollPane scrollPane = new JScrollPane(tableLivros);
+		JScrollPane scrollPane = new JScrollPane(tableUsers);
 		scrollPane.setPreferredSize(new Dimension(400, 150));
 		panel.add(buscaPanel, BorderLayout.PAGE_START);
 		panel.add(scrollPane, BorderLayout.CENTER);
@@ -173,37 +160,29 @@ public class LivrosGUI extends JFrame {
 		return panel;
 	}
 
-	private JPanel criarPanelDadosLivro() {
-		JPanel panelDadosLivros = new JPanel(new FlowLayout());
-		panelDadosLivros.setBorder(BorderFactory.createTitledBorder("Detalhes do Livro"));
-
-		JPanel capaPanel = new JPanel();
-		lblCapa = new JLabel();
-		capaPanel.add(lblCapa);
+	private JPanel criarPanelDadosUser() {
+		JPanel panelDadosUsers = new JPanel(new FlowLayout());
+		panelDadosUsers.setBorder(BorderFactory.createTitledBorder("Detalhes do Usuario"));
 
 		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 
 		textFieldNome = new JTextField();
-		textFieldAutor = new JTextField();
-		textFieldGenero = new JTextField();
-		lblDisponibilidade = new JLabel();
+		textFieldEmail = new JTextField();
+		textFieldSenha = new JTextField();
 
 		builder.append("Nome: ", textFieldNome);
 		builder.nextLine();
-		builder.append("Autor: ", textFieldAutor);
+		builder.append("Email: ", textFieldEmail);
 		builder.nextLine();
-		builder.append("Gênero: ", textFieldGenero);
+		builder.append("Senha: ", textFieldSenha);
 		builder.nextLine();
-		builder.append("Disponibilidade: ", lblDisponibilidade);
 
 		JPanel formPanel = builder.getPanel();
 
-		panelDadosLivros.add(capaPanel);
-		panelDadosLivros.add(new JSeparator(JSeparator.VERTICAL));
-		panelDadosLivros.add(formPanel);
+		panelDadosUsers.add(formPanel);
 
-		return panelDadosLivros;
+		return panelDadosUsers;
 	}
 
 	private JPanel criarPanelBotoes() {
@@ -214,18 +193,18 @@ public class LivrosGUI extends JFrame {
 		btnExcluir.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (livroSelecionado != null) {
-					int confirmacao = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja remover o livro?",
+				if (usuarioSelecionado != null) {
+					int confirmacao = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja remover o usuario?",
 							"Confirmação", JOptionPane.YES_NO_OPTION);
 
 					if (confirmacao == JOptionPane.YES_OPTION) {
-						boolean removerLivro = ServicoLivro.removerLivro(livroSelecionado);
-						if (removerLivro == true) {
-							System.out.println("Livro removido: " + livroSelecionado.getTitulo());
-							JOptionPane.showMessageDialog(null, "LIVRO REMOVIDO COM SUCESSO!");
+						boolean removerUsuario = ServicoUsuario.removerUsuario(usuarioSelecionado);
+						if (removerUsuario == true) {
+							System.out.println("User removido: " + usuarioSelecionado.getNome());
+							JOptionPane.showMessageDialog(null, "USUARIO REMOVIDO COM SUCESSO!");
 						} else {
 							JOptionPane.showMessageDialog(null,
-									"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER");
+									"ERRO AO REMOVER O USUARIO!");
 						}
 					}
 				} else {
@@ -234,14 +213,14 @@ public class LivrosGUI extends JFrame {
 			}
 		});
 
-		JButton btnAdicionar = new JButton("Adicionar Novo Livro");
+		JButton btnAdicionar = new JButton("Adicionar Novo Usuario");
 		btnAdicionar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				AdicionarLivroFrm addBookForm = new AdicionarLivroFrm();
+				CadastroFrm addUserFrm = new CadastroFrm();
 				dialog = new JDialog();
 				dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-				dialog.add(addBookForm);
+				dialog.add(addUserFrm);
 				dialog.setPreferredSize(new Dimension(400, 200));
 				dialog.pack();
 				dialog.setVisible(true);
@@ -255,12 +234,12 @@ public class LivrosGUI extends JFrame {
 			}
 		});
 
-		JButton btnEditarCapa = new JButton("Editar Capa");
-		btnEditarCapa.addActionListener(new ActionListener() {
+		JButton btnEditarFoto = new JButton("Editar Foto de Perfil");
+		btnEditarFoto.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (livroSelecionado != null) {
+				if (usuarioSelecionado != null) {
 					JFileChooser chooser = new JFileChooser();
 					FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
 					chooser.setFileFilter(filter);
@@ -276,7 +255,7 @@ public class LivrosGUI extends JFrame {
 									BufferedImage.TYPE_INT_RGB);
 							bufferedResizedImage.getGraphics().drawImage(resizedImage, 0, 0, null);
 
-							ImageIcon novaCapaIcon = new ImageIcon(bufferedResizedImage);
+							ImageIcon novaFotoIcon = new ImageIcon(bufferedResizedImage);
 
 							JOptionPane.showMessageDialog(null, "CAPA EDITADA COM SUCESSO!");
 						} catch (IOException e1) {
@@ -293,15 +272,13 @@ public class LivrosGUI extends JFrame {
 		btnAlterar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (livroSelecionado != null) {
+				if (usuarioSelecionado != null) {
 					EntityManager em = JPAUtil.getEntityManager();
-					GeneroDao generoDao = new GeneroDao(em);
-					AutorDao autorDao = new AutorDao(em);
-					LivroDao livroDao = new LivroDao(em);
+					UsuarioDao usuarioDao = new UsuarioDao(em);
 
-					String novoTitulo = textFieldNome.getText();
-					String novoAutor = textFieldAutor.getText();
-					String novoGenero = textFieldGenero.getText();
+					String novoNome = textFieldNome.getText();
+					String novoEmail = textFieldEmail.getText();
+					String novoSenha = textFieldSenha.getText();
 
 					if (selectedCoverFile != null) {
 						try {
@@ -310,33 +287,31 @@ public class LivrosGUI extends JFrame {
 							ImageIO.write(originalImage, "png", outputStream);
 							byte[] coverImageBytes = outputStream.toByteArray();
 							outputStream.close();
-							livroSelecionado.setCapa(coverImageBytes);
+							usuarioSelecionado.setFoto(coverImageBytes);
 
 						} catch (IOException ex) {
 							ex.printStackTrace();
 						}
 					}
 
-					livroSelecionado.setTitulo(novoTitulo);
-					livroSelecionado.getAutor().setNome(novoAutor);
-					livroSelecionado.getGenero().setNome(novoGenero);
+					usuarioSelecionado.setNome(novoNome);
+					usuarioSelecionado.setEmail(novoEmail);
+					usuarioSelecionado.setSenha(novoSenha);
 
 					em.getTransaction().begin();
-					generoDao.atualizar(livroSelecionado.getGenero());
-					autorDao.atualizar(livroSelecionado.getAutor());
-					livroDao.atualizar(livroSelecionado);
+					usuarioDao.atualizar(usuarioSelecionado);
 					em.getTransaction().commit();
 
 					JOptionPane.showMessageDialog(null, "ALTERAÇÕES SALVAS COM SUCESSO!");
 				} else {
-					JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO!");
+					JOptionPane.showMessageDialog(null, "SELECIONE UM USUARIO!");
 				}
 			}
 		});
 
 		panel.add(btnExcluir);
 		panel.add(btnAdicionar);
-		panel.add(btnEditarCapa);
+		panel.add(btnEditarFoto);
 		panel.add(btnAlterar);
 
 		return panel;

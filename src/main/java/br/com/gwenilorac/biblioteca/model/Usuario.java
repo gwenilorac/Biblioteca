@@ -17,6 +17,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Type;
+
 @Entity
 @Table(name = "usuarios")
 public class Usuario implements Serializable{
@@ -35,6 +37,10 @@ public class Usuario implements Serializable{
 	
 	@Column(nullable = false)
     private String senha;
+	
+	@Type(type="org.hibernate.type.BinaryType")
+	@Column(name = "foto")
+	private byte[] foto;
 
 	@Transient
 	private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
@@ -86,6 +92,17 @@ public class Usuario implements Serializable{
 		changeSupport.firePropertyChange("email", old, this.email);
 	}
 	
+	
+	public byte[] getFoto() {
+		return foto;
+	}
+
+	public void setFoto(byte[] foto) {
+		Object old = this.foto;
+		this.foto = foto;
+		changeSupport.firePropertyChange("foto", old, this.foto);
+	}
+
 	public Long getId() {
 		return id;
 	}

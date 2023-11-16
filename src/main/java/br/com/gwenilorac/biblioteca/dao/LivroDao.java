@@ -56,8 +56,6 @@ public class LivroDao {
 		}
 	}
 
-
-	
 	public List<Livro> buscarPorNomeDaCategoria(String nome) {
 		String jpql = "SELECT l FROM Livro l WHERE l.genero.nome = :nome";
 		return em.createQuery(jpql, Livro.class)

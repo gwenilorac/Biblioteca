@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.CloseAction;
 
 import org.postgresql.core.Oid;
 
@@ -83,7 +84,7 @@ public class AdicionarLivroFrm extends JPanel {
 		String autor = authorField.getText();
 		String genero = generoField.getText();
 
-		if (selectedCoverFile != null) {
+		if (titleField != null || authorField != null || generoField != null || selectedCoverFile != null) {
 			try {
 				Path destinationPath = Paths.get(selectedCoverFile.getName());
 
@@ -94,7 +95,9 @@ public class AdicionarLivroFrm extends JPanel {
 				System.out.println("Caminho do arquivo copiado: " + destinationPath.toString());
 
 				ServicoLivro.adicionarLivro(titulo, autor, genero, capa);
+				
 				limparCampos();
+				
 
 			} catch (FileAlreadyExistsException e) {
 				System.out.println("O arquivo já existe");
@@ -102,10 +105,10 @@ public class AdicionarLivroFrm extends JPanel {
 			} catch (IOException e) {
 				System.out.println("Erro ao copiar o arquivo: " + e.getMessage());
 				JOptionPane.showMessageDialog(this, "ERRO AO COPIAR O ARQUIVO");
+			} catch (NullPointerException e) {
+				System.out.println("Faltando um campo. O livro não será adicionado.");
+				JOptionPane.showMessageDialog(this, "FALTANDO ALGUMA INFORMAÇÃO!");
 			}
-		} else {
-			System.out.println("Nenhuma capa selecionada. O livro não será adicionado.");
-			JOptionPane.showMessageDialog(this, "SELECIONE UMA CAPA PARA O LIVRO");
 		}
 	}
 

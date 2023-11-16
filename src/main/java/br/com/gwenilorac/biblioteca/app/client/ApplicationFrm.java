@@ -13,7 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
@@ -111,28 +113,16 @@ public class ApplicationFrm extends JFrame {
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 	}
 
-	private Object livrosPanel() {
+	private JFrame livrosPanel() {
 		LivrosGUI livrosGui = new LivrosGUI();
 		
 		return livrosGui;
 	}
 
-	private JInternalFrame abrirInfoUsuario() {
-		InfoUsuario funcoesUser = new InfoUsuario();
-		internalFrame = new JInternalFrame("Detalhes do Usuário", true, true, true, true);
-		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-		internalFrame.add(funcoesUser);
-		internalFrame.setPreferredSize(new Dimension(600, 400));
-		internalFrame.pack();
-		internalFrame.setVisible(true);
-
-		jDesktopPane.add(internalFrame);
-
-		internalFrame.toFront();
-
-		centralizarPanel();
+	private JFrame abrirInfoUsuario() {
+		UsersGUI usersGUI = new UsersGUI();
 		
-		return internalFrame;
+		return usersGUI;
 	}
 
 	private void atualizarTela() {
@@ -154,8 +144,10 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private JInternalFrame exibirCapasDosLivros() {
+		EntityManager em = JPAUtil.getEntityManager();
+		LivroDao livroDao = new LivroDao(em);
 		
-		List<Livro> livros = ServicoLivro.pegarLivros();
+		List<Livro> livros = livroDao.buscarTodosLivros();
 		JInternalFrame internalFrame = new JInternalFrame();
 		internalFrame.setLayout(new FlowLayout());
 
@@ -167,9 +159,19 @@ public class ApplicationFrm extends JFrame {
 			northPane.removeMouseMotionListener(listener);
 
 		for (Livro livro : livros) {
+			JPanel panel = new JPanel();
+			panel.setPreferredSize(new Dimension(200, 225));
+			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+			panel.setBorder(BorderFactory.createRaisedBevelBorder());
+			
 			JButton btnCapas = criarBotaoComImagem(livro.getCapa());
 			btnCapas.addActionListener(e -> abrirDetalhesDoLivro(livro));
-			internalFrame.add(btnCapas);
+			JLabel tituloLivro = new JLabel(livro.getTitulo());
+			
+			panel.add(btnCapas);
+			panel.add(tituloLivro);
+			
+			internalFrame.add(panel);
 		}
 
 		internalFrame.pack();
