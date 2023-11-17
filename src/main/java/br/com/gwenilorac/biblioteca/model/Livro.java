@@ -124,6 +124,10 @@ public class Livro implements Serializable{
 	public void setEstado(Estado estado) {
 		this.estado = estado;
 	}
+
+	public Object getId() {
+		return id;
+	}
 	
 	public void adicionarLivroNaListaDoAutor(Livro livro) {
         if (livro.getAutor() != null) {
@@ -146,5 +150,6 @@ public class Livro implements Serializable{
 	                "Genero = " + genero + '\'' +
 	                '}';
 	    }
+
 
 }

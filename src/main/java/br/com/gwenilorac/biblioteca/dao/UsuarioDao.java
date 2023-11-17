@@ -26,12 +26,7 @@ private EntityManager em;
 	}
 	
 	public void remover(Usuario usuario) {
-		if(buscarLivrosEmprestados(usuario.getId()) == null) {
 			this.em.remove(usuario);
-			System.out.println("Usuario excluido com sucesso!");
-		} else {
-			System.out.println("Por favor devolver livros emprestados!");
-		}
 	}
 
 	public List<Usuario> buscarTodos() {
@@ -85,13 +80,6 @@ private EntityManager em;
 	    }
 	}
 	
-	public List<Livro> buscarLivrosEmprestadosPorUsuario(Usuario usuario) {
-	    String jpql = "SELECT livro FROM Usuario u JOIN u.livrosEmprestados livro WHERE u = :usuario";
-	    return em.createQuery(jpql, Livro.class)
-	             .setParameter("usuario", usuario)
-	             .getResultList();
-	}
-	
 	 public List<Usuario> buscarUsuariosComMaisEmprestimos(int quantidade) {
 	        String jpql = "SELECT u FROM Usuario u ORDER BY SIZE(u.livrosEmprestados) DESC";
 	        TypedQuery<Usuario> query = em.createQuery(jpql, Usuario.class);
@@ -111,4 +99,5 @@ private EntityManager em;
 		            .setParameter("idUsuario", idUsuario)
 		            .getResultList();
 		}
+	 
 }

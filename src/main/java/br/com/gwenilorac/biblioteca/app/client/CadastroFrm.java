@@ -3,17 +3,23 @@ package br.com.gwenilorac.biblioteca.app.client;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.KeyEvent;
+
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
+
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoCadastro;
 
@@ -29,6 +35,10 @@ public class CadastroFrm extends JDialog {
 	private JPasswordField passField;
 
 	private JButton btnCadastro;
+
+	private JButton btnUploadPhoto;
+
+	private java.io.File fotoSelecionada;
 
 	private boolean cadastro = false;
 
@@ -52,15 +62,43 @@ public class CadastroFrm extends JDialog {
 		getRootPane().setDefaultButton(btnCadastro);
 		btnCadastro.setMnemonic(KeyEvent.VK_ENTER);
 		btnCadastro.addActionListener(evt -> actionCadastro());
+
+		btnUploadPhoto = new JButton("Upload Photo");
+		btnUploadPhoto.addActionListener(evt -> uploadFoto());
 	}
 
 	private void actionCadastro() {
 		if (!isValid(model.getBean()))
 			return;
 
+		if (fotoSelecionada == null) {
+			JOptionPane.showMessageDialog(this, "Por favor, adicione uma foto de perfil.");
+		}
+
+		model.getBean().setFoto(ServicoCadastro.LerFoto(fotoSelecionada));
+
 		ServicoCadastro.cadastraUsuario(model.getBean());
 		cadastro = true;
 		dispose();
+	}
+
+	private void uploadFoto() {
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		int result = fileChooser.showOpenDialog(this);
+
+		if (result == JFileChooser.APPROVE_OPTION) {
+			fotoSelecionada = fileChooser.getSelectedFile();
+			displayfotoSelecionada(fotoSelecionada);
+		}
+	}
+
+	private void displayfotoSelecionada(java.io.File file) {
+	    ImageIcon icon = new ImageIcon(file.getPath());
+	    Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+	    ImageIcon resizedIcon = new ImageIcon(img);
+
+	    JOptionPane.showMessageDialog(this, resizedIcon, "Selected Photo", JOptionPane.PLAIN_MESSAGE);
 	}
 
 	private boolean isValid(Usuario bean) {
@@ -93,7 +131,7 @@ public class CadastroFrm extends JDialog {
 
 		add(panel);
 		setModal(true);
-		setPreferredSize(new Dimension(300, 150));
+		setPreferredSize(new Dimension(300, 200));
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		pack();
@@ -104,13 +142,13 @@ public class CadastroFrm extends JDialog {
 	private Component createButtonPanel() {
 		JPanel panel = new JPanel();
 		panel.add(btnCadastro);
+		panel.add(btnUploadPhoto);
 		return panel;
 	}
 
 	private Component createMainForm() {
-		
 		JPanel cadastroPanel = new JPanel();
-		
+
 		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 

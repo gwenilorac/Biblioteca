@@ -80,36 +80,28 @@ public class AdicionarLivroFrm extends JPanel {
 	}
 
 	private void adicionarLivro() {
-		String titulo = titleField.getText();
-		String autor = authorField.getText();
-		String genero = generoField.getText();
+	    String titulo = titleField.getText();
+	    String autor = authorField.getText();
+	    String genero = generoField.getText();
 
-		if (titleField != null || authorField != null || generoField != null || selectedCoverFile != null) {
-			try {
-				Path destinationPath = Paths.get(selectedCoverFile.getName());
+	    if (titulo != null && autor != null && genero != null && selectedCoverFile != null) {
+	        try {
+	            byte[] capa = Files.readAllBytes(selectedCoverFile.toPath());
 
-				Files.copy(selectedCoverFile.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+	            System.out.println("Caminho do arquivo selecionado: " + selectedCoverFile.getAbsolutePath());
 
-				byte[] capa = Files.readAllBytes(selectedCoverFile.toPath());
+	            ServicoLivro.adicionarLivro(titulo, autor, genero, capa);
 
-				System.out.println("Caminho do arquivo copiado: " + destinationPath.toString());
+	            limparCampos();
 
-				ServicoLivro.adicionarLivro(titulo, autor, genero, capa);
-				
-				limparCampos();
-				
-
-			} catch (FileAlreadyExistsException e) {
-				System.out.println("O arquivo já existe");
-				JOptionPane.showMessageDialog(this, "O ARQUIVO JÁ EXISTE");
-			} catch (IOException e) {
-				System.out.println("Erro ao copiar o arquivo: " + e.getMessage());
-				JOptionPane.showMessageDialog(this, "ERRO AO COPIAR O ARQUIVO");
-			} catch (NullPointerException e) {
-				System.out.println("Faltando um campo. O livro não será adicionado.");
-				JOptionPane.showMessageDialog(this, "FALTANDO ALGUMA INFORMAÇÃO!");
-			}
-		}
+	        } catch (IOException e) {
+	            System.out.println("Erro ao ler o arquivo: " + e.getMessage());
+	            JOptionPane.showMessageDialog(this, "ERRO AO LER O ARQUIVO");
+	        } catch (NullPointerException e) {
+	            System.out.println("Faltando um campo. O livro não será adicionado.");
+	            JOptionPane.showMessageDialog(this, "FALTANDO ALGUMA INFORMAÇÃO!");
+	        }
+	    }
 	}
 
 	private void limparCampos() {

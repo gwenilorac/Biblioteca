@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
 import br.com.gwenilorac.biblioteca.model.Livro;
@@ -77,4 +78,15 @@ public class LivroDao {
 	    return query.getResultList();
 	}
 
+	public Livro buscarPorId(Object id) {
+	    try {
+	        String jpql = "SELECT l FROM Livro l WHERE l.id = :livroId";
+	        TypedQuery<Livro> query = em.createQuery(jpql, Livro.class);
+	        query.setParameter("livroId", id);
+	        return query.getSingleResult();
+	    } catch (NoResultException e) {
+	        return null;
+	    }
+	}
+	
 }

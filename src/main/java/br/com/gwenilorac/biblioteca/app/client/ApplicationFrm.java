@@ -5,11 +5,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -22,32 +21,22 @@ import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 import com.jgoodies.binding.PresentationModel;
-import com.jgoodies.binding.adapter.BasicComponentFactory;
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
 
-import br.com.gwenilorac.biblioteca.dao.AutorDao;
-import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
-import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoBusca;
-import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
@@ -62,6 +51,12 @@ public class ApplicationFrm extends JFrame {
 	private JButton btnUser;
 	private JButton btnAtualizar;
 	private JInternalFrame internalFrame;
+	private boolean isDetalhesLivroFrameOpen = false;
+	private boolean isLivrosGuiOpen = false;
+	private LivrosGUI livrosGui;
+	private boolean isUsersGuiOpen = false;
+	private UsersGUI usersGUI;
+
 
 
 	public ApplicationFrm() {
@@ -114,15 +109,50 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private JFrame livrosPanel() {
-		LivrosGUI livrosGui = new LivrosGUI();
-		
-		return livrosGui;
+	    if (livrosGui == null || !livrosGui.isVisible()) {
+	        livrosGui = new LivrosGUI();
+
+	        livrosGui.addWindowListener(new WindowAdapter() {
+	            @Override
+	            public void windowClosed(WindowEvent e) {
+	                isLivrosGuiOpen = false;
+	            }
+	        });
+
+	        isLivrosGuiOpen = true;
+	        return livrosGui;
+	    } else {
+	        livrosGui.dispose(); 
+	        livrosGui = new LivrosGUI(); 
+
+	        livrosGui.addWindowListener(new WindowAdapter() {
+	            @Override
+	            public void windowClosed(WindowEvent e) {
+	                isLivrosGuiOpen = false;
+	            }
+	        });
+
+	        isLivrosGuiOpen = true;
+	        return livrosGui;
+	    }
 	}
 
 	private JFrame abrirInfoUsuario() {
-		UsersGUI usersGUI = new UsersGUI();
-		
-		return usersGUI;
+	    if (usersGUI != null) {
+	        usersGUI.dispose();
+	    }
+
+	    usersGUI = new UsersGUI();
+
+	    usersGUI.addWindowListener(new WindowAdapter() {
+	        @Override
+	        public void windowClosed(WindowEvent e) {
+	            isUsersGuiOpen = false;
+	        }
+	    });
+
+	    isUsersGuiOpen = true;
+	    return usersGUI;
 	}
 
 	private void atualizarTela() {
@@ -197,19 +227,31 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private void abrirDetalhesDoLivro(Livro livro) {
-		DetalhesLivroInternalFrame detalhesDoLivro = new DetalhesLivroInternalFrame(livro);
-		internalFrame = new JInternalFrame(livro.getTitulo(), false, true, false, false);
-		internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-		internalFrame.add(detalhesDoLivro);
-		internalFrame.setSize(400, 300);
-		internalFrame.setVisible(true);
-		internalFrame.pack();
+	    if (!isDetalhesLivroFrameOpen) {
+	        DetalhesLivroInternalFrame detalhesDoLivro = new DetalhesLivroInternalFrame(livro);
+	        internalFrame = new JInternalFrame(livro.getTitulo(), false, true, false, false);
+	        internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+	        internalFrame.add(detalhesDoLivro);
+	        internalFrame.setSize(400, 300);
+	        internalFrame.setVisible(true);
+	        internalFrame.pack();
 
-		centralizarPanel();
+	        centralizarPanel();
 
-		jDesktopPane.add(internalFrame);
+	        jDesktopPane.add(internalFrame);
 
-		internalFrame.toFront();
+	        internalFrame.toFront();
+	        isDetalhesLivroFrameOpen = true;
+
+	        internalFrame.addInternalFrameListener(new InternalFrameAdapter() {
+	            @Override
+	            public void internalFrameClosed(InternalFrameEvent e) {
+	                isDetalhesLivroFrameOpen = false;
+	            }
+	        });
+	    } else {
+	        JOptionPane.showMessageDialog(this, "Detalhes do Livro já está aberto.");
+	    }
 	}
 	
 	private void centralizarPanel() {

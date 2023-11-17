@@ -56,7 +56,7 @@ public class Usuario implements Serializable{
 	public Usuario() {
 	}
 
-	public Usuario(String nome, String email, String senha) {
+	public Usuario(String nome, String email, String senha, byte[] foto) {
 		this.nome = nome;
 		this.email = email;
 		this.senha = senha;

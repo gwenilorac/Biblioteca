@@ -123,20 +123,32 @@ public class UsersGUI extends JFrame {
 				}
 
 				tableUsers.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-					@Override
-					public void valueChanged(ListSelectionEvent e) {
-						if (!e.getValueIsAdjusting()) {
-							int selectedRow = tableUsers.getSelectedRow();
-							if (selectedRow != -1) {
-								usuarioSelecionado = usuariosEncontrados.get(selectedRow);
+		            @Override
+		            public void valueChanged(ListSelectionEvent e) {
+		                if (!e.getValueIsAdjusting()) {
+		                    int selectedRow = tableUsers.getSelectedRow();
+		                    if (selectedRow != -1) {
+		                        usuarioSelecionado = usuariosEncontrados.get(selectedRow);
 
-								textFieldNome.setText(usuarioSelecionado.getNome());
-								textFieldEmail.setText(usuarioSelecionado.getEmail());
-								textFieldSenha.setText(usuarioSelecionado.getSenha());
-							}
-						}
-					}
-				});
+		                        if (usuarioSelecionado != null) {
+		                            byte[] imagemIcon = usuarioSelecionado.getFoto();
+		                            if (imagemIcon != null) {
+		                                ImageIcon icon = new ImageIcon(imagemIcon);
+		                                Image img = icon.getImage().getScaledInstance(150, 190, Image.SCALE_SMOOTH);
+		                                ImageIcon newIcon = new ImageIcon(img);
+		                                lblFoto.setIcon(newIcon);
+		                            } else {
+		                                JOptionPane.showMessageDialog(null, "Foto Inexistente!");
+		                            }
+		                        }
+
+		                        textFieldNome.setText(usuarioSelecionado.getNome());
+		                        textFieldEmail.setText(usuarioSelecionado.getEmail());
+		                        textFieldSenha.setText(usuarioSelecionado.getSenha());
+		                    }
+		                }
+		            }
+		        });
 			}
 		});
 
@@ -159,32 +171,37 @@ public class UsersGUI extends JFrame {
 
 		return panel;
 	}
-
+	
 	private JPanel criarPanelDadosUser() {
-		JPanel panelDadosUsers = new JPanel(new FlowLayout());
-		panelDadosUsers.setBorder(BorderFactory.createTitledBorder("Detalhes do Usuario"));
+	    JPanel panelDadosUsers = new JPanel(new FlowLayout());
+	    panelDadosUsers.setBorder(BorderFactory.createTitledBorder("Detalhes do Usuario"));
 
-		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
-		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+	    JPanel fotoPanel = new JPanel();
+		lblFoto = new JLabel();
+		fotoPanel.add(lblFoto);
+	    
+	    FormLayout layout = new FormLayout("pref, 5px, 70dlu");
+	    DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 
-		textFieldNome = new JTextField();
-		textFieldEmail = new JTextField();
-		textFieldSenha = new JTextField();
+	    textFieldNome = new JTextField();
+	    textFieldEmail = new JTextField();
+	    textFieldSenha = new JTextField();
 
-		builder.append("Nome: ", textFieldNome);
-		builder.nextLine();
-		builder.append("Email: ", textFieldEmail);
-		builder.nextLine();
-		builder.append("Senha: ", textFieldSenha);
-		builder.nextLine();
+	    builder.append("Nome: ", textFieldNome);
+	    builder.nextLine();
+	    builder.append("Email: ", textFieldEmail);
+	    builder.nextLine();
+	    builder.append("Senha: ", textFieldSenha);
 
-		JPanel formPanel = builder.getPanel();
+	    JPanel formPanel = builder.getPanel();
 
-		panelDadosUsers.add(formPanel);
+	    panelDadosUsers.add(fotoPanel);
+	    panelDadosUsers.add(new JSeparator(JSeparator.VERTICAL));
+	    panelDadosUsers.add(formPanel);
 
-		return panelDadosUsers;
+	    return panelDadosUsers;
 	}
-
+	
 	private JPanel criarPanelBotoes() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout());
@@ -204,11 +221,11 @@ public class UsersGUI extends JFrame {
 							JOptionPane.showMessageDialog(null, "USUARIO REMOVIDO COM SUCESSO!");
 						} else {
 							JOptionPane.showMessageDialog(null,
-									"ERRO AO REMOVER O USUARIO!");
+									"ERRO AO REMOVER USUARIO!");
 						}
 					}
 				} else {
-					JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO!");
+					JOptionPane.showMessageDialog(null, "SELECIONE UM USUARIO!");
 				}
 			}
 		});
@@ -235,38 +252,44 @@ public class UsersGUI extends JFrame {
 		});
 
 		JButton btnEditarFoto = new JButton("Editar Foto de Perfil");
-		btnEditarFoto.addActionListener(new ActionListener() {
+	    btnEditarFoto.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	            if (usuarioSelecionado != null) {
+	                JFileChooser chooser = new JFileChooser();
+	                FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
+	                chooser.setFileFilter(filter);
+	                int result = chooser.showOpenDialog(null);
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (usuarioSelecionado != null) {
-					JFileChooser chooser = new JFileChooser();
-					FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
-					chooser.setFileFilter(filter);
-					int result = chooser.showOpenDialog(null);
+	                if (result == JFileChooser.APPROVE_OPTION) {
+	                    selectedCoverFile = chooser.getSelectedFile();
+	                    try {
+	                        BufferedImage originalImage = ImageIO.read(selectedCoverFile);
+	                        Image resizedImage = originalImage.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
 
-					if (result == JFileChooser.APPROVE_OPTION) {
-						selectedCoverFile = chooser.getSelectedFile();
-						try {
-							BufferedImage originalImage = ImageIO.read(selectedCoverFile);
-							Image resizedImage = originalImage.getScaledInstance(150, 200, Image.SCALE_SMOOTH);
+	                        BufferedImage bufferedResizedImage = new BufferedImage(150, 150, BufferedImage.TYPE_INT_RGB);
+	                        bufferedResizedImage.getGraphics().drawImage(resizedImage, 0, 0, null);
 
-							BufferedImage bufferedResizedImage = new BufferedImage(150, 200,
-									BufferedImage.TYPE_INT_RGB);
-							bufferedResizedImage.getGraphics().drawImage(resizedImage, 0, 0, null);
+	                        ImageIcon novaFotoIcon = new ImageIcon(bufferedResizedImage);
+	                        lblFoto.setIcon(novaFotoIcon); 
 
-							ImageIcon novaFotoIcon = new ImageIcon(bufferedResizedImage);
+	                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	                        ImageIO.write(originalImage, "png", outputStream);
+	                        byte[] coverImageBytes = outputStream.toByteArray();
+	                        outputStream.close();
+	                        usuarioSelecionado.setFoto(coverImageBytes);
 
-							JOptionPane.showMessageDialog(null, "CAPA EDITADA COM SUCESSO!");
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
-					}
-				} else {
-					JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO!");
-				}
-			}
-		});
+	                        JOptionPane.showMessageDialog(null, "FOTO EDITADA COM SUCESSO!");
+	                    } catch (IOException e1) {
+	                        e1.printStackTrace();
+	                    }
+	                }
+	            } else {
+	                JOptionPane.showMessageDialog(null, "SELECIONE UM USUARIO!");
+	            }
+	        }
+	    });
+
 
 		JButton btnAlterar = new JButton("Salvar Alterações");
 		btnAlterar.addActionListener(new ActionListener() {
