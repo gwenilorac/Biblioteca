@@ -7,7 +7,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
+import br.com.gwenilorac.biblioteca.model.Emprestimo;
+import br.com.gwenilorac.biblioteca.model.Estado;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 
 public class LivroDao {
 
@@ -40,6 +43,18 @@ public class LivroDao {
 	        String jpql = "SELECT l FROM Livro l WHERE LOWER(l.titulo) LIKE :palavraChave";
 	        return em.createQuery(jpql, Livro.class)
 	                .setParameter("palavraChave", "%" + palavraChave.toLowerCase() + "%")
+	                .getResultList();
+	    } catch (Exception e) {
+	        return Collections.emptyList();
+	    }
+	}
+	
+	public List<Livro> buscarLivrosDiponiveis(String palavraChave) {
+	    try {
+	        String jpql = "SELECT l FROM Livro l WHERE LOWER(l.titulo) LIKE :palavraChave AND l.estado = :estado";
+	        return em.createQuery(jpql, Livro.class)
+	                .setParameter("palavraChave", "%" + palavraChave.toLowerCase() + "%")
+	                .setParameter("estado", Estado.DISPONÍVEL)
 	                .getResultList();
 	    } catch (Exception e) {
 	        return Collections.emptyList();

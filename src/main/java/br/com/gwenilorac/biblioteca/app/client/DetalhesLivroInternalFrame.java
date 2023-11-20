@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -25,6 +26,7 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.hibernate.event.spi.RefreshEvent;
 import com.jgoodies.binding.PresentationModel;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
@@ -55,7 +57,6 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	private JButton btnAtualizar;
 	private JPanel capaPanel;
 	private JPanel infoPanel;
-	private JPanel editarPanel;
 	private JPanel buttonPanel;
 	private JButton btnEditarCapa;
 	private File selectedCoverFile;
@@ -82,30 +83,21 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	public void initLayout() {
 
 		setLayout(new BorderLayout());
-		setPreferredSize(new Dimension(520, 250));
+		setPreferredSize(new Dimension(400, 250));
+		
+		JPanel panelDadosLivros = new JPanel(new FlowLayout());
 
-		detalhesPanel = new JPanel(new BorderLayout());
+		JPanel capaPanel = new JPanel();
+		capaPanel.add(criarCapaPanel());
+		
+		JPanel infoPanel = new JPanel();
+		infoPanel.add(criarInfoPanel());
 
-		capaPanel = criarCapaPanel();
-		detalhesPanel.add(capaPanel, BorderLayout.LINE_START);
-
-		separator = new JSeparator(JSeparator.VERTICAL);
-		detalhesPanel.add(separator);
-
-		infoPanel = criarInfoPanel();
-		detalhesPanel.add(infoPanel, BorderLayout.CENTER);
-
-		tabbedPane = new JTabbedPane();
-		tabbedPane.addTab("Detalhes", detalhesPanel);
-
-		editarPanel = criarEditarPanel();
-		tabbedPane.addTab("Editar", editarPanel);
+		panelDadosLivros.add(capaPanel);
+		panelDadosLivros.add(new JSeparator(JSeparator.VERTICAL));
+		panelDadosLivros.add(infoPanel);
 
 		buttonPanel = new JPanel(new FlowLayout());
-
-		btnAtualizar = new JButton("Atualizar");
-		btnAtualizar.addActionListener(e -> atualizarInformacoes());
-		buttonPanel.add(btnAtualizar);
 
 		btnPegarEmprestado = new JButton("Pegar Emprestado");
 		btnPegarEmprestado.addActionListener(e -> pegarLivroEmprestado());
@@ -115,17 +107,8 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		btnDevolverLivro.addActionListener(dl -> devolverLivro());
 		buttonPanel.add(btnDevolverLivro);
 
-		add(tabbedPane, BorderLayout.CENTER);
+		add(panelDadosLivros, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.SOUTH);
-	}
-
-	private void atualizarInformacoes() {
-		removeAll();
-		initLayout();
-		revalidate();
-		repaint();
-
-		JOptionPane.showMessageDialog(this, "INFORMAÇÕES E CAPA ATUALIZADAS COM SUCESSO!");
 	}
 
 	private JPanel criarCapaPanel() {
@@ -151,106 +134,6 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		return infoPanel;
 	}
 
-	private JPanel criarEditarPanel() {
-		JPanel editarPanel = new JPanel();
-		FormLayout layout = new FormLayout("right:max(50dlu;pref), 6dlu, pref, 6dlu, pref",
-				"pref, 6dlu, pref, 6dlu, pref, 6dlu, pref, 6dlu, pref");
-		CellConstraints cc = new CellConstraints();
-		editarPanel.setLayout(layout);
-
-		JLabel lblTitulo = new JLabel("Título: ");
-		JLabel lblAutor = new JLabel("Autor: ");
-		JLabel lblGenero = new JLabel("Gênero: ");
-		JLabel lblCapa = new JLabel("Capa: ");
-
-		txtTitulo = new JTextField(livro.getTitulo());
-		txtAutor = new JTextField(livro.getAutor().toString());
-		txtGenero = new JTextField(livro.getGenero().toString());
-
-		btnEditarCapa = new JButton("Editar Capa");
-		btnEditarCapa.addActionListener(e -> editarCapa());
-
-		JButton btnSalvar = new JButton("Salvar");
-		btnSalvar.addActionListener(this::salvarEdicao);
-
-		JButton btnCancelar = new JButton("Cancelar");
-		btnCancelar.addActionListener(e -> tabbedPane.setSelectedIndex(0));
-
-		editarPanel.add(lblTitulo, cc.xy(1, 1));
-		editarPanel.add(txtTitulo, cc.xyw(3, 1, 3));
-		editarPanel.add(lblAutor, cc.xy(1, 3));
-		editarPanel.add(txtAutor, cc.xyw(3, 3, 3));
-		editarPanel.add(lblGenero, cc.xy(1, 5));
-		editarPanel.add(txtGenero, cc.xyw(3, 5, 3));
-		editarPanel.add(lblCapa, cc.xy(1, 7));
-		editarPanel.add(btnEditarCapa, cc.xyw(3, 7, 3));
-		editarPanel.add(btnSalvar, cc.xy(3, 9));
-		editarPanel.add(btnCancelar, cc.xy(5, 9));
-
-		return editarPanel;
-	}
-
-	private ImageIcon editarCapa() {
-		JFileChooser chooser = new JFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
-		chooser.setFileFilter(filter);
-		int result = chooser.showOpenDialog(null);
-
-		if (result == JFileChooser.APPROVE_OPTION) {
-			selectedCoverFile = chooser.getSelectedFile();
-			try {
-				BufferedImage originalImage = ImageIO.read(selectedCoverFile);
-				Image resizedImage = originalImage.getScaledInstance(150, 200, Image.SCALE_SMOOTH);
-
-				BufferedImage bufferedResizedImage = new BufferedImage(150, 200, BufferedImage.TYPE_INT_RGB);
-				bufferedResizedImage.getGraphics().drawImage(resizedImage, 0, 0, null);
-
-				ImageIcon novaCapaIcon = new ImageIcon(bufferedResizedImage);
-				return novaCapaIcon;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-
-	private void salvarEdicao(ActionEvent e) {
-		EntityManager em = JPAUtil.getEntityManager();
-		GeneroDao generoDao = new GeneroDao(em);
-		AutorDao autorDao = new AutorDao(em);
-		LivroDao livroDao = new LivroDao(em);
-
-		String novoTitulo = txtTitulo.getText();
-		String novoAutor = txtAutor.getText();
-		String novoGenero = txtGenero.getText();
-
-		if (selectedCoverFile != null) {
-			try {
-				BufferedImage originalImage = ImageIO.read(selectedCoverFile);
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				ImageIO.write(originalImage, "png", outputStream);
-				byte[] coverImageBytes = outputStream.toByteArray();
-				outputStream.close();
-
-				livro.setCapa(coverImageBytes);
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		livro.setTitulo(novoTitulo);
-		livro.getAutor().setNome(novoAutor);
-		livro.getGenero().setNome(novoGenero);
-
-		em.getTransaction().begin();
-		generoDao.atualizar(livro.getGenero());
-		autorDao.atualizar(livro.getAutor());
-		livroDao.atualizar(livro);
-		em.getTransaction().commit();
-		em.close();
-
-		tabbedPane.setSelectedIndex(0);
-	}
 
 	private void pegarLivroEmprestado() {
 		EntityManager em = JPAUtil.getEntityManager();

@@ -46,18 +46,18 @@ public class ApplicationFrm extends JFrame {
 	private Usuario usuario = ServicoLogin.getUsuarioLogado();
 	private PresentationModel<Usuario> model;
 	private JDesktopPane jDesktopPane;
-	private JTextField tfBusca;
-	private JButton btnBusca;
+	private JButton btnLivros;
 	private JButton btnUser;
 	private JButton btnAtualizar;
+	private JButton btnEmprestimos;
 	private JInternalFrame internalFrame;
 	private boolean isDetalhesLivroFrameOpen = false;
 	private boolean isLivrosGuiOpen = false;
 	private LivrosGUI livrosGui;
 	private boolean isUsersGuiOpen = false;
 	private UsersGUI usersGUI;
-
-
+	private EmprestimosGUI emprestimosGUI;
+	private boolean isEmprestimosGUIOpen;
 
 	public ApplicationFrm() {
 		initModel();
@@ -70,10 +70,10 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private void initComponents() {
-		tfBusca = new JTextField("Faça sua busca aqui", 30);
-		tfBusca.setMaximumSize(tfBusca.getPreferredSize());
-		btnBusca = new JButton("Buscar");
-		btnBusca.addActionListener(bb -> realizarBusca(tfBusca.getText()));
+		btnLivros = new JButton("Editar Livros");
+		btnLivros.addActionListener(al -> livrosPanel());
+		btnEmprestimos = new JButton("Emprestimos");
+		btnEmprestimos.addActionListener(be -> emprestimosPanel());
 		btnUser = new JButton("User");
 		btnUser.addActionListener(bu -> abrirInfoUsuario());
 		btnAtualizar = new JButton("Recarregar");
@@ -85,17 +85,12 @@ public class ApplicationFrm extends JFrame {
 		jDesktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
 		jDesktopPane.add(exibirCapasDosLivros());
 
-		JMenu menu = new JMenu("Menu");
-		JMenuItem editarLivro = new JMenuItem("Editar Livro");
-		editarLivro.addActionListener(al -> livrosPanel());
-		menu.add(editarLivro);
-
 		JMenuBar menubar = new JMenuBar();
-		menubar.add(menu);
 		menubar.add(btnAtualizar);
 		menubar.add(Box.createHorizontalGlue());
-		menubar.add(tfBusca);
-		menubar.add(btnBusca);
+		menubar.add(btnLivros);
+		menubar.add(Box.createHorizontalGlue());
+		menubar.add(btnEmprestimos);
 		menubar.add(Box.createHorizontalGlue());
 		menubar.add(btnUser);
 
@@ -109,59 +104,76 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private JFrame livrosPanel() {
-	    if (livrosGui == null || !livrosGui.isVisible()) {
-	        livrosGui = new LivrosGUI();
+		if (livrosGui == null || !livrosGui.isVisible()) {
+			livrosGui = new LivrosGUI();
 
-	        livrosGui.addWindowListener(new WindowAdapter() {
-	            @Override
-	            public void windowClosed(WindowEvent e) {
-	                isLivrosGuiOpen = false;
-	            }
-	        });
+			livrosGui.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosed(WindowEvent e) {
+					isLivrosGuiOpen = false;
+				}
+			});
 
-	        isLivrosGuiOpen = true;
-	        return livrosGui;
-	    } else {
-	        livrosGui.dispose(); 
-	        livrosGui = new LivrosGUI(); 
+			isLivrosGuiOpen = true;
+			return livrosGui;
+		} else {
+			livrosGui.dispose();
+			livrosGui = new LivrosGUI();
 
-	        livrosGui.addWindowListener(new WindowAdapter() {
-	            @Override
-	            public void windowClosed(WindowEvent e) {
-	                isLivrosGuiOpen = false;
-	            }
-	        });
+			livrosGui.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosed(WindowEvent e) {
+					isLivrosGuiOpen = false;
+				}
+			});
 
-	        isLivrosGuiOpen = true;
-	        return livrosGui;
-	    }
+			isLivrosGuiOpen = true;
+			return livrosGui;
+		}
 	}
 
 	private JFrame abrirInfoUsuario() {
-	    if (usersGUI != null) {
-	        usersGUI.dispose();
-	    }
+		if (usersGUI != null) {
+			usersGUI.dispose();
+		}
 
-	    usersGUI = new UsersGUI();
+		usersGUI = new UsersGUI();
 
-	    usersGUI.addWindowListener(new WindowAdapter() {
-	        @Override
-	        public void windowClosed(WindowEvent e) {
-	            isUsersGuiOpen = false;
-	        }
-	    });
+		usersGUI.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				isUsersGuiOpen = false;
+			}
+		});
 
-	    isUsersGuiOpen = true;
-	    return usersGUI;
+		isUsersGuiOpen = true;
+		return usersGUI;
+	}
+
+	private Object emprestimosPanel() {
+		if (emprestimosGUI != null) {
+			emprestimosGUI.dispose();
+		}
+
+		emprestimosGUI = new EmprestimosGUI();
+
+		emprestimosGUI.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				isEmprestimosGUIOpen = false;
+			}
+		});
+
+		isEmprestimosGUIOpen = true;
+		return emprestimosGUI;
 	}
 
 	private void atualizarTela() {
 		jDesktopPane.removeAll();
 		jDesktopPane.add(exibirCapasDosLivros());
-        revalidate();
-        repaint();
-    }
-
+		revalidate();
+		repaint();
+	}
 
 	private Livro realizarBusca(String termoBusca) {
 		if (ServicoBusca.busca(termoBusca) == null) {
@@ -176,7 +188,7 @@ public class ApplicationFrm extends JFrame {
 	private JInternalFrame exibirCapasDosLivros() {
 		EntityManager em = JPAUtil.getEntityManager();
 		LivroDao livroDao = new LivroDao(em);
-		
+
 		List<Livro> livros = livroDao.buscarTodosLivros();
 		JInternalFrame internalFrame = new JInternalFrame();
 		internalFrame.setLayout(new FlowLayout());
@@ -193,14 +205,14 @@ public class ApplicationFrm extends JFrame {
 			panel.setPreferredSize(new Dimension(200, 225));
 			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 			panel.setBorder(BorderFactory.createRaisedBevelBorder());
-			
+
 			JButton btnCapas = criarBotaoComImagem(livro.getCapa());
 			btnCapas.addActionListener(e -> abrirDetalhesDoLivro(livro));
 			JLabel tituloLivro = new JLabel(livro.getTitulo());
-			
+
 			panel.add(btnCapas);
 			panel.add(tituloLivro);
-			
+
 			internalFrame.add(panel);
 		}
 
@@ -227,33 +239,33 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private void abrirDetalhesDoLivro(Livro livro) {
-	    if (!isDetalhesLivroFrameOpen) {
-	        DetalhesLivroInternalFrame detalhesDoLivro = new DetalhesLivroInternalFrame(livro);
-	        internalFrame = new JInternalFrame(livro.getTitulo(), false, true, false, false);
-	        internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-	        internalFrame.add(detalhesDoLivro);
-	        internalFrame.setSize(400, 300);
-	        internalFrame.setVisible(true);
-	        internalFrame.pack();
+		if (!isDetalhesLivroFrameOpen) {
+			DetalhesLivroInternalFrame detalhesDoLivro = new DetalhesLivroInternalFrame(livro);
+			internalFrame = new JInternalFrame(livro.getTitulo(), false, true, false, false);
+			internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+			internalFrame.add(detalhesDoLivro);
+			internalFrame.setSize(400, 300);
+			internalFrame.setVisible(true);
+			internalFrame.pack();
 
-	        centralizarPanel();
+			centralizarPanel();
 
-	        jDesktopPane.add(internalFrame);
+			jDesktopPane.add(internalFrame);
 
-	        internalFrame.toFront();
-	        isDetalhesLivroFrameOpen = true;
+			internalFrame.toFront();
+			isDetalhesLivroFrameOpen = true;
 
-	        internalFrame.addInternalFrameListener(new InternalFrameAdapter() {
-	            @Override
-	            public void internalFrameClosed(InternalFrameEvent e) {
-	                isDetalhesLivroFrameOpen = false;
-	            }
-	        });
-	    } else {
-	        JOptionPane.showMessageDialog(this, "Detalhes do Livro já está aberto.");
-	    }
+			internalFrame.addInternalFrameListener(new InternalFrameAdapter() {
+				@Override
+				public void internalFrameClosed(InternalFrameEvent e) {
+					isDetalhesLivroFrameOpen = false;
+				}
+			});
+		} else {
+			JOptionPane.showMessageDialog(this, "Detalhes do Livro já está aberto.");
+		}
 	}
-	
+
 	private void centralizarPanel() {
 		Dimension desktopSize = jDesktopPane.getSize();
 		Dimension jInternalFrameSize = internalFrame.getSize();
