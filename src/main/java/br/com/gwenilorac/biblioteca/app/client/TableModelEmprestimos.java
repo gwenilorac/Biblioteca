@@ -5,6 +5,7 @@ import com.jgoodies.binding.list.SelectionInList;
 
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 
+@SuppressWarnings("serial")
 public class TableModelEmprestimos extends AbstractTableAdapter<Emprestimo>{
 	
 	public TableModelEmprestimos(SelectionInList<Emprestimo> selection) {
@@ -25,5 +26,5 @@ public class TableModelEmprestimos extends AbstractTableAdapter<Emprestimo>{
 		default: return null;
 		}
 	}
-
+	
 }

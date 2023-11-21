@@ -175,16 +175,6 @@ public class ApplicationFrm extends JFrame {
 		repaint();
 	}
 
-	private Livro realizarBusca(String termoBusca) {
-		if (ServicoBusca.busca(termoBusca) == null) {
-			JOptionPane.showMessageDialog(this, "NÃO EXISTE!");
-			return null;
-		} else {
-			List<Livro> resultados = (List<Livro>) ServicoBusca.busca(termoBusca);
-			return (Livro) resultados;
-		}
-	}
-
 	private JInternalFrame exibirCapasDosLivros() {
 		EntityManager em = JPAUtil.getEntityManager();
 		LivroDao livroDao = new LivroDao(em);

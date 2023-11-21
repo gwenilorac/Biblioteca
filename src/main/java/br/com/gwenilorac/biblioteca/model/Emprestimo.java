@@ -17,10 +17,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
-import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
-import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
@@ -40,15 +36,26 @@ public class Emprestimo {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private StatusEmprestimo status = StatusEmprestimo.ENCERRADO;
+	private StatusEmprestimo status;
 
+	@Column(nullable = false)
 	protected LocalDate dataEmprestimo;
+	
+	@Column(nullable = false)
 	private LocalDate dataDevolucaoLivro;
+	
 	private LocalDate dataAtual;
+	
+	@Column(nullable = false)
 	private double valorMulta;
+	
 	private static final double VALOR_MULTA = 5.0;
-	private boolean multaPaga = false;
-	private TemMulta temMulta = TemMulta.INEXISTENTE;
+	
+	@Column(nullable = false)
+	private boolean multaPaga;
+	
+	@Column(nullable = false)
+	private TemMulta temMulta;
 
 	@Deprecated
 	public Emprestimo() {
@@ -60,6 +67,8 @@ public class Emprestimo {
 		this.dataEmprestimo = LocalDate.now();
 		this.dataDevolucaoLivro = LocalDate.now().plusWeeks(4);
 		this.status = StatusEmprestimo.ENCERRADO;
+		this.multaPaga = false;
+		this.temMulta = TemMulta.INEXISTENTE;
 	}
 
 	public boolean pegarLivroEmprestado() {
@@ -68,8 +77,8 @@ public class Emprestimo {
 		em.getTransaction().begin();
 
 		if (status == StatusEmprestimo.ENCERRADO) {
-			this.setStatus(StatusEmprestimo.ABERTO);
-			this.livro.setEstado(Estado.INDISPONÍVEL);
+			setStatus(StatusEmprestimo.ABERTO);
+			livro.setEstado(Estado.INDISPONÍVEL);
 			System.out.println("Livro emprestado com sucesso!");
 			System.out.println("Data da Devolução do Livro: " + dataDevolucaoLivro);
 			em.getTransaction().commit();
@@ -82,26 +91,14 @@ public class Emprestimo {
 	}
 
 	public boolean devolverLivro() {
-		EntityManager em = JPAUtil.getEntityManager();
-		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-
-		em.getTransaction().begin();
-
-		if (emprestimoDao.isLivroDisponivel(livro) == false) {
-			if (isMultaValid() == false) {
-				setStatus(StatusEmprestimo.ENCERRADO);
-				getLivro().setEstado(Estado.DISPONÍVEL);
-				System.out.println("Livro devolvido com sucesso!");
-				System.out.println("Data devolução: " + LocalDate.now());
-				em.getTransaction().commit();
-				return true;
-			} else {
-				temMulta = TemMulta.PENDENTE;
-				return false;
-			}
+		if (isMultaValid() == false) {
+			setStatus(StatusEmprestimo.ENCERRADO);
+			livro.setEstado(Estado.DISPONÍVEL);
+			System.out.println("Livro devolvido com sucesso!");
+			System.out.println("Data devolução: " + LocalDate.now());
+			return true;
 		} else {
-			System.out.println("O livro não está emprestado ou já foi devolvido.");
-			em.getTransaction().rollback();
+			temMulta = TemMulta.PENDENTE;
 			return false;
 		}
 	}
@@ -129,6 +126,7 @@ public class Emprestimo {
 				long diasAtraso = dataDevolucaoLivro.until(dataAtual).getDays();
 				valorMulta = diasAtraso * VALOR_MULTA;
 				if (valorMulta > 0.0) {
+					temMulta = TemMulta.PENDENTE;
 					return true;
 				} else {
 					System.out.println("Não há multa a ser paga.");
@@ -203,9 +201,9 @@ public class Emprestimo {
 	}
 
 	public String getDataDevolucaoFormatted() {
-		if (dataDevolucaoLivro == null) return null;
+		if (dataDevolucaoLivro == null)
+			return null;
 		return dataDevolucaoLivro.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 	}
-	
 
 }

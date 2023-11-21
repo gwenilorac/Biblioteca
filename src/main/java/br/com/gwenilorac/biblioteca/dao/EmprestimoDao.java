@@ -53,9 +53,10 @@ public class EmprestimoDao {
 	}
 	
 	public List<Emprestimo> buscarEmprestimosUser(Long idUsuario) {
-	    String jpql = "SELECT e FROM Emprestimo e WHERE e.usuario.id = :idUsuario";
+	    String jpql = "SELECT e FROM Emprestimo e WHERE e.usuario.id = :idUsuario AND e.status = :status";
 	    return em.createQuery(jpql, Emprestimo.class)
 	             .setParameter("idUsuario", idUsuario)
+	             .setParameter("status", StatusEmprestimo.ENCERRADO)
 	             .getResultList();
 	}
 

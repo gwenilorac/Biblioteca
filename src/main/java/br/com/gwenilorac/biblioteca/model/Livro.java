@@ -50,7 +50,7 @@ public class Livro implements Serializable{
 	
 	@Enumerated(EnumType.STRING) 
     @Column(nullable = false)
-    private Estado estado = Estado.DISPONÍVEL;
+    private Estado estado;
 	
 	@Transient
 	private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
@@ -71,9 +71,7 @@ public class Livro implements Serializable{
 		this.autor = autor;
 		this.genero = genero;
 		this.capa = capa;
-		
-		this.adicionarLivroNaListaDoAutor(this);
-
+		this.estado = Estado.DISPONÍVEL;
 	}
 
 	public String getTitulo() {
@@ -128,19 +126,6 @@ public class Livro implements Serializable{
 	public Object getId() {
 		return id;
 	}
-	
-	public void adicionarLivroNaListaDoAutor(Livro livro) {
-        if (livro.getAutor() != null) {
-            List<Livro> livrosDoAutor = livro.getAutor().getLivrosDoAutor();
-
-            if (livrosDoAutor == null) {
-                livrosDoAutor = new ArrayList<>();
-                livro.getAutor().setLivrosDoAutor(livrosDoAutor);
-            }
-
-            livrosDoAutor.add(livro);
-        }
-    }
 	
 	  @Override
 	    public String toString() {

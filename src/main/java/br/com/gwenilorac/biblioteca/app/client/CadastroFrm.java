@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -14,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
@@ -38,7 +40,7 @@ public class CadastroFrm extends JDialog {
 
 	private JButton btnUploadPhoto;
 
-	private java.io.File fotoSelecionada;
+	private File selectedCoverFile;
 
 	private boolean cadastro = false;
 
@@ -71,11 +73,7 @@ public class CadastroFrm extends JDialog {
 		if (!isValid(model.getBean()))
 			return;
 
-		if (fotoSelecionada == null) {
-			JOptionPane.showMessageDialog(this, "Por favor, adicione uma foto de perfil.");
-		}
-
-		model.getBean().setFoto(ServicoCadastro.LerFoto(fotoSelecionada));
+		model.getBean().setFoto(ServicoCadastro.LerFoto(selectedCoverFile));
 
 		ServicoCadastro.cadastraUsuario(model.getBean());
 		cadastro = true;
@@ -83,21 +81,22 @@ public class CadastroFrm extends JDialog {
 	}
 
 	private void uploadFoto() {
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		int result = fileChooser.showOpenDialog(this);
+			JFileChooser chooser = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
+			chooser.setFileFilter(filter);
+			int result = chooser.showOpenDialog(this);
 
-		if (result == JFileChooser.APPROVE_OPTION) {
-			fotoSelecionada = fileChooser.getSelectedFile();
-			displayfotoSelecionada(fotoSelecionada);
+			if (result == JFileChooser.APPROVE_OPTION) {
+				selectedCoverFile = chooser.getSelectedFile();
+				displayfotoSelecionada(selectedCoverFile);
+				System.out.println(selectedCoverFile.getName());
 		}
 	}
 
-	private void displayfotoSelecionada(java.io.File file) {
+	private void displayfotoSelecionada(File file) {
 	    ImageIcon icon = new ImageIcon(file.getPath());
 	    Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
 	    ImageIcon resizedIcon = new ImageIcon(img);
-
 	    JOptionPane.showMessageDialog(this, resizedIcon, "Selected Photo", JOptionPane.PLAIN_MESSAGE);
 	}
 
