@@ -40,20 +40,20 @@ public class Emprestimo {
 
 	@Column(nullable = false)
 	protected LocalDate dataEmprestimo;
-	
+
 	@Column(nullable = false)
 	private LocalDate dataDevolucaoLivro;
-	
+
 	private LocalDate dataAtual;
-	
+
 	@Column(nullable = false)
 	private double valorMulta;
-	
+
 	private static final double VALOR_MULTA = 5.0;
-	
+
 	@Column(nullable = false)
 	private boolean multaPaga;
-	
+
 	@Column(nullable = false)
 	private TemMulta temMulta;
 
@@ -71,40 +71,20 @@ public class Emprestimo {
 		this.temMulta = TemMulta.INEXISTENTE;
 	}
 
-	public boolean pegarLivroEmprestado() {
-		EntityManager em = JPAUtil.getEntityManager();
-
-		em.getTransaction().begin();
-
-		if (status == StatusEmprestimo.ENCERRADO) {
+	public void pegarLivroEmprestado() {
 			setStatus(StatusEmprestimo.ABERTO);
-			livro.setEstado(Estado.INDISPONÍVEL);
 			System.out.println("Livro emprestado com sucesso!");
 			System.out.println("Data da Devolução do Livro: " + dataDevolucaoLivro);
-			em.getTransaction().commit();
-			return true;
-		} else {
-			System.out.println("O livro não está disponível para empréstimo.");
-			em.getTransaction().rollback();
-			return false;
-		}
 	}
 
-	public boolean devolverLivro() {
-		if (isMultaValid() == false) {
-			setStatus(StatusEmprestimo.ENCERRADO);
-			livro.setEstado(Estado.DISPONÍVEL);
-			System.out.println("Livro devolvido com sucesso!");
-			System.out.println("Data devolução: " + LocalDate.now());
-			return true;
-		} else {
-			temMulta = TemMulta.PENDENTE;
-			return false;
-		}
+	public void devolverLivro() {
+	    setStatus(StatusEmprestimo.ENCERRADO);
+	    System.out.println("Livro devolvido com sucesso!");
+	    System.out.println("Data devolução: " + LocalDate.now());
+	    temMulta = TemMulta.INEXISTENTE;
 	}
 
-	public boolean DevolucaoParaExclusaoConta() {
-		if (isMultaValid() == false) {
+	public boolean devolucaoParaExclusaoConta() {
 			EntityManager em = JPAUtil.getEntityManager();
 			UsuarioDao usuarioDao = new UsuarioDao(em);
 			List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
@@ -113,39 +93,6 @@ public class Emprestimo {
 			}
 			System.out.println("Livros devolvidos com sucesso!");
 			return true;
-		} else {
-			temMulta = TemMulta.PENDENTE;
-			return false;
-		}
-	}
-
-	public boolean isMultaValid() {
-		if (!multaPaga) {
-			dataAtual = LocalDate.now();
-			if (dataAtual.isAfter(dataDevolucaoLivro)) {
-				long diasAtraso = dataDevolucaoLivro.until(dataAtual).getDays();
-				valorMulta = diasAtraso * VALOR_MULTA;
-				if (valorMulta > 0.0) {
-					temMulta = TemMulta.PENDENTE;
-					return true;
-				} else {
-					System.out.println("Não há multa a ser paga.");
-					return false;
-				}
-			} else {
-				System.out.println("Livro devolvido antes da data de devolução");
-				return false;
-			}
-		} else {
-			System.out.println("Multa já foi paga anteriormente.");
-			return false;
-		}
-	}
-
-	public void pagarMulta() {
-		multaPaga = true;
-		temMulta = TemMulta.INEXISTENTE;
-		System.out.println("Multa paga com sucesso. Valor: R$ " + valorMulta);
 	}
 
 	public Livro getLivro() {
@@ -198,6 +145,34 @@ public class Emprestimo {
 
 	public void setTemMulta(TemMulta temMulta) {
 		this.temMulta = temMulta;
+	}
+	
+	public LocalDate getDataDevolucaoLivro() {
+		return dataDevolucaoLivro;
+	}
+
+	public void setDataDevolucaoLivro(LocalDate dataDevolucaoLivro) {
+		this.dataDevolucaoLivro = dataDevolucaoLivro;
+	}
+
+	public LocalDate getDataAtual() {
+		return dataAtual;
+	}
+
+	public void setDataAtual(LocalDate dataAtual) {
+		this.dataAtual = dataAtual;
+	}
+
+	public void setValorMulta(double valorMulta) {
+		this.valorMulta = valorMulta;
+	}
+
+	public double getValorMulta() {
+		return VALOR_MULTA;
+	}
+
+	public void setMultaPaga(boolean multaPaga) {
+		this.multaPaga = multaPaga;
 	}
 
 	public String getDataDevolucaoFormatted() {

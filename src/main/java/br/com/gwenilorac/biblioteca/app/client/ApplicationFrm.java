@@ -194,7 +194,7 @@ public class ApplicationFrm extends JFrame {
 			JPanel panel = new JPanel();
 			panel.setPreferredSize(new Dimension(200, 225));
 			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-			panel.setBorder(BorderFactory.createRaisedBevelBorder());
+			panel.setBorder(BorderFactory.createEtchedBorder());
 
 			JButton btnCapas = criarBotaoComImagem(livro.getCapa());
 			btnCapas.addActionListener(e -> abrirDetalhesDoLivro(livro));

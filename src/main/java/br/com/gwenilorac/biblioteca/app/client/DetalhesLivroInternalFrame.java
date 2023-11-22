@@ -45,27 +45,14 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 @SuppressWarnings("serial")
 public class DetalhesLivroInternalFrame extends JPanel {
 
-	private Usuario usuario = ServicoLogin.getUsuarioLogado();
 	private Livro livro;
-	private JPanel detalhesPanel;
-	private JTabbedPane tabbedPane;
-	private JTextField txtTitulo;
-	private JTextField txtAutor;
-	private JTextField txtGenero;
-	private JButton btnPegarEmprestado;
-	private JButton btnDevolverLivro;
-	private JButton btnAtualizar;
 	private JPanel capaPanel;
 	private JPanel infoPanel;
-	private JPanel buttonPanel;
-	private JButton btnEditarCapa;
-	private File selectedCoverFile;
 	private byte[] imagemIcon;
 	private ImageIcon icon;
 	private Image img;
 	private ImageIcon newIcon;
 	private JLabel capaLabel;
-	private JSeparator separator;
 
 	public DetalhesLivroInternalFrame(Livro livro) {
 		this.livro = livro;
@@ -97,10 +84,7 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		panelDadosLivros.add(new JSeparator(JSeparator.VERTICAL));
 		panelDadosLivros.add(infoPanel);
 
-		buttonPanel = new JPanel(new FlowLayout());
-
 		add(panelDadosLivros, BorderLayout.CENTER);
-		add(buttonPanel, BorderLayout.SOUTH);
 	}
 
 	private JPanel criarCapaPanel() {

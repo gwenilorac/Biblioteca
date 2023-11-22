@@ -1,7 +1,6 @@
 package br.com.gwenilorac.biblioteca.app.client;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -9,12 +8,14 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -24,13 +25,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 
-import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.list.SelectionInList;
 
 import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
@@ -38,9 +40,9 @@ import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.model.TemMulta;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoEmprestimo;
-import br.com.gwenilorac.biblioteca.servicos.ServicoUsuario;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
@@ -57,7 +59,7 @@ public class EmprestimosGUI extends JFrame {
 	private Usuario usuarioSelecionado;
 	private Livro livroSelecionado;
 	private Container contentPane;
-	
+
 	private List<Usuario> usuariosEncontrados;
 	private List<Livro> livrosEncontrados;
 
@@ -93,113 +95,118 @@ public class EmprestimosGUI extends JFrame {
 	}
 
 	private JPanel criarPanelPesquisa() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout());
-		panel.setBorder(BorderFactory.createTitledBorder("Pesquisar"));
+	    JPanel panel = new JPanel();
+	    panel.setLayout(new BorderLayout());
+	    panel.setBorder(BorderFactory.createTitledBorder("Pesquisar"));
 
-		JPanel buscaPanel = new JPanel();
-		buscaPanel.setLayout(new FlowLayout());
+	    JPanel buscaPanel = new JPanel();
+	    buscaPanel.setLayout(new FlowLayout());
 
-		JRadioButton btnUser = new JRadioButton("Usuario");
-		JRadioButton btnLivro = new JRadioButton("Livro");
+	    JRadioButton btnUser = new JRadioButton("Usuario");
+	    JRadioButton btnLivro = new JRadioButton("Livro");
 
-		textFieldPesquisa = new JTextField(20);
-		JButton btnBuscar = new JButton("Buscar");
-		btnBuscar.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (btnUser.isSelected()) {
-					userDao = new UsuarioDao(em);
-					usuariosEncontrados = userDao.buscarUsuarios(textFieldPesquisa.getText());
+	    textFieldPesquisa = new JTextField(20);
+	    JButton btnBuscar = new JButton("Buscar");
+	    btnBuscar.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	            if (btnUser.isSelected()) {
+	                realizarBuscaUsuario();
+	            } else if (btnLivro.isSelected()) {
+	                realizarBuscaLivro();
+	            }
+	        }
+	    });
 
-					DefaultTableModel userTableModel = (DefaultTableModel) tableUsers.getModel();
-					userTableModel.setRowCount(0);
+	    buscaPanel.add(new JLabel("Pesquisar:"));
+	    buscaPanel.add(textFieldPesquisa);
+	    buscaPanel.add(btnBuscar);
+	    buscaPanel.add(btnUser);
+	    buscaPanel.add(btnLivro);
 
-					for (Usuario usuario : usuariosEncontrados) {
-						Object[] rowData = { usuario.getNome(), usuario.getEmail() };
-						userTableModel.addRow(rowData);
+	    String[] userColunas = { "Nome", "Email" };
+	    DefaultTableModel userTableModel = new DefaultTableModel(userColunas, 0);
+	    tableUsers = new JTable(userTableModel) {
+	        @Override
+	        public boolean isCellEditable(int row, int column) {
+	            return false;
+	        }
+	    };
 
-					}
-					if (btnLivro.isSelected()) {
-						livroDao = new LivroDao(em);
-						livrosEncontrados = livroDao.buscarLivrosDiponiveis(textFieldPesquisa.getText());
+	    String[] livrosColunas = { "Titulo", "Autor", "Genero" };
+	    DefaultTableModel livroTableModel = new DefaultTableModel(livrosColunas, 0);
+	    tableLivros = new JTable(livroTableModel) {
+	        @Override
+	        public boolean isCellEditable(int row, int column) {
+	            return false;
+	        }
+	    };
 
-						DefaultTableModel livroTableModel = (DefaultTableModel) tableLivros.getModel();
-						livroTableModel.setRowCount(0);
+	    JScrollPane userScrollPane = new JScrollPane(tableUsers);
+	    userScrollPane.setPreferredSize(new Dimension(400, 150));
 
-						for (Livro livro : livrosEncontrados) {
-							Object[] rowData = { livro.getTitulo(), livro.getAutor(), livro.getGenero() };
-							livroTableModel.addRow(rowData);
-						}
+	    JScrollPane livrosScrollPane = new JScrollPane(tableLivros);
+	    livrosScrollPane.setPreferredSize(new Dimension(400, 150));
 
-					}
+	    JPanel pesquisaPanel = new JPanel(new FlowLayout());
+	    pesquisaPanel.add(userScrollPane);
+	    pesquisaPanel.add(livrosScrollPane);
 
-					tableUsers.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-						@Override
-						public void valueChanged(ListSelectionEvent e) {
-							if (!e.getValueIsAdjusting()) {
-								int selectedRow = tableUsers.getSelectedRow();
-								if (selectedRow != -1) {
-									usuarioSelecionado = usuariosEncontrados.get(selectedRow);
-									pesquisarEmprestimos(usuarioSelecionado);
-								}
-							}
-						}
-					});
+	    panel.add(buscaPanel, BorderLayout.PAGE_START);
+	    panel.add(pesquisaPanel, BorderLayout.CENTER);
 
-					tableLivros.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-						@Override
-						public void valueChanged(ListSelectionEvent e) {
-							if (!e.getValueIsAdjusting()) {
-								int selectedRow = tableLivros.getSelectedRow();
-								if (selectedRow != -1) {
-									livroSelecionado = livrosEncontrados.get(selectedRow);
-								}
-							}
-						}
-					});
-				}
-			}
-		});
+	    return panel;
+	}
 
-		buscaPanel.add(new JLabel("Pesquisar:"));
-		buscaPanel.add(textFieldPesquisa);
-		buscaPanel.add(btnBuscar);
-		buscaPanel.add(btnUser);
-		buscaPanel.add(btnLivro);
+	private void realizarBuscaUsuario() {
+	    userDao = new UsuarioDao(em);
+	    usuariosEncontrados = userDao.buscarUsuarios(textFieldPesquisa.getText());
 
-		String[] userColunas = { "Nome", "Email" };
-		DefaultTableModel userTableModel = new DefaultTableModel(userColunas, 0);
-		tableUsers = new JTable(userTableModel) {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
+	    DefaultTableModel userTableModel = (DefaultTableModel) tableUsers.getModel();
+	    userTableModel.setRowCount(0);
 
-		String[] livrosColunas = { "Titulo", "Autor", "Genero" };
-		DefaultTableModel livroTableModel = new DefaultTableModel(livrosColunas, 0);
-		tableLivros = new JTable(livroTableModel) {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
+	    for (Usuario usuario : usuariosEncontrados) {
+	        Object[] rowData = { usuario.getNome(), usuario.getEmail() };
+	        userTableModel.addRow(rowData);
+	    }
 
-		JScrollPane userScrollPane = new JScrollPane(tableUsers);
-		userScrollPane.setPreferredSize(new Dimension(400, 150));
+	    tableUsers.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+	        @Override
+	        public void valueChanged(ListSelectionEvent e) {
+	            if (!e.getValueIsAdjusting()) {
+	                int selectedRow = tableUsers.getSelectedRow();
+	                if (selectedRow != -1) {
+	                    usuarioSelecionado = usuariosEncontrados.get(selectedRow);
+	                    pesquisarEmprestimos(usuarioSelecionado);
+	                }
+	            }
+	        }
+	    });
+	}
 
-		JScrollPane livrosScrollPane = new JScrollPane(tableLivros);
-		livrosScrollPane.setPreferredSize(new Dimension(400, 150));
+	private void realizarBuscaLivro() {
+	    livroDao = new LivroDao(em);
+	    livrosEncontrados = livroDao.buscarLivros(textFieldPesquisa.getText());
 
-		JPanel pesquisaPanel = new JPanel(new FlowLayout());
-		pesquisaPanel.add(userScrollPane);
-		pesquisaPanel.add(livrosScrollPane);
+	    DefaultTableModel livroTableModel = (DefaultTableModel) tableLivros.getModel();
+	    livroTableModel.setRowCount(0);
 
-		panel.add(buscaPanel, BorderLayout.PAGE_START);
-		panel.add(pesquisaPanel, BorderLayout.CENTER);
+	    for (Livro livro : livrosEncontrados) {
+	        Object[] rowData = { livro.getTitulo(), livro.getAutor(), livro.getGenero() };
+	        livroTableModel.addRow(rowData);
+	    }
 
-		return panel;
+	    tableLivros.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+	        @Override
+	        public void valueChanged(ListSelectionEvent e) {
+	            if (!e.getValueIsAdjusting()) {
+	                int selectedRow = tableLivros.getSelectedRow();
+	                if (selectedRow != -1) {
+	                    livroSelecionado = livrosEncontrados.get(selectedRow);
+	                }
+	            }
+	        }
+	    });
 	}
 
 	private void pesquisarEmprestimos(Usuario usuario) {
@@ -210,6 +217,8 @@ public class EmprestimosGUI extends JFrame {
 		}
 
 		selectionEmprestimo.getList().addAll(emprestimosEncontrados);
+
+		((AbstractTableModel) tableEmprestimos.getModel()).fireTableDataChanged();
 	}
 
 	private EmprestimoDao getEmprestimoDAO() {
@@ -225,7 +234,7 @@ public class EmprestimosGUI extends JFrame {
 		panel.setBorder(BorderFactory.createTitledBorder("Emprestimos"));
 
 		TableModelEmprestimos tableModelEmprestimos = new TableModelEmprestimos(selectionEmprestimo);
-		
+
 		tableEmprestimos = new JTable(tableModelEmprestimos) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
@@ -233,12 +242,83 @@ public class EmprestimosGUI extends JFrame {
 			}
 		};
 
+		tableEmprestimos.setModel(tableModelEmprestimos);
+		tableModelEmprestimos.fireTableDataChanged();
+
+		tableEmprestimos.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting()) {
+					int selectedRow = tableEmprestimos.getSelectedRow();
+					if (selectedRow != -1) {
+						Emprestimo emprestimoSelecionado = selectionEmprestimo.getElementAt(selectedRow);
+
+						if (emprestimoSelecionado.getTemMulta() == TemMulta.PENDENTE) {
+							exibirTelaMulta(emprestimoSelecionado);
+						}
+					}
+				}
+			}
+		});
+
 		JScrollPane emprestimosScrollPane = new JScrollPane(tableEmprestimos);
 		emprestimosScrollPane.setPreferredSize(new Dimension(400, 150));
 
 		panel.add(emprestimosScrollPane, BorderLayout.CENTER);
 
 		return panel;
+	}
+
+	private void exibirTelaMulta(Emprestimo emprestimo) {
+
+		JDialog multaDialog = new JDialog(this, "Detalhes da Multa", true);
+		multaDialog.setSize(400, 400);
+		multaDialog.setLayout(new BorderLayout());
+		
+		JButton btnPagarMulta = new JButton("Pagar Multa");
+		btnPagarMulta.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ServicoEmprestimo.pagarMulta(emprestimo);
+				
+				JOptionPane.showMessageDialog(multaDialog, "Multa paga com sucesso. Data: " + LocalDate.now(),
+						"Multa Paga", JOptionPane.INFORMATION_MESSAGE);
+				
+				((AbstractTableModel) tableEmprestimos.getModel()).fireTableDataChanged();
+				
+				multaDialog.dispose();
+			}
+		});
+
+		JPanel panelDadosMulta = new JPanel(new FlowLayout());
+		
+		JPanel capaPanel = new JPanel();
+		byte[] imagemIcon = emprestimo.getLivro().getCapa();
+		ImageIcon icon = new ImageIcon(imagemIcon);
+		Image img = icon.getImage().getScaledInstance(150, 200, Image.SCALE_SMOOTH);
+		ImageIcon newIcon = new ImageIcon(img);
+		JLabel capaLabel = new JLabel(newIcon);
+		capaPanel.add(capaLabel);
+		
+		JPanel infoPanel = new JPanel();
+		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.PAGE_AXIS));
+		infoPanel.add(new JLabel("Dias Atrasados: " + calcularDiasAtrasados(emprestimo)));
+		infoPanel.add(new JLabel("Valor da Multa: R$ " + emprestimo.getValorMulta()));
+		infoPanel.add(btnPagarMulta);
+
+		panelDadosMulta.add(capaPanel);
+		panelDadosMulta.add(new JSeparator(JSeparator.VERTICAL));
+		panelDadosMulta.add(infoPanel);
+		
+		multaDialog.add(panelDadosMulta, BorderLayout.CENTER);
+
+		multaDialog.setLocationRelativeTo(this);
+		multaDialog.setVisible(true);
+	}
+
+	private long calcularDiasAtrasados(Emprestimo emprestimo) {
+		LocalDate dataAtual = LocalDate.now();
+		return emprestimo.getDataDevolucao().until(dataAtual, ChronoUnit.DAYS);
 	}
 
 	private JPanel criarPanelBotoes() {
@@ -252,7 +332,7 @@ public class EmprestimosGUI extends JFrame {
 				ServicoEmprestimo.pegarLivroEmprestado(livroSelecionado, usuarioSelecionado);
 			}
 		});
-		
+
 		JButton btnDevolverLivro = new JButton("Devolver Livro");
 		btnDevolverLivro.addActionListener(new ActionListener() {
 			@Override
@@ -263,7 +343,7 @@ public class EmprestimosGUI extends JFrame {
 
 		panel.add(btnPegarEmprestado);
 		panel.add(btnDevolverLivro);
-		
+
 		return panel;
 	}
 

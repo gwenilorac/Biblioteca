@@ -49,18 +49,6 @@ public class LivroDao {
 	    }
 	}
 	
-	public List<Livro> buscarLivrosDiponiveis(String palavraChave) {
-	    try {
-	        String jpql = "SELECT l FROM Livro l WHERE LOWER(l.titulo) LIKE :palavraChave AND l.estado = :estado";
-	        return em.createQuery(jpql, Livro.class)
-	                .setParameter("palavraChave", "%" + palavraChave.toLowerCase() + "%")
-	                .setParameter("estado", Estado.DISPONÍVEL)
-	                .getResultList();
-	    } catch (Exception e) {
-	        return Collections.emptyList();
-	    }
-	}
-	
 	public Livro buscarLivroPorTitulo(String titulo) {
 		try {
 		String jpql = "SELECT l FROM Livro l WHERE l.titulo = :titulo";

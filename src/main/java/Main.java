@@ -1,9 +1,9 @@
-import br.com.gwenilorac.biblioteca.app.client.TelaInicialFrm;
+import br.com.gwenilorac.biblioteca.app.client.LoginFrm;
 
 public class Main {
 
 	public static void main(String[] args) {
-		TelaInicialFrm login = new TelaInicialFrm();
+		LoginFrm login = new LoginFrm();
 
 	}
 }

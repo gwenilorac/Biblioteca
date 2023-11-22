@@ -56,34 +56,34 @@ public class ServicoLivro {
 	}
 
 	public static boolean removerLivro(Livro livro) {
-	    EntityManager em = JPAUtil.getEntityManager();
-	    LivroDao livroDao = new LivroDao(em);
+		EntityManager em = JPAUtil.getEntityManager();
+		LivroDao livroDao = new LivroDao(em);
 
-	    em.getTransaction().begin();
+		em.getTransaction().begin();
+		livro = em.merge(livro);
 
-	    try {
-	        livro = em.merge(livro); 
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+		Emprestimo emprestimo = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
 
-	        if (livro.getEstado() == Estado.DISPONÍVEL) {
-	            EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-	            Emprestimo emprestimo = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
-
-	            if (emprestimo != null) {
-	                emprestimoDao.atualizar(emprestimo);
-	                emprestimoDao.remover(emprestimo);
-	            }
-
-	            livroDao.remover(livro);
-	            em.getTransaction().commit();
-	            return true;
-	        } else {
-	            return false;
-	        }
-	    } catch (Exception e) {
-	        em.getTransaction().rollback();
-	        throw e;
-	    } finally {
-	        em.close();
-	    }
+		if (emprestimo != null) {
+			boolean estaAberto = emprestimoDao.StatusEmprestimoEstaAberto(emprestimo);
+			if (estaAberto == false) {
+				emprestimoDao.remover(emprestimo);
+				livroDao.remover(livro);
+				em.getTransaction().commit();
+				em.close();
+				return true;
+			} else {
+				System.out.println("Livro esta com emprestimo aberto");
+				em.getTransaction().rollback();
+                em.close();
+				return false;
+			}
+		} else {
+			livroDao.remover(livro);
+			em.getTransaction().commit();
+			em.close();
+			return true;
+		}
 	}
 }

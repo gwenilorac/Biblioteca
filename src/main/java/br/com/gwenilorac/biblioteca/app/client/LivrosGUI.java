@@ -120,7 +120,7 @@ public class LivrosGUI extends JFrame {
 				tableModel.setRowCount(0);
 
 				for (Livro livro : livrosEncontrados) {
-					Object[] rowData = { livro.getTitulo(), livro.getAutor(), livro.getGenero(), livro.getEstado() };
+					Object[] rowData = { livro.getTitulo(), livro.getAutor(), livro.getGenero()};
 					tableModel.addRow(rowData);
 				}
 
@@ -141,7 +141,6 @@ public class LivrosGUI extends JFrame {
 								textFieldNome.setText(livroSelecionado.getTitulo());
 								textFieldAutor.setText(livroSelecionado.getAutor().toString());
 								textFieldGenero.setText(livroSelecionado.getGenero().toString());
-								lblDisponibilidade.setText(livroSelecionado.getEstado().toString());
 							}
 						}
 					}
@@ -215,11 +214,7 @@ public class LivrosGUI extends JFrame {
 			                "Confirmação", JOptionPane.YES_NO_OPTION);
 
 			        if (confirmacao == JOptionPane.YES_OPTION) {
-			            livroDao = new LivroDao(em);
-			            
-			            Livro livroParaRemover = em.merge(livroSelecionado);
-
-			            boolean removerLivro = ServicoLivro.removerLivro(livroParaRemover);
+			            boolean removerLivro = ServicoLivro.removerLivro(livroSelecionado);
 			            
 			            if (removerLivro) {
 			                System.out.println("Livro removido: " + livroSelecionado.getTitulo());

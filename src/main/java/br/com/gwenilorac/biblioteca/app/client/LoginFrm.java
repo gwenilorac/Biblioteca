@@ -1,11 +1,14 @@
 package br.com.gwenilorac.biblioteca.app.client;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 
 import javax.persistence.EntityManager;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -86,10 +89,11 @@ public class LoginFrm extends JDialog {
 	}
 
 	private void initLayout() {
+		
 		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout());
-		panel.add(createMainForm(), BorderLayout.CENTER);
-		panel.add(createButtonPanel(), BorderLayout.SOUTH);
+		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+		panel.add(createMainForm());
+		panel.add(createButtonPanel());
 
 		add(panel);
 		setModal(true);
