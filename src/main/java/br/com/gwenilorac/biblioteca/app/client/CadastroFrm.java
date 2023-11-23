@@ -29,19 +29,12 @@ import br.com.gwenilorac.biblioteca.servicos.ServicoCadastro;
 public class CadastroFrm extends JDialog {
 
 	private PresentationModel<Usuario> model;
-
 	private JTextField tfUserName;
-
 	private JTextField tfEmail;
-
 	private JPasswordField passField;
-
 	private JButton btnCadastro;
-
 	private JButton btnUploadPhoto;
-
 	private File selectedCoverFile;
-
 	private boolean cadastro = false;
 
 	public CadastroFrm() {

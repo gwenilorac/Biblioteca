@@ -1,6 +1,7 @@
 package br.com.gwenilorac.biblioteca.servicos;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -104,6 +105,7 @@ public class ServicoEmprestimo {
 			if (dataAtual.isAfter(dataDevolucaoLivro)) {
 				long diasAtraso = dataDevolucaoLivro.until(dataAtual).getDays();
 				double valorMulta = diasAtraso * emprestimo.getValorMulta();
+				emprestimo.setDiasAtrasados(diasAtraso);
 				emprestimo.setValorMulta(valorMulta);
 				emprestimo.setTemMulta(TemMulta.PENDENTE);
 				emprestimoDao.atualizar(emprestimo);
@@ -135,5 +137,4 @@ public class ServicoEmprestimo {
 
 		System.out.println("Multa paga com sucesso. Valor: R$ " + emprestimo.getValorMulta());
 	}
-
 }

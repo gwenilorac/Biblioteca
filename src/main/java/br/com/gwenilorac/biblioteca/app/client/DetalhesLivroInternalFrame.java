@@ -53,18 +53,19 @@ public class DetalhesLivroInternalFrame extends JPanel {
 	private Image img;
 	private ImageIcon newIcon;
 	private JLabel capaLabel;
+	private JPanel panelDadosLivros;
 
 	public DetalhesLivroInternalFrame(Livro livro) {
 		this.livro = livro;
-		initModel();
 		initComponents();
 		initLayout();
 	}
 
-	private void initModel() {
-	}
-
 	private void initComponents() {
+		panelDadosLivros = new JPanel(new FlowLayout());
+		capaPanel = new JPanel();
+		infoPanel = new JPanel();
+
 	}
 
 	public void initLayout() {
@@ -72,12 +73,7 @@ public class DetalhesLivroInternalFrame extends JPanel {
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(500, 250));
 		
-		JPanel panelDadosLivros = new JPanel(new FlowLayout());
-
-		JPanel capaPanel = new JPanel();
 		capaPanel.add(criarCapaPanel());
-		
-		JPanel infoPanel = new JPanel();
 		infoPanel.add(criarInfoPanel());
 
 		panelDadosLivros.add(capaPanel);

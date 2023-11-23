@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
@@ -33,14 +34,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
-import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
-import br.com.gwenilorac.biblioteca.model.Emprestimo;
-import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoUsuario;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -49,12 +46,9 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 public class UsersGUI extends JFrame {
 
 	private EntityManager em = JPAUtil.getEntityManager();
-	private PresentationModel<Livro> model;
 	private UsuarioDao usuarioDao;
-	private EmprestimoDao emprestimoDao;
 	private JTextField textFieldPesquisa;
 	private JTable tableUsers;
-	private JTable tableEmprestimos;
 	private JLabel lblFoto;
 	private JTextField textFieldNome;
 	private JTextField textFieldEmail;
@@ -63,20 +57,10 @@ public class UsersGUI extends JFrame {
 	private File selectedCoverFile;
 	private Container contentPane;
 	private JDialog dialog;
-	private java.util.List<Usuario> usuariosEncontrados;
-	private java.util.List<Emprestimo> emprestimosUser;
+	private List<Usuario> usuariosEncontrados;
 
 	public UsersGUI() {
-		initModel();
-		initComponents();
 		initLayout();
-	}
-
-	private void initModel() {
-	}
-
-	private void initComponents() {
-
 	}
 
 	public void initLayout() {

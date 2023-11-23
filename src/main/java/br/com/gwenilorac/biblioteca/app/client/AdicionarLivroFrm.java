@@ -1,34 +1,38 @@
 package br.com.gwenilorac.biblioteca.app.client;
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.util.List;
 
-import javax.swing.GroupLayout;
+import javax.persistence.EntityManager;
+import javax.swing.BoxLayout;
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.CloseAction;
 
-import org.postgresql.core.Oid;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
+import br.com.gwenilorac.biblioteca.dao.GeneroDao;
+import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
+import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 public class AdicionarLivroFrm extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField titleField;
 	private JTextField authorField;
-	private JTextField generoField;
+	private JComboBox<Genero> generosCb;
 	private JButton addButton;
 	private JButton selectCoverButton;
 	private File selectedCoverFile;
@@ -41,48 +45,31 @@ public class AdicionarLivroFrm extends JPanel {
 	private void initComponents() {
 		titleField = new JTextField(20);
 		authorField = new JTextField(20);
-		generoField = new JTextField(20);
+		
 		addButton = new JButton("Adicionar Livro");
 		selectCoverButton = new JButton("Selecionar Capa");
 
 		addButton.addActionListener(e -> adicionarLivro());
 		selectCoverButton.addActionListener(e -> selecionarCapa());
+		
+		generosCb = initCbGenero();
 	}
 
 	private void initLayout() {
-		GroupLayout layout = new GroupLayout(this);
-		setLayout(layout);
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 
-		layout.setAutoCreateGaps(true);
-		layout.setAutoCreateContainerGaps(true);
+		panel.add(createMainForm());
+		panel.add(createButtonPanel());
 
-		JLabel titleLabel = new JLabel("Título:");
-		JLabel authorLabel = new JLabel("Autor:");
-		JLabel generoLabel = new JLabel("Gênero:");
-
-		layout.setHorizontalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(titleLabel)
-						.addComponent(authorLabel).addComponent(generoLabel).addComponent(selectCoverButton))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(titleField)
-						.addComponent(authorField).addComponent(generoField).addComponent(addButton)));
-
-		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(titleLabel)
-						.addComponent(titleField))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(authorLabel)
-						.addComponent(authorField))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(generoLabel)
-						.addComponent(generoField))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(selectCoverButton)
-						.addComponent(addButton)));
-
+		add(panel);
 		setPreferredSize(new Dimension(350, 150));
 	}
 
 	private void adicionarLivro() {
 	    String titulo = titleField.getText();
 	    String autor = authorField.getText();
-	    String genero = generoField.getText();
+	    String genero = generosCb.getSelectedItem().toString();
 
 	    if (titulo != null && autor != null && genero != null && selectedCoverFile != null) {
 	        try {
@@ -107,7 +94,7 @@ public class AdicionarLivroFrm extends JPanel {
 	private void limparCampos() {
 		titleField.setText("");
 		authorField.setText("");
-		generoField.setText("");
+		generosCb.setSelectedItem(null);
 		selectedCoverFile = null;
 	}
 
@@ -122,4 +109,50 @@ public class AdicionarLivroFrm extends JPanel {
 			System.out.println(selectedCoverFile.getName());
 		}
 	}
+	
+	private Component createMainForm() {
+		JPanel addPanel = new JPanel();
+		
+		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
+		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+
+		builder.append("Título: ", titleField);
+		builder.nextLine();
+
+		builder.append("Autor: ", authorField);
+		builder.nextLine();
+		
+		builder.append("Genero: ", generosCb);
+		
+		JPanel formPanel = builder.getPanel();
+		
+		addPanel.add(formPanel);
+
+		return addPanel;
+	}
+	
+	private JComboBox<Genero> initCbGenero(){
+		EntityManager em = JPAUtil.getEntityManager();
+		GeneroDao generoDao = new GeneroDao(em);
+		
+		generosCb = new JComboBox<Genero>();
+		generosCb.setEditable(true);
+
+		List<Genero> generos = generoDao.buscarTodosGeneros();
+		
+		for (Genero genero : generos) {
+			generosCb.addItem(genero);
+		}
+		
+		return generosCb;
+	}
+	
+	private Component createButtonPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout());
+		panel.add(selectCoverButton);
+		panel.add(addButton);
+		return panel;
+	}
+	
 }

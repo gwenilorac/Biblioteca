@@ -67,16 +67,11 @@ public class EmprestimosGUI extends JFrame {
 
 	public EmprestimosGUI() {
 		initModel();
-		initComponents();
 		initLayout();
 	}
 
 	private void initModel() {
 		selectionEmprestimo = new SelectionInList<Emprestimo>(new ArrayList<>());
-	}
-
-	private void initComponents() {
-
 	}
 
 	public void initLayout() {
@@ -191,8 +186,8 @@ public class EmprestimosGUI extends JFrame {
 	    DefaultTableModel livroTableModel = (DefaultTableModel) tableLivros.getModel();
 	    livroTableModel.setRowCount(0);
 
-	    for (Livro livro : livrosEncontrados) {
-	        Object[] rowData = { livro.getTitulo(), livro.getAutor(), livro.getGenero() };
+	    for (Object livro : livrosEncontrados) {
+	        Object[] rowData = { ((Livro) livro).getTitulo(), ((Livro) livro).getAutor(), ((Livro) livro).getGenero() };
 	        livroTableModel.addRow(rowData);
 	    }
 
@@ -202,7 +197,7 @@ public class EmprestimosGUI extends JFrame {
 	            if (!e.getValueIsAdjusting()) {
 	                int selectedRow = tableLivros.getSelectedRow();
 	                if (selectedRow != -1) {
-	                    livroSelecionado = livrosEncontrados.get(selectedRow);
+	                    livroSelecionado = (Livro) livrosEncontrados.get(selectedRow);
 	                }
 	            }
 	        }
@@ -272,7 +267,7 @@ public class EmprestimosGUI extends JFrame {
 	private void exibirTelaMulta(Emprestimo emprestimo) {
 
 		JDialog multaDialog = new JDialog(this, "Detalhes da Multa", true);
-		multaDialog.setSize(400, 400);
+		multaDialog.setSize(400, 250);
 		multaDialog.setLayout(new BorderLayout());
 		
 		JButton btnPagarMulta = new JButton("Pagar Multa");
@@ -302,7 +297,7 @@ public class EmprestimosGUI extends JFrame {
 		
 		JPanel infoPanel = new JPanel();
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.PAGE_AXIS));
-		infoPanel.add(new JLabel("Dias Atrasados: " + calcularDiasAtrasados(emprestimo)));
+		infoPanel.add(new JLabel("Dias Atrasados: " + emprestimo.getDiasAtrasados()));
 		infoPanel.add(new JLabel("Valor da Multa: R$ " + emprestimo.getValorMulta()));
 		infoPanel.add(btnPagarMulta);
 
@@ -314,11 +309,6 @@ public class EmprestimosGUI extends JFrame {
 
 		multaDialog.setLocationRelativeTo(this);
 		multaDialog.setVisible(true);
-	}
-
-	private long calcularDiasAtrasados(Emprestimo emprestimo) {
-		LocalDate dataAtual = LocalDate.now();
-		return emprestimo.getDataDevolucao().until(dataAtual, ChronoUnit.DAYS);
 	}
 
 	private JPanel criarPanelBotoes() {

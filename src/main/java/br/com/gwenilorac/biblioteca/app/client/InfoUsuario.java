@@ -47,7 +47,6 @@ public class InfoUsuario extends JPanel {
 	private JTextField txtEmail;
 	private JButton btnSalvar;
 	private JButton btnRemover;
-	private JSeparator separator;
 	private String novoNome;
 	private String novoEmail;
 	private JPanel editarUserPanel;
@@ -84,9 +83,6 @@ public class InfoUsuario extends JPanel {
 		btnSalvar.addActionListener(this::salvarEdicao);
 		btnRemover = new JButton("Remover Usuario");
 		btnRemover.addActionListener(this::excluirUsuario);
-		btnDevolverLivro = new JButton("Devolver Livro");
-
-		separator = new JSeparator(JSeparator.HORIZONTAL);
 
 		usuarioDao = new UsuarioDao(em);
 		livroDao = new LivroDao(em);
@@ -108,7 +104,6 @@ public class InfoUsuario extends JPanel {
 				usuarioDao.buscarLivrosEmprestados(model.getBean().getId()));
 
 		add(infoPane, BorderLayout.LINE_START);
-//		add(separator, BorderLayout.CENTER);
 		add(livrosEmprestadosPanel, BorderLayout.AFTER_LAST_LINE);
 
 		setVisible(true);

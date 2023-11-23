@@ -2,6 +2,7 @@ package br.com.gwenilorac.biblioteca.model;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -45,11 +46,10 @@ public class Emprestimo {
 	private LocalDate dataDevolucaoLivro;
 
 	private LocalDate dataAtual;
-
+	private long diasAtrasados;
+	
 	@Column(nullable = false)
 	private double valorMulta;
-
-	private static final double VALOR_MULTA = 5.0;
 
 	@Column(nullable = false)
 	private boolean multaPaga;
@@ -94,7 +94,7 @@ public class Emprestimo {
 			System.out.println("Livros devolvidos com sucesso!");
 			return true;
 	}
-
+	
 	public Livro getLivro() {
 		return livro;
 	}
@@ -163,14 +163,6 @@ public class Emprestimo {
 		this.dataAtual = dataAtual;
 	}
 
-	public void setValorMulta(double valorMulta) {
-		this.valorMulta = valorMulta;
-	}
-
-	public double getValorMulta() {
-		return VALOR_MULTA;
-	}
-
 	public void setMultaPaga(boolean multaPaga) {
 		this.multaPaga = multaPaga;
 	}
@@ -181,4 +173,21 @@ public class Emprestimo {
 		return dataDevolucaoLivro.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 	}
 
+	public double getValorMulta() {
+		return valorMulta = 5.0;
+	}
+
+	public void setValorMulta(double valorMulta) {
+		this.valorMulta = valorMulta;
+	}
+	
+	public long getDiasAtrasados() {
+		return diasAtrasados;
+	}
+
+	public void setDiasAtrasados(long diasAtrasados) {
+		this.diasAtrasados = diasAtrasados;
+	}
+	
+	
 }

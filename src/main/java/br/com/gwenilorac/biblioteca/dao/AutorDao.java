@@ -1,7 +1,11 @@
 package br.com.gwenilorac.biblioteca.dao;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
+
 import br.com.gwenilorac.biblioteca.model.Autor;
+import br.com.gwenilorac.biblioteca.model.Genero;
 
 public class AutorDao {
 
@@ -22,6 +26,12 @@ public class AutorDao {
 	public void remover(Autor autor) {
 		this.em.remove(autor);
 		System.out.println("Autor excluido com sucesso!");
+	}
+	
+	public List<Autor> buscarTodosAutores(){
+		String jpql = "SELECT a FROM Autor a";
+		return em.createQuery(jpql, Autor.class)
+				.getResultList();
 	}
 
 	public Autor buscarAutorPorNome(String nome) {

@@ -70,12 +70,6 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private void initComponents() {
-		btnLivros = new JButton("Editar Livros");
-		btnLivros.addActionListener(al -> livrosPanel());
-		btnEmprestimos = new JButton("Emprestimos");
-		btnEmprestimos.addActionListener(be -> emprestimosPanel());
-		btnUser = new JButton("User");
-		btnUser.addActionListener(bu -> abrirInfoUsuario());
 		btnAtualizar = new JButton("Recarregar");
 		btnAtualizar.addActionListener(ba -> atualizarTela());
 	}
@@ -84,15 +78,25 @@ public class ApplicationFrm extends JFrame {
 		jDesktopPane = new JDesktopPane();
 		jDesktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
 		jDesktopPane.add(exibirCapasDosLivros());
+		
+		JMenuItem livrosItem = new JMenuItem("Livros");
+		livrosItem.addActionListener(li -> livrosPanel());
 
+		JMenuItem userItem = new JMenuItem("Usuarios");
+		userItem.addActionListener(ui -> abrirInfoUsuario());
+		
+		JMenuItem emprestimosItem = new JMenuItem("Emprestimos");
+		emprestimosItem.addActionListener(ei -> emprestimosPanel());
+		
+		JMenu menu = new JMenu("Menu");
+		menu.add(livrosItem);
+		menu.add(userItem);
+		menu.add(emprestimosItem);
+		
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(btnAtualizar);
 		menubar.add(Box.createHorizontalGlue());
-		menubar.add(btnLivros);
-		menubar.add(Box.createHorizontalGlue());
-		menubar.add(btnEmprestimos);
-		menubar.add(Box.createHorizontalGlue());
-		menubar.add(btnUser);
+		menubar.add(menu);
 
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(800, 600));
@@ -190,15 +194,15 @@ public class ApplicationFrm extends JFrame {
 		for (MouseMotionListener listener : motionListeners)
 			northPane.removeMouseMotionListener(listener);
 
-		for (Livro livro : livros) {
+		for (Object livro : livros) {
 			JPanel panel = new JPanel();
 			panel.setPreferredSize(new Dimension(200, 225));
 			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 			panel.setBorder(BorderFactory.createEtchedBorder());
 
-			JButton btnCapas = criarBotaoComImagem(livro.getCapa());
-			btnCapas.addActionListener(e -> abrirDetalhesDoLivro(livro));
-			JLabel tituloLivro = new JLabel(livro.getTitulo());
+			JButton btnCapas = criarBotaoComImagem(((Livro) livro).getCapa());
+			btnCapas.addActionListener(e -> abrirDetalhesDoLivro((Livro) livro));
+			JLabel tituloLivro = new JLabel(((Livro) livro).getTitulo());
 
 			panel.add(btnCapas);
 			panel.add(tituloLivro);
@@ -262,5 +266,4 @@ public class ApplicationFrm extends JFrame {
 		internalFrame.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
 				(desktopSize.height - jInternalFrameSize.height) / 2);
 	}
-
 }

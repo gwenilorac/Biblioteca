@@ -26,5 +26,4 @@ public class TableModelEmprestimos extends AbstractTableAdapter<Emprestimo>{
 		default: return null;
 		}
 	}
-	
 }

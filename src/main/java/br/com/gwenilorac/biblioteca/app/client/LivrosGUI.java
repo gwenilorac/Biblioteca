@@ -14,18 +14,22 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
@@ -42,6 +46,8 @@ import com.jgoodies.forms.layout.FormLayout;
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
+import br.com.gwenilorac.biblioteca.model.Autor;
+import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -52,6 +58,7 @@ public class LivrosGUI extends JFrame {
 	private EntityManager em = JPAUtil.getEntityManager();
 	private PresentationModel<Livro> model;
 	private LivroDao livroDao;
+	private GeneroDao generoDao;
 	private JTextField textFieldPesquisa;
 	private JTable tableLivros;
 	private JLabel lblCapa;
@@ -69,20 +76,18 @@ public class LivrosGUI extends JFrame {
 	private Container contentPane;
 	private JDialog dialog;
 	private boolean isAddBookDialogOpen = false;
+	private JComboBox<Genero> generosCb;
+	private JComboBox<Autor> autorCb;
+	private List<Livro> livrosEncontrados;
 
 	public LivrosGUI() {
 		initModel();
-		initComponents();
 		initLayout();
 	}
 
 	private void initModel() {
 		Livro livro = new Livro();
 		model = new PresentationModel<Livro>(livro);
-	}
-
-	private void initComponents() {
-
 	}
 
 	public void initLayout() {
@@ -108,51 +113,56 @@ public class LivrosGUI extends JFrame {
 		JPanel buscaPanel = new JPanel();
 		buscaPanel.setLayout(new FlowLayout());
 
+		JRadioButton generoBtn = new JRadioButton("Genero");
+		generoBtn.addActionListener(gb -> abrirDialogGenero());
+		
+		JRadioButton autorBtn = new JRadioButton("Autor");
+		autorBtn.addActionListener(ab -> abrirDialogAutor());
+
 		textFieldPesquisa = new JTextField(20);
 		JButton btnBuscar = new JButton("Buscar");
 		btnBuscar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				EntityManager em = JPAUtil.getEntityManager();
 				livroDao = new LivroDao(em);
-				java.util.List<Livro> livrosEncontrados = livroDao.buscarLivros(textFieldPesquisa.getText());
+				
+				if (generoBtn.isSelected()) {
+					
+					String genero = generosCb.getSelectedItem().toString();
+					
+					livrosEncontrados = livroDao.buscarPorNomeDoGenero(genero);
+					
+					realizarBusca();
+					
+				} if (autorBtn.isSelected()) {
 
-				DefaultTableModel tableModel = (DefaultTableModel) tableLivros.getModel();
-				tableModel.setRowCount(0);
-
-				for (Livro livro : livrosEncontrados) {
-					Object[] rowData = { livro.getTitulo(), livro.getAutor(), livro.getGenero()};
-					tableModel.addRow(rowData);
+					String autor = autorCb.getSelectedItem().toString();
+					
+					livrosEncontrados = livroDao.buscarPorNomeAutor(autor);
+					
+					realizarBusca();
+				} else {
+				    String livro = textFieldPesquisa.getText();
+				    
+				    if(livro != null) {
+				    	livrosEncontrados = (livroDao.buscarLivros(livro));
+				    	
+				    	realizarBusca();
+				    } else {
+				    	livrosEncontrados = livroDao.buscarTodosLivros();
+				    }
 				}
-
-				tableLivros.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-					@Override
-					public void valueChanged(ListSelectionEvent e) {
-						if (!e.getValueIsAdjusting()) {
-							int selectedRow = tableLivros.getSelectedRow();
-							if (selectedRow != -1) {
-								livroSelecionado = livrosEncontrados.get(selectedRow);
-
-								imagemIcon = livroSelecionado.getCapa();
-								icon = new ImageIcon(imagemIcon);
-								img = icon.getImage().getScaledInstance(150, 190, Image.SCALE_SMOOTH);
-								newIcon = new ImageIcon(img);
-								capaLabel = new JLabel(newIcon);
-								lblCapa.setIcon(newIcon);
-								textFieldNome.setText(livroSelecionado.getTitulo());
-								textFieldAutor.setText(livroSelecionado.getAutor().toString());
-								textFieldGenero.setText(livroSelecionado.getGenero().toString());
-							}
-						}
-					}
-				});
 			}
 		});
 
 		buscaPanel.add(new JLabel("Pesquisar Livros:"));
 		buscaPanel.add(textFieldPesquisa);
 		buscaPanel.add(btnBuscar);
+		buscaPanel.add(generoBtn);
+		buscaPanel.add(autorBtn);
 
-		String[] colunas = { "Nome", "Autor", "Gênero", "Disponibilidade" };
+		String[] colunas = { "Nome", "Autor", "Gênero"};
 		DefaultTableModel tableModel = new DefaultTableModel(colunas, 0);
 		tableLivros = new JTable(tableModel) {
 			@Override
@@ -166,6 +176,85 @@ public class LivrosGUI extends JFrame {
 		panel.add(scrollPane, BorderLayout.CENTER);
 
 		return panel;
+	}
+	
+	private JDialog abrirDialogGenero() {
+
+		EntityManager em = JPAUtil.getEntityManager();
+		GeneroDao generoDao = new GeneroDao(em);
+
+		generosCb = new JComboBox<Genero>();
+
+		List<Genero> generos = generoDao.buscarTodosGeneros();
+
+		for (Genero genero : generos) {
+			generosCb.addItem(genero);
+		}
+
+		JPanel panel = new JPanel();
+		panel.add(generosCb);
+		
+		dialog = new JDialog();
+		dialog.setPreferredSize(new Dimension(300, 150));
+		dialog.setLocationRelativeTo(null);
+		dialog.add(panel);
+		
+		return dialog;
+	}
+	
+	private JDialog abrirDialogAutor() {
+		EntityManager em = JPAUtil.getEntityManager();
+		AutorDao autorDao = new AutorDao(em);
+
+		autorCb = new JComboBox<Autor>();
+
+		List<Autor> autores = autorDao.buscarTodosAutores();
+
+		for (Autor autor : autores) {
+			autorCb.addItem(autor);
+		}
+
+		JPanel panel = new JPanel();
+		panel.add(autorCb);
+		
+		dialog = new JDialog();
+		dialog.setPreferredSize(new Dimension(300, 150));
+		dialog.setLocationRelativeTo(null);
+		dialog.add(panel);
+		
+		return dialog;
+	}
+
+	private void realizarBusca() {
+		DefaultTableModel tableModel = (DefaultTableModel) tableLivros.getModel();
+		tableModel.setRowCount(0);
+
+		for (Livro livro : livrosEncontrados) {
+			Object[] rowData = { (livro).getTitulo(), (livro).getAutor(), (livro).getGenero() };
+			tableModel.addRow(rowData);
+		}
+
+		tableLivros.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting()) {
+					int selectedRow = tableLivros.getSelectedRow();
+					if (selectedRow != -1) {
+						livroSelecionado = livrosEncontrados.get(selectedRow);
+
+						imagemIcon = livroSelecionado.getCapa();
+						icon = new ImageIcon(imagemIcon);
+						img = icon.getImage().getScaledInstance(150, 190, Image.SCALE_SMOOTH);
+						newIcon = new ImageIcon(img);
+						capaLabel = new JLabel(newIcon);
+						lblCapa.setIcon(newIcon);
+						textFieldNome.setText(livroSelecionado.getTitulo());
+						textFieldAutor.setText(livroSelecionado.getAutor().toString());
+						textFieldGenero.setText(livroSelecionado.getGenero().toString());
+					}
+				}
+			}
+		});
 	}
 
 	private JPanel criarPanelDadosLivro() {
@@ -189,8 +278,6 @@ public class LivrosGUI extends JFrame {
 		builder.append("Autor: ", textFieldAutor);
 		builder.nextLine();
 		builder.append("Gênero: ", textFieldGenero);
-		builder.nextLine();
-		builder.append("Disponibilidade: ", lblDisponibilidade);
 
 		JPanel formPanel = builder.getPanel();
 
@@ -209,58 +296,58 @@ public class LivrosGUI extends JFrame {
 		btnExcluir.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-			    if (livroSelecionado != null) {
-			        int confirmacao = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja remover o livro?",
-			                "Confirmação", JOptionPane.YES_NO_OPTION);
+				if (livroSelecionado != null) {
+					int confirmacao = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja remover o livro?",
+							"Confirmação", JOptionPane.YES_NO_OPTION);
 
-			        if (confirmacao == JOptionPane.YES_OPTION) {
-			            boolean removerLivro = ServicoLivro.removerLivro(livroSelecionado);
-			            
-			            if (removerLivro) {
-			                System.out.println("Livro removido: " + livroSelecionado.getTitulo());
-			                JOptionPane.showMessageDialog(null, "LIVRO REMOVIDO COM SUCESSO!");
-			            } else {
-			                JOptionPane.showMessageDialog(null,
-			                        "ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER");
-			            }
-			        }
-			    } else {
-			        JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO!");
-			    }
+					if (confirmacao == JOptionPane.YES_OPTION) {
+						boolean removerLivro = ServicoLivro.removerLivro(livroSelecionado);
+
+						if (removerLivro) {
+							System.out.println("Livro removido: " + livroSelecionado.getTitulo());
+							JOptionPane.showMessageDialog(null, "LIVRO REMOVIDO COM SUCESSO!");
+						} else {
+							JOptionPane.showMessageDialog(null,
+									"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER");
+						}
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO!");
+				}
 			}
 
 		});
 
 		JButton btnAdicionar = new JButton("Adicionar Novo Livro");
-        btnAdicionar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!isAddBookDialogOpen) {
-                    isAddBookDialogOpen = true;
-                    AdicionarLivroFrm addBookForm = new AdicionarLivroFrm();
-                    dialog = new JDialog();
-                    dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                    dialog.add(addBookForm);
-                    dialog.setPreferredSize(new Dimension(400, 200));
-                    dialog.pack();
-                    dialog.setVisible(true);
+		btnAdicionar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!isAddBookDialogOpen) {
+					isAddBookDialogOpen = true;
+					AdicionarLivroFrm addBookForm = new AdicionarLivroFrm();
+					dialog = new JDialog();
+					dialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+					dialog.add(addBookForm);
+					dialog.setPreferredSize(new Dimension(400, 200));
+					dialog.pack();
+					dialog.setVisible(true);
 
-                    dialog.addWindowListener(new WindowAdapter() {
-                        @Override
-                        public void windowClosed(WindowEvent e) {
-                            isAddBookDialogOpen = false;
-                        }
-                    });
+					dialog.addWindowListener(new WindowAdapter() {
+						@Override
+						public void windowClosed(WindowEvent e) {
+							isAddBookDialogOpen = false;
+						}
+					});
 
-                    Dimension desktopSize = contentPane.getSize();
-                    Dimension jInternalFrameSize = dialog.getSize();
-                    dialog.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
-                            (desktopSize.height - jInternalFrameSize.height) / 2);
-                } else {
-                    JOptionPane.showMessageDialog(null, "A janela de adicionar livro já está aberta.");
-                }
-            }
-        });
+					Dimension desktopSize = contentPane.getSize();
+					Dimension jInternalFrameSize = dialog.getSize();
+					dialog.setLocation((desktopSize.width - jInternalFrameSize.width) / 2,
+							(desktopSize.height - jInternalFrameSize.height) / 2);
+				} else {
+					JOptionPane.showMessageDialog(null, "A janela de adicionar livro já está aberta.");
+				}
+			}
+		});
 
 		JButton btnEditarCapa = new JButton("Editar Capa");
 		btnEditarCapa.addActionListener(new ActionListener() {

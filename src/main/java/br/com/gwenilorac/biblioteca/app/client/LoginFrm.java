@@ -29,15 +29,10 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
 public class LoginFrm extends JDialog {
-
 	private PresentationModel<Usuario> model;
-
 	private JTextField tfUserName;
-
 	private JPasswordField passField;
-
 	private JButton btnLogin;
-
 	private boolean login = false;
 
 	public LoginFrm() {

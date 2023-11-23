@@ -1,9 +1,10 @@
 package br.com.gwenilorac.biblioteca.dao;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+
 import br.com.gwenilorac.biblioteca.model.Genero;
-import br.com.gwenilorac.biblioteca.model.Livro;
 
 public class GeneroDao {
 	
@@ -26,6 +27,12 @@ public class GeneroDao {
 		System.out.println("Genero excluido com sucesso!");
 	}
 	
+	public List<Genero> buscarTodosGeneros(){
+		String jpql = "SELECT g FROM Genero g";
+		return em.createQuery(jpql, Genero.class)
+				.getResultList();
+	}
+
 	public Genero buscarGeneroPorNome(String nome) {
 		try {
 			String jpql = "SELECT g FROM Genero g WHERE g.nome = :nome";
@@ -36,5 +43,5 @@ public class GeneroDao {
 			return null;
 		}
 	}
-	
+	 
 }
