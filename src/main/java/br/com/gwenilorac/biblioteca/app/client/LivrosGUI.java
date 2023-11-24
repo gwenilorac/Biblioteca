@@ -19,13 +19,13 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -113,11 +113,19 @@ public class LivrosGUI extends JFrame {
 		JPanel buscaPanel = new JPanel();
 		buscaPanel.setLayout(new FlowLayout());
 
-		JRadioButton generoBtn = new JRadioButton("Genero");
-		generoBtn.addActionListener(gb -> abrirDialogGenero());
-		
+		JRadioButton generoBtn = new JRadioButton("Gênero");
+		generoBtn.addActionListener(gb -> {
+		    if (generoBtn.isSelected()) {
+		        abrirDialogGenero();
+		    }
+		});
+
 		JRadioButton autorBtn = new JRadioButton("Autor");
-		autorBtn.addActionListener(ab -> abrirDialogAutor());
+		autorBtn.addActionListener(ab -> {
+		    if (autorBtn.isSelected()) {
+		        abrirDialogAutor();
+		    }
+		});
 
 		textFieldPesquisa = new JTextField(20);
 		JButton btnBuscar = new JButton("Buscar");
@@ -126,34 +134,32 @@ public class LivrosGUI extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				EntityManager em = JPAUtil.getEntityManager();
 				livroDao = new LivroDao(em);
-				
+
 				if (generoBtn.isSelected()) {
-					
+
 					String genero = generosCb.getSelectedItem().toString();
-					
+
 					livrosEncontrados = livroDao.buscarPorNomeDoGenero(genero);
-					
+
 					realizarBusca();
-					
-				} if (autorBtn.isSelected()) {
+
+				} else if (autorBtn.isSelected()) {
 
 					String autor = autorCb.getSelectedItem().toString();
-					
+
 					livrosEncontrados = livroDao.buscarPorNomeAutor(autor);
-					
+
 					realizarBusca();
+
 				} else {
-				    String livro = textFieldPesquisa.getText();
-				    
-				    if(livro != null) {
-				    	livrosEncontrados = (livroDao.buscarLivros(livro));
-				    	
-				    	realizarBusca();
-				    } else {
-				    	livrosEncontrados = livroDao.buscarTodosLivros();
-				    }
+					String livro = textFieldPesquisa.getText();
+
+					livrosEncontrados = (livroDao.buscarLivros(livro));
+
+					realizarBusca();
 				}
 			}
+
 		});
 
 		buscaPanel.add(new JLabel("Pesquisar Livros:"));
@@ -162,7 +168,7 @@ public class LivrosGUI extends JFrame {
 		buscaPanel.add(generoBtn);
 		buscaPanel.add(autorBtn);
 
-		String[] colunas = { "Nome", "Autor", "Gênero"};
+		String[] colunas = { "Nome", "Autor", "Gênero" };
 		DefaultTableModel tableModel = new DefaultTableModel(colunas, 0);
 		tableLivros = new JTable(tableModel) {
 			@Override
@@ -178,50 +184,54 @@ public class LivrosGUI extends JFrame {
 		return panel;
 	}
 	
+	
 	private JDialog abrirDialogGenero() {
-
 		EntityManager em = JPAUtil.getEntityManager();
 		GeneroDao generoDao = new GeneroDao(em);
 
-		generosCb = new JComboBox<Genero>();
+		DefaultComboBoxModel<Genero> generoModel = new DefaultComboBoxModel<>();
 
 		List<Genero> generos = generoDao.buscarTodosGeneros();
-
 		for (Genero genero : generos) {
-			generosCb.addItem(genero);
+			generoModel.addElement(genero);
 		}
+
+		generosCb = new JComboBox<>(generoModel);
 
 		JPanel panel = new JPanel();
 		panel.add(generosCb);
-		
+
 		dialog = new JDialog();
-		dialog.setPreferredSize(new Dimension(300, 150));
+		dialog.setSize(new Dimension(100, 100));
 		dialog.setLocationRelativeTo(null);
 		dialog.add(panel);
-		
+		dialog.setVisible(true);
+
 		return dialog;
 	}
-	
+
 	private JDialog abrirDialogAutor() {
 		EntityManager em = JPAUtil.getEntityManager();
 		AutorDao autorDao = new AutorDao(em);
 
-		autorCb = new JComboBox<Autor>();
+		DefaultComboBoxModel<Autor> autorModel = new DefaultComboBoxModel<>();
 
 		List<Autor> autores = autorDao.buscarTodosAutores();
-
 		for (Autor autor : autores) {
-			autorCb.addItem(autor);
+			autorModel.addElement(autor);
 		}
+
+		autorCb = new JComboBox<>(autorModel);
 
 		JPanel panel = new JPanel();
 		panel.add(autorCb);
-		
+
 		dialog = new JDialog();
-		dialog.setPreferredSize(new Dimension(300, 150));
+		dialog.setSize(new Dimension(200, 100));
 		dialog.setLocationRelativeTo(null);
 		dialog.add(panel);
-		
+		dialog.setVisible(true);
+
 		return dialog;
 	}
 

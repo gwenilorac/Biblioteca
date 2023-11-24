@@ -2,7 +2,6 @@ package br.com.gwenilorac.biblioteca.model;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -18,12 +17,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.ibm.icu.math.BigDecimal;
+
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @Entity
 @Table(name = "emprestimos")
 public class Emprestimo {
+
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,8 +47,11 @@ public class Emprestimo {
 	@Column(nullable = false)
 	private LocalDate dataDevolucaoLivro;
 
+    @Column(name = "data_atual")
 	private LocalDate dataAtual;
-	private long diasAtrasados;
+    
+    @Column(name = "dias_atrasados", nullable = true)
+    private Long diasAtrasados = 0L;
 	
 	@Column(nullable = false)
 	private double valorMulta;
@@ -56,6 +61,8 @@ public class Emprestimo {
 
 	@Column(nullable = false)
 	private TemMulta temMulta;
+
+	private static final double valorMultaPorDia = 5.0;
 
 	@Deprecated
 	public Emprestimo() {
@@ -174,16 +181,21 @@ public class Emprestimo {
 	}
 
 	public double getValorMulta() {
-		return valorMulta = 5.0;
+	    return diasAtrasados * valorMultaPorDia; 
 	}
+
 
 	public void setValorMulta(double valorMulta) {
 		this.valorMulta = valorMulta;
 	}
 	
 	public long getDiasAtrasados() {
-		return diasAtrasados;
+	    if (diasAtrasados == null) {
+	        return 0L; 
+	    }
+	    return diasAtrasados;
 	}
+
 
 	public void setDiasAtrasados(long diasAtrasados) {
 		this.diasAtrasados = diasAtrasados;

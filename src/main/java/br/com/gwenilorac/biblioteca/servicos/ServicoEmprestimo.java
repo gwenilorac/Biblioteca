@@ -1,16 +1,17 @@
 package br.com.gwenilorac.biblioteca.servicos;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.swing.JOptionPane;
 
 import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
+import br.com.gwenilorac.biblioteca.dao.ReservaDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.model.Reserva;
 import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 import br.com.gwenilorac.biblioteca.model.TemMulta;
 import br.com.gwenilorac.biblioteca.model.Usuario;
@@ -20,35 +21,41 @@ public class ServicoEmprestimo {
 
 	public static void pegarLivroEmprestado(Livro livro, Usuario usuario) {
 		EntityManager em = JPAUtil.getEntityManager();
-		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
 		UsuarioDao usuarioDao = new UsuarioDao(em);
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
 		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
-		List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(ServicoLogin.getUsuarioLogado().getId());
+		List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
+		ReservaDao reservaDao = new ReservaDao(em);
+		Reserva livroTemReserva = reservaDao.buscarSeLivroTemReserva(livro);
 
 		em.getTransaction().begin();
 
-		if (livrosEmprestados.size() <= 2) {
-			if (emprestimoDoLivro == null) {
-				Emprestimo Novoemprestimo = new Emprestimo(livro, usuario);
-				emprestimoDao.cadastrar(Novoemprestimo);
-				if (Novoemprestimo.getStatus() == StatusEmprestimo.ENCERRADO) {
-					Novoemprestimo.pegarLivroEmprestado();
-					emprestimoDao.atualizar(Novoemprestimo);
-					JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
+		if (livroTemReserva == null) {
+			if (livrosEmprestados.size() <= 2) {
+				if (emprestimoDoLivro == null) {
+					Emprestimo Novoemprestimo = new Emprestimo(livro, usuario);
+					emprestimoDao.cadastrar(Novoemprestimo);
+					if (Novoemprestimo.getStatus() == StatusEmprestimo.ENCERRADO) {
+						Novoemprestimo.pegarLivroEmprestado();
+						emprestimoDao.atualizar(Novoemprestimo);
+						JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
+					} else {
+						JOptionPane.showMessageDialog(null, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.");
+					}
 				} else {
-					JOptionPane.showMessageDialog(null, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.");
+					if (emprestimoDoLivro.getStatus() == StatusEmprestimo.ENCERRADO) {
+						emprestimoDoLivro.pegarLivroEmprestado();
+						emprestimoDao.atualizar(emprestimoDoLivro);
+						JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
+					} else {
+						JOptionPane.showMessageDialog(null, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.");
+					}
 				}
 			} else {
-				if (emprestimoDoLivro.getStatus() == StatusEmprestimo.ENCERRADO) {
-					emprestimoDoLivro.pegarLivroEmprestado();
-					emprestimoDao.atualizar(emprestimoDoLivro);
-					JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
-				} else {
-					JOptionPane.showMessageDialog(null, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.");
-				}
+				JOptionPane.showMessageDialog(null, "SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
 			}
 		} else {
-			JOptionPane.showMessageDialog(null, "SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
+			JOptionPane.showMessageDialog(null, "LIVRO RESERVADO, POR FAVOR ESCOLHER OUTRO");
 		}
 		em.getTransaction().commit();
 	}

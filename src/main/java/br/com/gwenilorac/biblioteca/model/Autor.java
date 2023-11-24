@@ -26,16 +26,11 @@ public class Autor implements Serializable{
 	@Column(nullable = false, unique = true)
     private String nome;
 
-	@OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Livro> livrosDoAutor = new ArrayList<>();
-    
     @Deprecated
     public Autor() {}
 
     public Autor(String nome) {
         this.nome = nome;
-        this.livrosDoAutor = new ArrayList<>();
-
     }
 
     public String getNome() {
@@ -49,14 +44,6 @@ public class Autor implements Serializable{
     @Override
     public String toString() {
         return nome;
-    }
-
-    public List<Livro> getLivrosDoAutor() {
-        return livrosDoAutor;
-    }
-
-    public void setLivrosDoAutor(List<Livro> livrosDoAutor) {
-        this.livrosDoAutor = livrosDoAutor;
     }
 
 }

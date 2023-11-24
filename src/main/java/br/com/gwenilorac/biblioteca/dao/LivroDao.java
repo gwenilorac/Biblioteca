@@ -7,10 +7,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
-import br.com.gwenilorac.biblioteca.model.Emprestimo;
-import br.com.gwenilorac.biblioteca.model.Estado;
 import br.com.gwenilorac.biblioteca.model.Livro;
-import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
+import br.com.gwenilorac.biblioteca.model.Usuario;
 
 public class LivroDao {
 

@@ -3,6 +3,7 @@ package br.com.gwenilorac.biblioteca.dao;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
@@ -78,5 +79,21 @@ public class EmprestimoDao {
 			return false;
 		}
 	}
+	
+	public boolean buscarSeLivroEstaEmprestadoPorUser(Usuario usuario, Livro livro) {
+	    try {
+	        String jpql = "SELECT COUNT(e) FROM Emprestimo e WHERE e.usuario = :usuario AND e.livro = :livro AND e.status = 'ABERTO'";
+	        Long count = em.createQuery(jpql, Long.class)
+	                .setParameter("usuario", usuario)
+	                .setParameter("livro", livro)
+	                .getSingleResult();
 
+	        return count > 0;
+	    } catch (Exception e) {
+	        return false;
+	    }
+	}
+
+
+	
 }
