@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Reserva;
+import br.com.gwenilorac.biblioteca.model.Usuario;
 
 public class ReservaDao {
     private EntityManager em;
@@ -32,24 +33,47 @@ public class ReservaDao {
 				.getResultList();
 	}
 	
-	public Reserva buscarSeLivroTemReserva(Livro livro) {
-	    try {
-	        String jpql = "SELECT r FROM Reserva r WHERE r.livro = :livro";
-	        List<Reserva> resultados = em.createQuery(jpql, Reserva.class)
-	                .setParameter("livro", livro)
-	                .getResultList();
-
-	        if (!resultados.isEmpty()) {
-	            return resultados.get(0);
-	        } else {
-	            System.out.println("Nenhuma Reserva encontrado para o livro: " + livro.getTitulo());
-	            return null;
-	        }
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return null;
-	    }
+	public boolean buscarSeLivroTemReserva(Livro livro) {
+		try {
+			String jpql = "SELECT r FROM Reserva r WHERE r.livro = :livro";
+			return em.createQuery(jpql, Reserva.class)
+					.setParameter("livro", livro)
+					.getResultList().get(0) != null;
+		} catch (Exception e) {
+			return false;
+		}
 	}
+	
+	public List<Reserva> buscarReservasUsuario(Usuario usuario){
+		String jpql = "SELECT r FROM Reserva r WHERE r.usuario = :usuario";
+		return em.createQuery(jpql, Reserva.class)
+				.getResultList();
+	}
+	
+//	public boolean livroEstaReservadoPorUsuario(Livro livro, Usuario usuario) {
+//		try {
+//			String jpql = "SELECT r.livro FROM Reserva r WHERE r.livro = :livro AND r.usuario = :usuario";
+//			return em.createQuery(jpql, Reserva.class)
+//					.setParameter("livro", livro)
+//					.setParameter("usuario", usuario)
+//					.getResultList().get(0) != null;
+//		} catch (Exception e) {
+//			return false;
+//		}
+//	}
+		
+		public boolean livroEstaReservadoPorUsuario(Usuario usuario, Livro livro) {
+		    try {
+		        String jpql = "SELECT COUNT(r) FROM Reserva r WHERE r.usuario = :usuario AND r.livro = :livro;";
+		        Long count = em.createQuery(jpql, Long.class)
+		                .setParameter("usuario", usuario)
+		                .setParameter("livro", livro)
+		                .getSingleResult();
 
+		        return count > 0;
+		    } catch (Exception e) {
+		        return false;
+		    }
+		}
 
 }

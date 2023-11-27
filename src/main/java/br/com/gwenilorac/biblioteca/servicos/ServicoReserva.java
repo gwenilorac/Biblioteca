@@ -2,57 +2,68 @@ package br.com.gwenilorac.biblioteca.servicos;
 
 import javax.persistence.EntityManager;
 import javax.swing.JOptionPane;
-
 import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.ReservaDao;
+import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Reserva;
+import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 public class ServicoReserva {
 
-	static EntityManager em = JPAUtil.getEntityManager();
-	static EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-	static ReservaDao reservaDao = new ReservaDao(JPAUtil.getEntityManager());
-	
 	public static void realizarReserva(Usuario usuarioSelecionado, Livro livroSelecionado) {
-	    try {
-	        boolean estaEmprestadoPorUser = emprestimoDao.buscarSeLivroEstaEmprestadoPorUser(usuarioSelecionado, livroSelecionado);
+		EntityManager em = JPAUtil.getEntityManager();
+		em.getTransaction().begin();
 
-	        if (!estaEmprestadoPorUser) {
-	            Reserva livroTemReserva = reservaDao.buscarSeLivroTemReserva(livroSelecionado);
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+		ReservaDao reservaDao = new ReservaDao(JPAUtil.getEntityManager());
 
-	            if (livroSelecionado != null && usuarioSelecionado != n ull) {
-	                if (livroTemReserva == null) {
-	                    if (!emprestimoDao.isLivroDisponivel(livroSelecionado)) {
-	                        em.getTransaction().begin();
+		try {
 
-	                        Reserva reserva = new Reserva(livroSelecionado, usuarioSelecionado);
+			if (livroSelecionado != null && usuarioSelecionado != null) {
 
-	                        reservaDao.cadastrar(reserva);
-	                        em.getTransaction().commit();
+				Emprestimo buscarSeLivroJaTemEmprestimo = emprestimoDao.buscarSeLivroJaTemEmprestimo(livroSelecionado);
 
-	                        JOptionPane.showMessageDialog(null, "Livro reservado com sucesso!");
-	                    } else {
-	                        JOptionPane.showMessageDialog(null, "O livro selecionado está disponível para empréstimo.");
-	                    }
-	                } else {
-	                    JOptionPane.showMessageDialog(null, "Livro já está reservado");
-	                }
-	            } else {
-	                JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO E USUÁRIO!");
-	            }
-	        }
-	    } catch (Exception e) {
-	        if (em.getTransaction().isActive()) {
-	            em.getTransaction().rollback();
-	        }
-	        JOptionPane.showMessageDialog(null, "Erro ao realizar a reserva: " + e.getMessage());
-	    } finally {
-	        if (em.getTransaction().isActive()) {
-	            em.getTransaction().rollback();
-	        }
-	    }
+				if (buscarSeLivroJaTemEmprestimo != null && buscarSeLivroJaTemEmprestimo.getStatus() == StatusEmprestimo.ABERTO) {
+					boolean estaEmprestadoPorUser = emprestimoDao.buscarSeLivroEstaEmprestadoPorUser(usuarioSelecionado,
+							livroSelecionado);
+
+					if (!estaEmprestadoPorUser) {
+						boolean livroTemReserva = reservaDao.buscarSeLivroTemReserva(livroSelecionado);
+
+						if (livroTemReserva == false) {
+
+							Reserva reserva = new Reserva(livroSelecionado, usuarioSelecionado);
+							
+							reservaDao.cadastrar(reserva);
+							em.getTransaction().commit();
+							em.close();
+
+							JOptionPane.showMessageDialog(null, "Livro reservado com sucesso!");
+						} else {
+							JOptionPane.showMessageDialog(null, "O livro selecionado já esta reservado.");
+						}
+					} else {
+						JOptionPane.showMessageDialog(null, "Livro está emprestado para você");
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Livro está disponivel para emprestimo!");
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO E USUARIO!");
+			}
+			
+		} catch (Exception e) {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+			JOptionPane.showMessageDialog(null, "Erro ao realizar a reserva: " + e.getMessage());
+		} finally {
+			if (em.getTransaction().isActive()) {
+				em.getTransaction().rollback();
+			}
+		}
 	}
 }

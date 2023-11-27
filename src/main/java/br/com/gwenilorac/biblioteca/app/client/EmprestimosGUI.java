@@ -201,7 +201,7 @@ public class EmprestimosGUI extends JFrame {
 				if (!e.getValueIsAdjusting()) {
 					int selectedRow = tableLivros.getSelectedRow();
 					if (selectedRow != -1) {
-						livroSelecionado = (Livro) livrosEncontrados.get(selectedRow);
+						livroSelecionado = livrosEncontrados.get(selectedRow);
 					}
 				}
 			}
@@ -252,7 +252,7 @@ public class EmprestimosGUI extends JFrame {
 					if (selectedRow != -1) {
 						emprestimoSelecionado = selectionEmprestimo.getElementAt(selectedRow);
 
-						if (emprestimoSelecionado.getTemMulta() == TemMulta.PENDENTE) {
+						if (ServicoEmprestimo.isMultaValid(emprestimoSelecionado)) {
 							exibirTelaMulta(emprestimoSelecionado);
 						}
 					}
@@ -271,7 +271,7 @@ public class EmprestimosGUI extends JFrame {
 	private void exibirTelaMulta(Emprestimo emprestimo) {
 
 		JDialog multaDialog = new JDialog(this, "Detalhes da Multa", true);
-		multaDialog.setSize(400, 250);
+		multaDialog.setSize(400, 255);
 		multaDialog.setLayout(new BorderLayout());
 
 		JButton btnPagarMulta = new JButton("Pagar Multa");

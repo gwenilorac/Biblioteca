@@ -26,11 +26,12 @@ public class ServicoEmprestimo {
 		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
 		List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
 		ReservaDao reservaDao = new ReservaDao(em);
-		Reserva livroTemReserva = reservaDao.buscarSeLivroTemReserva(livro);
+		boolean livroTemReserva = reservaDao.buscarSeLivroTemReserva(livro);
+		boolean livroEstaReservadoPorUsuario = reservaDao.livroEstaReservadoPorUsuario(usuario, livro);
 
 		em.getTransaction().begin();
 
-		if (livroTemReserva == null) {
+		if (livroTemReserva == false || livroEstaReservadoPorUsuario) {
 			if (livrosEmprestados.size() <= 2) {
 				if (emprestimoDoLivro == null) {
 					Emprestimo Novoemprestimo = new Emprestimo(livro, usuario);
@@ -45,6 +46,8 @@ public class ServicoEmprestimo {
 				} else {
 					if (emprestimoDoLivro.getStatus() == StatusEmprestimo.ENCERRADO) {
 						emprestimoDoLivro.pegarLivroEmprestado();
+						emprestimoDoLivro.setDataDevolucao(LocalDate.now().plusWeeks(4));
+						emprestimoDoLivro.setMultaPaga(false);
 						emprestimoDao.atualizar(emprestimoDoLivro);
 						JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
 					} else {
@@ -55,7 +58,7 @@ public class ServicoEmprestimo {
 				JOptionPane.showMessageDialog(null, "SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
 			}
 		} else {
-			JOptionPane.showMessageDialog(null, "LIVRO RESERVADO, POR FAVOR ESCOLHER OUTRO");
+			JOptionPane.showMessageDialog(null, "LIVRO RESERVADO POR " + usuario.getId() + usuario.getNome() , ", POR FAVOR ESCOLHER OUTRO", 0);
 		}
 		em.getTransaction().commit();
 	}
@@ -74,8 +77,6 @@ public class ServicoEmprestimo {
 					if (!isMultaValid(emprestimoDoLivro)) {
 
 						emprestimoDoLivro.devolverLivro();
-						emprestimoDoLivro.setMultaPaga(false);
-						emprestimoDoLivro.setValorMulta(0.0);
 
 						emprestimoDao.atualizar(emprestimoDoLivro);
 						em.getTransaction().commit();
@@ -99,22 +100,48 @@ public class ServicoEmprestimo {
 		}
 	}
 
-	private static boolean isMultaValid(Emprestimo emprestimo) {
-
+	public static void pagarMulta(Emprestimo emprestimo) {
 		EntityManager em = JPAUtil.getEntityManager();
 		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
 
 		em.getTransaction().begin();
 
+		emprestimo.setMultaPaga(true);
+		emprestimo.setTemMulta(TemMulta.INEXISTENTE);
+		emprestimo.setValorMulta(0);
+		emprestimo.setDiasAtrasados(0);
+
+		emprestimoDao.atualizar(emprestimo);
+		em.getTransaction().commit();
+		em.close();
+
+		System.out.println("Multa paga com sucesso. Valor: R$ " + emprestimo.getValorMulta());
+	}
+
+	public boolean devolucaoParaExclusaoConta(Usuario usuario) {
+		EntityManager em = JPAUtil.getEntityManager();
+		UsuarioDao usuarioDao = new UsuarioDao(em);
+		List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
+		for (Livro livro : livrosEmprestados) {
+			devolverLivro(livro);
+		}
+		System.out.println("Livros devolvidos com sucesso!");
+		return true;
+	}
+
+	public static boolean isMultaValid(Emprestimo emprestimo) {
+		EntityManager em = JPAUtil.getEntityManager();
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+		
+		em.getTransaction().begin();
+		
 		if (!emprestimo.isMultaPaga()) {
-			LocalDate dataAtual = LocalDate.now();
-			LocalDate dataDevolucaoLivro = emprestimo.getDataDevolucao();
-			if (dataAtual.isAfter(dataDevolucaoLivro)) {
-				long diasAtraso = dataDevolucaoLivro.until(dataAtual).getDays();
-				double valorMulta = diasAtraso * emprestimo.getValorMulta();
-				emprestimo.setDiasAtrasados(diasAtraso);
-				emprestimo.setValorMulta(valorMulta);
+			emprestimo.setDataAtual(LocalDate.now());
+			if (emprestimo.getDataAtual().isAfter(emprestimo.getDataDevolucaoLivro())) {
+				emprestimo.setDiasAtrasados(emprestimo.getDataDevolucao().until(emprestimo.getDataAtual()).getDays());
+				emprestimo.setValorMulta(emprestimo.getDiasAtrasados() * emprestimo.getValormultapordia());
 				emprestimo.setTemMulta(TemMulta.PENDENTE);
+				
 				emprestimoDao.atualizar(emprestimo);
 				em.getTransaction().commit();
 				em.close();
@@ -127,21 +154,5 @@ public class ServicoEmprestimo {
 			System.out.println("Multa já foi paga anteriormente.");
 			return false;
 		}
-	}
-
-	public static void pagarMulta(Emprestimo emprestimo) {
-		EntityManager em = JPAUtil.getEntityManager();
-		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-
-		em.getTransaction().begin();
-
-		emprestimo.setMultaPaga(true);
-		emprestimo.setTemMulta(TemMulta.INEXISTENTE);
-
-		emprestimoDao.atualizar(emprestimo);
-		em.getTransaction().commit();
-		em.close();
-
-		System.out.println("Multa paga com sucesso. Valor: R$ " + emprestimo.getValorMulta());
 	}
 }

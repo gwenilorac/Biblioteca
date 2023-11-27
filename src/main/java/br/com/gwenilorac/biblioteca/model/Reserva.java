@@ -30,9 +30,6 @@ public class Reserva {
 	@JoinColumn(name = "usuario_id", nullable = false)
 	private Usuario usuario;
 	
-	@OneToMany(mappedBy = "usuario")
-	private List<Reserva> reservas = new ArrayList<>();
-
 	private LocalDateTime dataReserva;
 	private boolean reservado;
 	
@@ -44,15 +41,6 @@ public class Reserva {
 		this.usuario = usuario;
 		this.dataReserva = LocalDateTime.now();
 		this.reservado = true;
-		adicionarReserva(this);
-	}
-
-	public void adicionarReserva(Reserva reserva) {
-		reservas.add(reserva);
-	}
-	
-	public void removerReserva(Reserva reserva) {
-		reservas.remove(reserva);
 	}
 
 	public Livro getLivro() {

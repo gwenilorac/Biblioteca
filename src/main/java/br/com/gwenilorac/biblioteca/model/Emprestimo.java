@@ -17,8 +17,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.ibm.icu.impl.duration.Period;
 import com.ibm.icu.math.BigDecimal;
 
+import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
@@ -47,11 +49,10 @@ public class Emprestimo {
 	@Column(nullable = false)
 	private LocalDate dataDevolucaoLivro;
 
-    @Column(name = "data_atual")
 	private LocalDate dataAtual;
     
-    @Column(name = "dias_atrasados", nullable = true)
-    private Long diasAtrasados = 0L;
+    @Column(name = "dias_atrasados")
+    private Long diasAtrasados;
 	
 	@Column(nullable = false)
 	private double valorMulta;
@@ -85,22 +86,11 @@ public class Emprestimo {
 	}
 
 	public void devolverLivro() {
-	    setStatus(StatusEmprestimo.ENCERRADO);
-	    System.out.println("Livro devolvido com sucesso!");
-	    System.out.println("Data devolução: " + LocalDate.now());
-	    temMulta = TemMulta.INEXISTENTE;
-	}
+			setStatus(StatusEmprestimo.ENCERRADO);
+			System.out.println("Livro devolvido com sucesso!");
+			System.out.println("Data devolução: " + LocalDate.now());
+		} 
 
-	public boolean devolucaoParaExclusaoConta() {
-			EntityManager em = JPAUtil.getEntityManager();
-			UsuarioDao usuarioDao = new UsuarioDao(em);
-			List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
-			for (int i = 0; i < livrosEmprestados.size(); i++) {
-				devolverLivro();
-			}
-			System.out.println("Livros devolvidos com sucesso!");
-			return true;
-	}
 	
 	public Livro getLivro() {
 		return livro;
@@ -181,25 +171,23 @@ public class Emprestimo {
 	}
 
 	public double getValorMulta() {
-	    return diasAtrasados * valorMultaPorDia; 
+	    return valorMulta; 
 	}
-
 
 	public void setValorMulta(double valorMulta) {
 		this.valorMulta = valorMulta;
 	}
 	
 	public long getDiasAtrasados() {
-	    if (diasAtrasados == null) {
-	        return 0L; 
-	    }
-	    return diasAtrasados;
+		return diasAtrasados;
 	}
-
 
 	public void setDiasAtrasados(long diasAtrasados) {
 		this.diasAtrasados = diasAtrasados;
 	}
-	
+
+	public double getValormultapordia() {
+		return valorMultaPorDia;
+	}
 	
 }

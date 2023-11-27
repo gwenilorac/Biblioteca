@@ -69,7 +69,7 @@ public class EmprestimoDao {
 	             .getResultList();
 	}
 	
-	public boolean StatusEmprestimoEstaAberto(Emprestimo emprestimo) {
+	public boolean EmprestimoEstaAberto(Emprestimo emprestimo) {
 		try {
 		  String jpql = "SELECT e FROM Emprestimo e WHERE e.status = :status";
 		    return em.createQuery(jpql, Emprestimo.class)

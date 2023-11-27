@@ -66,7 +66,7 @@ public class ServicoLivro {
 		Emprestimo emprestimo = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
 
 		if (emprestimo != null) {
-			boolean estaAberto = emprestimoDao.StatusEmprestimoEstaAberto(emprestimo);
+			boolean estaAberto = emprestimoDao.EmprestimoEstaAberto(emprestimo);
 			if (estaAberto == false) {
 				emprestimoDao.remover(emprestimo);
 				livroDao.remover(livro);
