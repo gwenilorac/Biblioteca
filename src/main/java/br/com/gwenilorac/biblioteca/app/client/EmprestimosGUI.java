@@ -113,6 +113,9 @@ public class EmprestimosGUI extends JFrame {
 					realizarBuscaUsuario();
 				} else if (btnLivro.isSelected()) {
 					realizarBuscaLivro();
+				} else {
+					realizarBuscaUsuario();
+					realizarBuscaLivro();
 				}
 			}
 		});
@@ -202,6 +205,7 @@ public class EmprestimosGUI extends JFrame {
 					int selectedRow = tableLivros.getSelectedRow();
 					if (selectedRow != -1) {
 						livroSelecionado = livrosEncontrados.get(selectedRow);
+						em.merge(livroSelecionado);
 					}
 				}
 			}
@@ -331,7 +335,7 @@ public class EmprestimosGUI extends JFrame {
 		btnDevolverLivro.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ServicoEmprestimo.devolverLivro(livroSelecionado);
+				ServicoEmprestimo.devolverLivro(livroSelecionado, usuarioSelecionado);
 			}
 		});
 

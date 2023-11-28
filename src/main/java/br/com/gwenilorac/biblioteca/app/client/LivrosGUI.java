@@ -202,7 +202,7 @@ public class LivrosGUI extends JFrame {
 		panel.add(generosCb);
 
 		dialog = new JDialog();
-		dialog.setSize(new Dimension(100, 100));
+		dialog.setSize(new Dimension(250, 100));
 		dialog.setLocationRelativeTo(null);
 		dialog.add(panel);
 		dialog.setVisible(true);
@@ -227,7 +227,7 @@ public class LivrosGUI extends JFrame {
 		panel.add(autorCb);
 
 		dialog = new JDialog();
-		dialog.setSize(new Dimension(200, 100));
+		dialog.setSize(new Dimension(250, 100));
 		dialog.setLocationRelativeTo(null);
 		dialog.add(panel);
 		dialog.setVisible(true);

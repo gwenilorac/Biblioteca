@@ -44,36 +44,22 @@ public class ReservaDao {
 		}
 	}
 	
-	public List<Reserva> buscarReservasUsuario(Usuario usuario){
+	public Reserva buscarReservaUsuario(Usuario usuario){
 		String jpql = "SELECT r FROM Reserva r WHERE r.usuario = :usuario";
 		return em.createQuery(jpql, Reserva.class)
-				.getResultList();
+				.getSingleResult();
 	}
 	
-//	public boolean livroEstaReservadoPorUsuario(Livro livro, Usuario usuario) {
-//		try {
-//			String jpql = "SELECT r.livro FROM Reserva r WHERE r.livro = :livro AND r.usuario = :usuario";
-//			return em.createQuery(jpql, Reserva.class)
-//					.setParameter("livro", livro)
-//					.setParameter("usuario", usuario)
-//					.getResultList().get(0) != null;
-//		} catch (Exception e) {
-//			return false;
-//		}
-//	}
-		
-		public boolean livroEstaReservadoPorUsuario(Usuario usuario, Livro livro) {
-		    try {
-		        String jpql = "SELECT COUNT(r) FROM Reserva r WHERE r.usuario = :usuario AND r.livro = :livro;";
-		        Long count = em.createQuery(jpql, Long.class)
-		                .setParameter("usuario", usuario)
-		                .setParameter("livro", livro)
-		                .getSingleResult();
-
-		        return count > 0;
-		    } catch (Exception e) {
-		        return false;
-		    }
+	public Reserva livroEstaReservadoPorUsuario(Livro livro, Usuario usuario) {
+		try {
+			String jpql = "SELECT r FROM Reserva r WHERE r.livro = :livro AND r.usuario = :usuario";
+			return em.createQuery(jpql, Reserva.class)
+					.setParameter("livro", livro)
+					.setParameter("usuario", usuario)
+					.getSingleResult();
+		} catch (Exception e) {
+			return null;
 		}
+	}
 
 }

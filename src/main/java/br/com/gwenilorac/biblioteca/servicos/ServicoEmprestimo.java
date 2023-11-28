@@ -18,74 +18,83 @@ import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 public class ServicoEmprestimo {
-
+	
 	public static void pegarLivroEmprestado(Livro livro, Usuario usuario) {
 		EntityManager em = JPAUtil.getEntityManager();
-		UsuarioDao usuarioDao = new UsuarioDao(em);
-		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
-		List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
-		ReservaDao reservaDao = new ReservaDao(em);
-		boolean livroTemReserva = reservaDao.buscarSeLivroTemReserva(livro);
-		boolean livroEstaReservadoPorUsuario = reservaDao.livroEstaReservadoPorUsuario(usuario, livro);
-
 		em.getTransaction().begin();
+		
+		ReservaDao reservaDao = new ReservaDao(em);
+		Reserva livroEstaReservadoPorUsuario = reservaDao.livroEstaReservadoPorUsuario(livro, usuario);
+		boolean livroTemReserva = reservaDao.buscarSeLivroTemReserva(livro);
 
-		if (livroTemReserva == false || livroEstaReservadoPorUsuario) {
-			if (livrosEmprestados.size() <= 2) {
-				if (emprestimoDoLivro == null) {
-					Emprestimo Novoemprestimo = new Emprestimo(livro, usuario);
-					emprestimoDao.cadastrar(Novoemprestimo);
-					if (Novoemprestimo.getStatus() == StatusEmprestimo.ENCERRADO) {
-						Novoemprestimo.pegarLivroEmprestado();
-						emprestimoDao.atualizar(Novoemprestimo);
-						JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
-					} else {
-						JOptionPane.showMessageDialog(null, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.");
-					}
-				} else {
-					if (emprestimoDoLivro.getStatus() == StatusEmprestimo.ENCERRADO) {
-						emprestimoDoLivro.pegarLivroEmprestado();
-						emprestimoDoLivro.setDataDevolucao(LocalDate.now().plusWeeks(4));
-						emprestimoDoLivro.setMultaPaga(false);
-						emprestimoDao.atualizar(emprestimoDoLivro);
-						JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
-					} else {
-						JOptionPane.showMessageDialog(null, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.");
-					}
-				}
-			} else {
-				JOptionPane.showMessageDialog(null, "SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
-			}
+		if (livroTemReserva == false) {
+			EmprestarLivro(livro, usuario);
+		} else if (livroEstaReservadoPorUsuario != null) {
+			reservaDao.remover(livroEstaReservadoPorUsuario);
+			EmprestarLivro(livro, usuario);
 		} else {
-			JOptionPane.showMessageDialog(null, "LIVRO RESERVADO POR " + usuario.getId() + usuario.getNome() , ", POR FAVOR ESCOLHER OUTRO", 0);
+			JOptionPane.showMessageDialog(null, "LIVRO RESERVADO");
 		}
 		em.getTransaction().commit();
 	}
 
-	public static void devolverLivro(Livro livro) {
+	public static void EmprestarLivro(Livro livro, Usuario usuario) {
+		EntityManager em = JPAUtil.getEntityManager();
+		UsuarioDao usuarioDao = new UsuarioDao(em);
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimoRelacionadoAUsuario(livro, usuario);
+		List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
+		boolean esteUsuarioEstaComOEmprestimoDesteLivroEncerrado = emprestimoDao
+				.esteUsuarioEstaComOEmprestimoDesteLivroEncerrado(livro, usuario);
+		boolean isLivroEmprestado = emprestimoDao.isLivroEmprestado(livro);
+
+		em.getTransaction().begin();
+
+		if (isLivroEmprestado == false) {
+			if (livrosEmprestados.size() <= 2) {
+				if (emprestimoDoLivro == null) {
+					Emprestimo Novoemprestimo = new Emprestimo(livro, usuario);
+					emprestimoDao.cadastrar(Novoemprestimo);
+					Novoemprestimo.pegarLivroEmprestado();
+					emprestimoDao.atualizar(Novoemprestimo);
+					JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
+
+				} else if (esteUsuarioEstaComOEmprestimoDesteLivroEncerrado) {
+					emprestimoDoLivro.pegarLivroEmprestado();
+					emprestimoDoLivro.setDataDevolucao(LocalDate.now().plusWeeks(4));
+					emprestimoDoLivro.setMultaPaga(false);
+					emprestimoDao.atualizar(emprestimoDoLivro);
+					JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
+				} else {
+					JOptionPane.showMessageDialog(null, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.");
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "SEU LIMITE DE EMPRESTIMOS FOI ATINGIDO");
+			} 
+		} else {
+			JOptionPane.showMessageDialog(null, "O LIVRO NÃO ESTÁ DISPONÍVEL PARA EMPRÉSTIMO.");
+		}
+		em.getTransaction().commit();
+	}
+
+	public static void devolverLivro(Livro livro, Usuario usuario) {
 		EntityManager em = JPAUtil.getEntityManager();
 		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+		Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroEstaEmprestadoPorUser(usuario, livro);
 
 		try {
 			em.getTransaction().begin();
 
-			if (!emprestimoDao.isLivroDisponivel(livro)) {
-				Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
+			if (emprestimoDoLivro != null) {
 
-				if (emprestimoDoLivro != null) {
-					if (!isMultaValid(emprestimoDoLivro)) {
+				if (!isMultaValid(emprestimoDoLivro)) {
+					emprestimoDoLivro.devolverLivro();
+					emprestimoDao.atualizar(emprestimoDoLivro);
+					em.getTransaction().commit();
+					JOptionPane.showMessageDialog(null, "LIVRO DEVOLVIDO COM SUCESSO!");
 
-						emprestimoDoLivro.devolverLivro();
-
-						emprestimoDao.atualizar(emprestimoDoLivro);
-						em.getTransaction().commit();
-						JOptionPane.showMessageDialog(null, "LIVRO DEVOLVIDO COM SUCESSO!");
-					} else {
-						JOptionPane.showMessageDialog(null, "LIVRO TEM MULTA PENDENTE!");
-					}
 				} else {
-					JOptionPane.showMessageDialog(null, "NÃO EXISTE EMPRÉSTIMO COM ESSE LIVRO!");
+					JOptionPane.showMessageDialog(null, "LIVRO TEM MULTA PENDENTE!");
 				}
 			} else {
 				JOptionPane.showMessageDialog(null, "LIVRO NÃO ESTÁ EMPRESTADO OU JÁ FOI DEVOLVIDO!");
@@ -123,7 +132,7 @@ public class ServicoEmprestimo {
 		UsuarioDao usuarioDao = new UsuarioDao(em);
 		List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
 		for (Livro livro : livrosEmprestados) {
-			devolverLivro(livro);
+			devolverLivro(livro, usuario);
 		}
 		System.out.println("Livros devolvidos com sucesso!");
 		return true;
@@ -132,16 +141,16 @@ public class ServicoEmprestimo {
 	public static boolean isMultaValid(Emprestimo emprestimo) {
 		EntityManager em = JPAUtil.getEntityManager();
 		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-		
+
 		em.getTransaction().begin();
-		
+
 		if (!emprestimo.isMultaPaga()) {
 			emprestimo.setDataAtual(LocalDate.now());
 			if (emprestimo.getDataAtual().isAfter(emprestimo.getDataDevolucaoLivro())) {
 				emprestimo.setDiasAtrasados(emprestimo.getDataDevolucao().until(emprestimo.getDataAtual()).getDays());
 				emprestimo.setValorMulta(emprestimo.getDiasAtrasados() * emprestimo.getValormultapordia());
 				emprestimo.setTemMulta(TemMulta.PENDENTE);
-				
+
 				emprestimoDao.atualizar(emprestimo);
 				em.getTransaction().commit();
 				em.close();

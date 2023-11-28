@@ -30,12 +30,12 @@ public class EmprestimoDao {
 		this.em.remove(emprestimo);
 	}
 
-	public boolean isLivroDisponivel(Livro livro) {
+	public boolean isLivroEmprestado(Livro livro) {
 		try {
 			String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro AND e.status = :status";
 			return em.createQuery(jpql, Emprestimo.class)
 					.setParameter("livro", livro)
-					.setParameter("status", StatusEmprestimo.ENCERRADO)
+					.setParameter("status", StatusEmprestimo.ABERTO)
 					.getResultList().get(0) != null;
 		} catch (Exception e) {
 			return false;
@@ -80,17 +80,50 @@ public class EmprestimoDao {
 		}
 	}
 	
-	public boolean buscarSeLivroEstaEmprestadoPorUser(Usuario usuario, Livro livro) {
+	public Emprestimo buscarSeLivroEstaEmprestadoPorUser(Usuario usuario, Livro livro) {
 	    try {
-	        String jpql = "SELECT COUNT(e) FROM Emprestimo e WHERE e.usuario = :usuario AND e.livro = :livro AND e.status = 'ABERTO'";
-	        Long count = em.createQuery(jpql, Long.class)
+	        String jpql = "SELECT e FROM Emprestimo e WHERE e.usuario = :usuario AND e.livro = :livro AND e.status = :status";
+	        return em.createQuery(jpql, Emprestimo.class)
 	                .setParameter("usuario", usuario)
 	                .setParameter("livro", livro)
+	                .setParameter("status", StatusEmprestimo.ABERTO)
 	                .getSingleResult();
-
-	        return count > 0;
 	    } catch (Exception e) {
-	        return false;
+	        return null;
+	    }
+	}
+	
+	
+	public boolean esteUsuarioEstaComOEmprestimoDesteLivroEncerrado(Livro livro, Usuario usuario) {
+		try {
+			String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro AND e.usuario = :usuario AND e.status = :status";
+			return em.createQuery(jpql, Emprestimo.class)
+					.setParameter("livro", livro)
+					.setParameter("usuario", usuario)
+					.setParameter("status", StatusEmprestimo.ENCERRADO)
+					.getResultList().get(0) != null;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
+	public Emprestimo buscarSeLivroJaTemEmprestimoRelacionadoAUsuario(Livro livro, Usuario usuario) {
+	    try {
+	        String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro AND e.usuario = :usuario";
+	        List<Emprestimo> resultados = em.createQuery(jpql, Emprestimo.class)
+	                .setParameter("livro", livro)
+	                .setParameter("usuario", usuario)
+	                .getResultList();
+
+	        if (!resultados.isEmpty()) {
+	            return resultados.get(0);
+	        } else {
+	            System.out.println("Nenhum empréstimo encontrado para o livro: " + livro.getTitulo());
+	            return null;
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return null;
 	    }
 	}
 

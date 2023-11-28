@@ -18,19 +18,15 @@ public class ServicoReserva {
 		em.getTransaction().begin();
 
 		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-		ReservaDao reservaDao = new ReservaDao(JPAUtil.getEntityManager());
-
+		ReservaDao reservaDao = new ReservaDao(em);
+		
 		try {
 
 			if (livroSelecionado != null && usuarioSelecionado != null) {
 
-				Emprestimo buscarSeLivroJaTemEmprestimo = emprestimoDao.buscarSeLivroJaTemEmprestimo(livroSelecionado);
+					boolean isLivroEmprestado = emprestimoDao.isLivroEmprestado(livroSelecionado);
 
-				if (buscarSeLivroJaTemEmprestimo != null && buscarSeLivroJaTemEmprestimo.getStatus() == StatusEmprestimo.ABERTO) {
-					boolean estaEmprestadoPorUser = emprestimoDao.buscarSeLivroEstaEmprestadoPorUser(usuarioSelecionado,
-							livroSelecionado);
-
-					if (!estaEmprestadoPorUser) {
+					if (isLivroEmprestado) {
 						boolean livroTemReserva = reservaDao.buscarSeLivroTemReserva(livroSelecionado);
 
 						if (livroTemReserva == false) {
@@ -39,18 +35,14 @@ public class ServicoReserva {
 							
 							reservaDao.cadastrar(reserva);
 							em.getTransaction().commit();
-							em.close();
 
 							JOptionPane.showMessageDialog(null, "Livro reservado com sucesso!");
 						} else {
 							JOptionPane.showMessageDialog(null, "O livro selecionado já esta reservado.");
 						}
 					} else {
-						JOptionPane.showMessageDialog(null, "Livro está emprestado para você");
+						JOptionPane.showMessageDialog(null, "Livro está disponivel para emprestimo");
 					}
-				} else {
-					JOptionPane.showMessageDialog(null, "Livro está disponivel para emprestimo!");
-				}
 			} else {
 				JOptionPane.showMessageDialog(null, "SELECIONE UM LIVRO E USUARIO!");
 			}
@@ -60,10 +52,6 @@ public class ServicoReserva {
 				em.getTransaction().rollback();
 			}
 			JOptionPane.showMessageDialog(null, "Erro ao realizar a reserva: " + e.getMessage());
-		} finally {
-			if (em.getTransaction().isActive()) {
-				em.getTransaction().rollback();
-			}
-		}
+		} 
 	}
 }
