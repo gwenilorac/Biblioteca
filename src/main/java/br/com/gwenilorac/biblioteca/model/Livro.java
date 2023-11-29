@@ -17,7 +17,6 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Type;
 
-
 @Entity
 @Table(name = "livros")
 public class Livro implements Serializable{
@@ -117,6 +116,5 @@ public class Livro implements Serializable{
 	                "Genero = " + genero + '\'' +
 	                '}';
 	    }
-
-
+	  
 }

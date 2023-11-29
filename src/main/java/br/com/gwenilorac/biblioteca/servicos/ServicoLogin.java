@@ -13,24 +13,31 @@ public class ServicoLogin {
 		EntityManager em = JPAUtil.getEntityManager();
 		UsuarioDao usuarioDao = new UsuarioDao(em);
 
-		String nome = usuario.getNome();
-		String senha = usuario.getSenha();
-		
-		em.getTransaction().begin();
+		try {
+			em.getTransaction().begin();
 
-		Usuario credenciais = usuarioDao.buscarCredenciais(nome, senha);
+			String nome = usuario.getNome();
+			String senha = usuario.getSenha();
+			
+			Usuario credenciais = usuarioDao.buscarCredenciais(nome, senha);
 
-		if (credenciais != null) {
-			Usuario usuarioAtualizado = credenciais;
-			usuario = usuarioAtualizado;
-			usuarioLogado = usuario;
-			em.getTransaction().commit();
-			System.out.println("Usuario valido!");
-			return true;
-		} else {
-			System.out.println("Usuario invalido!");
+			if (credenciais != null) {
+				usuarioLogado = credenciais;
+				em.getTransaction().commit();
+				System.out.println("Usuário válido!");
+				return true;
+			} else {
+				System.out.println("Usuário inválido!");
+				return false;
+			}
+		} catch (Exception e) {
+			System.out.println("Erro durante a validação do usuário: " + e.getMessage());
 			em.getTransaction().rollback();
 			return false;
+		} finally {
+			if (em != null && em.isOpen()) {
+				em.close();
+			}
 		}
 	}
 
@@ -45,5 +52,4 @@ public class ServicoLogin {
 	public static Usuario getUsuarioLogado() {
 		return usuarioLogado;
 	}
-
 }

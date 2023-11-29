@@ -95,14 +95,18 @@ public class DetalhesLivroInternalFrame extends JPanel {
 
 		return capaPanel;
 	}
-
+	
 	private JPanel criarInfoPanel() {
-		infoPanel = new JPanel();
-		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.PAGE_AXIS));
-		infoPanel.add(new JLabel("Nome: " + livro.getTitulo()));
-		infoPanel.add(new JLabel("Autor: " + livro.getAutor().getNome()));
-		infoPanel.add(new JLabel("Gênero: " + livro.getGenero().getNome()));
+	    infoPanel = new JPanel();
+	    infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.PAGE_AXIS));
 
-		return infoPanel;
+	    infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+	    infoPanel.add(new JLabel("Nome: " + livro.getTitulo()));
+	    infoPanel.add(new JLabel("Autor: " + livro.getAutor().getNome()));
+	    infoPanel.add(new JLabel("Gênero: " + livro.getGenero().getNome()));
+
+	    return infoPanel;
 	}
+
 }

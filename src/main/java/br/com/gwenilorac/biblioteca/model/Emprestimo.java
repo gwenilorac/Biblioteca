@@ -28,68 +28,63 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 @Table(name = "emprestimos")
 public class Emprestimo {
 
-
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	private Livro livro;
+    @OneToOne(fetch = FetchType.LAZY)
+    private Livro livro;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Usuario usuario;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Usuario usuario;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private StatusEmprestimo status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatusEmprestimo status;
 
-	@Column(nullable = false)
-	protected LocalDate dataEmprestimo;
+    @Column(nullable = false)
+    protected LocalDate dataEmprestimo = LocalDate.now();
 
-	@Column(nullable = false)
-	private LocalDate dataDevolucaoLivro;
+    @Column(nullable = false)
+    private LocalDate dataDevolucaoLivro = LocalDate.now().plusWeeks(4);
 
-	private LocalDate dataAtual;
-    
     @Column(name = "dias_atrasados")
     private Long diasAtrasados;
-	
-	@Column(nullable = false)
-	private double valorMulta;
 
-	@Column(nullable = false)
-	private boolean multaPaga;
+    @Column(nullable = false)
+    private double valorMulta;
 
-	@Column(nullable = false)
-	private TemMulta temMulta;
+    @Column(nullable = false)
+    private boolean multaPaga;
 
-	private static final double valorMultaPorDia = 5.0;
+    @Column(nullable = false)
+    private boolean temMulta;
 
-	@Deprecated
-	public Emprestimo() {
-	}
+    private static final double VALOR_MULTA_POR_DIA = 5.0;
 
-	public Emprestimo(Livro livro, Usuario usuario) {
-		this.livro = livro;
-		this.usuario = usuario;
-		this.dataEmprestimo = LocalDate.now();
-		this.dataDevolucaoLivro = LocalDate.now().plusWeeks(4);
-		this.status = StatusEmprestimo.ENCERRADO;
-		this.multaPaga = false;
-		this.temMulta = TemMulta.INEXISTENTE;
-	}
+    @Deprecated
+    public Emprestimo() {
+    }
 
-	public void pegarLivroEmprestado() {
-			setStatus(StatusEmprestimo.ABERTO);
-			System.out.println("Livro emprestado com sucesso!");
-			System.out.println("Data da Devolução do Livro: " + dataDevolucaoLivro);
-	}
+    public Emprestimo(Livro livro, Usuario usuario) {
+        this.livro = livro;
+        this.usuario = usuario;
+        this.status = StatusEmprestimo.ENCERRADO;
+        this.multaPaga = false;
+        this.temMulta = false;
+    }
 
-	public void devolverLivro() {
-			setStatus(StatusEmprestimo.ENCERRADO);
-			System.out.println("Livro devolvido com sucesso!");
-			System.out.println("Data devolução: " + LocalDate.now());
-		} 
+    public void pegarLivroEmprestado() {
+        setStatus(StatusEmprestimo.ABERTO);
+        System.out.println("Livro emprestado com sucesso!");
+        System.out.println("Data da Devolução do Livro: " + dataDevolucaoLivro);
+    }
+
+    public void devolverLivro() {
+        setStatus(StatusEmprestimo.ENCERRADO);
+        System.out.println("Livro devolvido com sucesso!");
+        System.out.println("Data devolução: " + LocalDate.now());
+    }
 
 	
 	public Livro getLivro() {
@@ -136,11 +131,11 @@ public class Emprestimo {
 		return multaPaga;
 	}
 
-	public TemMulta getTemMulta() {
+	public boolean getTemMulta() {
 		return temMulta;
 	}
 
-	public void setTemMulta(TemMulta temMulta) {
+	public void setTemMulta(boolean temMulta) {
 		this.temMulta = temMulta;
 	}
 	
@@ -150,14 +145,6 @@ public class Emprestimo {
 
 	public void setDataDevolucaoLivro(LocalDate dataDevolucaoLivro) {
 		this.dataDevolucaoLivro = dataDevolucaoLivro;
-	}
-
-	public LocalDate getDataAtual() {
-		return dataAtual;
-	}
-
-	public void setDataAtual(LocalDate dataAtual) {
-		this.dataAtual = dataAtual;
 	}
 
 	public void setMultaPaga(boolean multaPaga) {
@@ -187,7 +174,7 @@ public class Emprestimo {
 	}
 
 	public double getValormultapordia() {
-		return valorMultaPorDia;
+		return VALOR_MULTA_POR_DIA;
 	}
 	
 }

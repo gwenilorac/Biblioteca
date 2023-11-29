@@ -18,26 +18,30 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "reserva")
 public class Reserva {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "livro_id", nullable = false)
-    private Livro livro;
+	@JoinColumn(name = "livro_id", nullable = false)
+	private Livro livro;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "usuario_id", nullable = false)
 	private Usuario usuario;
-	
+
 	private LocalDateTime dataReserva;
 	private boolean reservado;
-	
-	@Deprecated
-	public Reserva() {}
+
+	public Reserva() {
+	}
 
 	public Reserva(Livro livro, Usuario usuario) {
+		if (livro == null || usuario == null) {
+			throw new IllegalArgumentException("Livro e Usuário não podem ser nulos.");
+		}
+
 		this.livro = livro;
 		this.usuario = usuario;
 		this.dataReserva = LocalDateTime.now();
@@ -74,6 +78,21 @@ public class Reserva {
 
 	public void setReservado(boolean reservado) {
 		this.reservado = reservado;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Reserva reserva = (Reserva) o;
+		return id != null && id.equals(reserva.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
 	}
 
 }

@@ -262,6 +262,7 @@ public class UsersGUI extends JFrame {
 							JOptionPane.showMessageDialog(null, "FOTO EDITADA COM SUCESSO!");
 						} catch (IOException e1) {
 							e1.printStackTrace();
+						    JOptionPane.showMessageDialog(null, "Erro ao editar a foto.", "Erro", JOptionPane.ERROR_MESSAGE);
 						}
 					}
 				} else {

@@ -69,27 +69,30 @@ public class AdicionarLivroFrm extends JPanel {
 	private void adicionarLivro() {
 	    String titulo = titleField.getText();
 	    String autor = authorField.getText();
-	    String genero = generosCb.getSelectedItem().toString();
+	    Genero genero = (Genero) generosCb.getSelectedItem();
 
-	    if (titulo != null && autor != null && genero != null && selectedCoverFile != null) {
-	        try {
-	            byte[] capa = Files.readAllBytes(selectedCoverFile.toPath());
+	    if (titulo.isEmpty() || autor.isEmpty() || genero == null || selectedCoverFile == null) {
+	        JOptionPane.showMessageDialog(this, "Preencha todos os campos e selecione uma capa.");
+	        return;
+	    }
 
-	            System.out.println("Caminho do arquivo selecionado: " + selectedCoverFile.getAbsolutePath());
+	    try {
+	        byte[] capa = Files.readAllBytes(selectedCoverFile.toPath());
 
-	            ServicoLivro.adicionarLivro(titulo, autor, genero, capa);
+	        System.out.println("Caminho do arquivo selecionado: " + selectedCoverFile.getAbsolutePath());
 
-	            limparCampos();
+	        ServicoLivro.adicionarLivro(titulo, autor, genero.getNome(), capa);
 
-	        } catch (IOException e) {
-	            System.out.println("Erro ao ler o arquivo: " + e.getMessage());
-	            JOptionPane.showMessageDialog(this, "ERRO AO LER O ARQUIVO");
-	        } catch (NullPointerException e) {
-	            System.out.println("Faltando um campo. O livro não será adicionado.");
-	            JOptionPane.showMessageDialog(this, "FALTANDO ALGUMA INFORMAÇÃO!");
-	        }
+	        JOptionPane.showMessageDialog(this, "Livro adicionado com sucesso!");
+
+	        limparCampos();
+
+	    } catch (IOException e) {
+	        System.out.println("Erro ao ler o arquivo: " + e.getMessage());
+	        JOptionPane.showMessageDialog(this, "Erro ao ler o arquivo.");
 	    }
 	}
+
 
 	private void limparCampos() {
 		titleField.setText("");

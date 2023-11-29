@@ -13,32 +13,32 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 public class ServicoUsuario {
 
-	public static boolean removerUsuario(Usuario usuario) {
-	    EntityManager em = JPAUtil.getEntityManager();
-	    EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-	    UsuarioDao usuarioDao = new UsuarioDao(em);
-	    List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
-	    List<Emprestimo> emprestimosUser = emprestimoDao.buscarEmprestimosUser(usuario.getId());
+    public static boolean removerUsuario(Usuario usuario) {
+        EntityManager em = JPAUtil.getEntityManager();
+        EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+        UsuarioDao usuarioDao = new UsuarioDao(em);
+        List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
+        List<Emprestimo> emprestimosUser = emprestimoDao.buscarEmprestimosUser(usuario.getId());
 
-	    if (emprestimosUser.isEmpty() || livrosEmprestados.isEmpty()) {  
-	        try {
-	        	usuario = em.merge(usuario); 
-	            em.getTransaction().begin();
-	            usuarioDao.remover(usuario);
-	            em.getTransaction().commit();
-	            return true;
-	        } catch (Exception e) {
-	            if (em.getTransaction().isActive()) {
-	                em.getTransaction().rollback();
-	            }
-	            e.printStackTrace();
-	            return false;
-	        } finally {
-	            em.close();
-	        }
-	    } else {
-	        return false;
-	    }
-	}
-
+        if (emprestimosUser.isEmpty() && livrosEmprestados.isEmpty()) {
+            try {
+                em.getTransaction().begin();
+                usuarioDao.remover(usuario);
+                em.getTransaction().commit();
+                return true;
+            } catch (Exception e) {
+                if (em.getTransaction().isActive()) {
+                    em.getTransaction().rollback();
+                }
+                e.printStackTrace();
+                return false;
+            } finally {
+                if (em != null && em.isOpen()) {
+                    em.close();
+                }
+            }
+        } else {
+            return false;
+        }
+    }
 }

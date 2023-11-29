@@ -3,7 +3,7 @@ package br.com.gwenilorac.biblioteca.dao;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
@@ -31,16 +31,18 @@ public class EmprestimoDao {
 	}
 
 	public boolean isLivroEmprestado(Livro livro) {
-		try {
-			String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro AND e.status = :status";
-			return em.createQuery(jpql, Emprestimo.class)
-					.setParameter("livro", livro)
-					.setParameter("status", StatusEmprestimo.ABERTO)
-					.getResultList().get(0) != null;
-		} catch (Exception e) {
-			return false;
-		}
+	    try {
+	        String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro AND e.status = :status";
+	        return !em.createQuery(jpql, Emprestimo.class)
+	                  .setParameter("livro", livro)
+	                  .setParameter("status", StatusEmprestimo.ABERTO)
+	                  .getResultList()
+	                  .isEmpty();
+	    } catch (Exception e) {
+	        return false;
+	    }
 	}
+
 
 	public Emprestimo buscarSeLivroJaTemEmprestimo(Livro livro) {
 	    try {
@@ -110,10 +112,11 @@ public class EmprestimoDao {
 	public Emprestimo buscarSeLivroJaTemEmprestimoRelacionadoAUsuario(Livro livro, Usuario usuario) {
 	    try {
 	        String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro AND e.usuario = :usuario";
-	        List<Emprestimo> resultados = em.createQuery(jpql, Emprestimo.class)
-	                .setParameter("livro", livro)
-	                .setParameter("usuario", usuario)
-	                .getResultList();
+	        TypedQuery<Emprestimo> query = em.createQuery(jpql, Emprestimo.class);
+	        query.setParameter("livro", livro);
+	        query.setParameter("usuario", usuario);
+
+	        List<Emprestimo> resultados = query.getResultList();
 
 	        if (!resultados.isEmpty()) {
 	            return resultados.get(0);
@@ -127,6 +130,4 @@ public class EmprestimoDao {
 	    }
 	}
 
-
-	
 }

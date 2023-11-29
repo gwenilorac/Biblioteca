@@ -19,109 +19,106 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Type;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "usuarios")
-public class Usuario implements Serializable{
+public class Usuario implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String nome;
-	
-	@Column(nullable = false, unique = true) 
+
+    @Column(nullable = false, unique = true)
     private String email;
-	
-	@Column(nullable = false)
+
+    @Column(nullable = false)
     private String senha;
-	
-	@Type(type="org.hibernate.type.BinaryType")
-	@Column(name = "foto")
-	private byte[] foto;
 
-	@Transient
-	private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-	
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		changeSupport.addPropertyChangeListener(l);
-	}
+    @Type(type = "org.hibernate.type.BinaryType")
+    @Column(name = "foto")
+    private byte[] foto;
 
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		changeSupport.removePropertyChangeListener(l);
-	}
- 
-	public Usuario() {
-	}
+    @Transient
+    private PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
-	public Usuario(String nome, String email, String senha, byte[] foto) {
-		this.nome = nome;
-		this.email = email;
-		this.senha = senha;
-	}
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        changeSupport.addPropertyChangeListener(l);
+    }
 
-	public String getNome() {
-		return nome;
-	}
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        changeSupport.removePropertyChangeListener(l);
+    }
 
-	public void setNome(String nome) {
-		Object old = this.nome;
-		this.nome = nome;
-		changeSupport.firePropertyChange("nome", old, this.nome);
-	}
+    public Usuario() {
+    }
 
-	public String getSenha() {
-		return senha;
-	}
+    public Usuario(String nome, String email, String senha, byte[] foto) {
+        setNome(nome);
+        setEmail(email);
+        setSenha(senha);
+        setFoto(foto);
+    }
 
-	public void setSenha(String senha) {
-		Object old = this.senha;
-		this.senha = senha;
-		changeSupport.firePropertyChange("senha", old, this.senha);
-	}
-	
-	public String getEmail() {
-		return email;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public void setEmail(String email) {
-		Object old = this.email;
-		this.email = email;
-		changeSupport.firePropertyChange("email", old, this.email);
-	}
-	
-	
-	public byte[] getFoto() {
-		return foto;
-	}
+    public void setNome(String nome) {
+        Objects.requireNonNull(nome, "Nome não pode ser nulo");
+        Object old = this.nome;
+        this.nome = nome;
+        changeSupport.firePropertyChange("nome", old, this.nome);
+    }
 
-	public void setFoto(byte[] foto) {
-		Object old = this.foto;
-		this.foto = foto;
-		changeSupport.firePropertyChange("foto", old, this.foto);
-	}
+    public String getSenha() {
+        return senha;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public void setSenha(String senha) {
+        Objects.requireNonNull(senha, "Senha não pode ser nula");
+        Object old = this.senha;
+        this.senha = senha;
+        changeSupport.firePropertyChange("senha", old, this.senha);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Usuario other = (Usuario) obj;
-		return Objects.equals(id, other.id);
-	}
+    public void setEmail(String email) {
+        Objects.requireNonNull(email, "E-mail não pode ser nulo");
+        Object old = this.email;
+        this.email = email;
+        changeSupport.firePropertyChange("email", old, this.email);
+    }
 
+    public byte[] getFoto() {
+        return foto;
+    }
+
+    public void setFoto(byte[] foto) {
+        Object old = this.foto;
+        this.foto = foto;
+        changeSupport.firePropertyChange("foto", old, this.foto);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Usuario other = (Usuario) obj;
+        return Objects.equals(id, other.id);
+    }
 }

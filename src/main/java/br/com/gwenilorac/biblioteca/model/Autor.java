@@ -15,18 +15,17 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "autor")
-public class Autor implements Serializable{
+public class Autor implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String nome;
 
-    @Deprecated
     public Autor() {}
 
     public Autor(String nome) {

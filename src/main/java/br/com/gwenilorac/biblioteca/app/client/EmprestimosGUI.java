@@ -42,7 +42,6 @@ import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Reserva;
-import br.com.gwenilorac.biblioteca.model.TemMulta;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoEmprestimo;
 import br.com.gwenilorac.biblioteca.servicos.ServicoReserva;
@@ -52,23 +51,21 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 public class EmprestimosGUI extends JFrame {
 
 	private EntityManager em = JPAUtil.getEntityManager();
-	private LivroDao livroDao;
-	private UsuarioDao userDao;
-	private EmprestimoDao emprestimoDao;
-	private JTextField textFieldPesquisa;
-	private JTable tableUsers;
-	private JTable tableLivros;
-	private JTable tableEmprestimos;
-	private Usuario usuarioSelecionado;
-	private Livro livroSelecionado;
-	private Emprestimo emprestimoSelecionado;
-	private Container contentPane;
-
-	private List<Usuario> usuariosEncontrados;
-	private List<Livro> livrosEncontrados;
-
-	private SelectionInList<Emprestimo> selectionEmprestimo;
-
+    private LivroDao livroDao;
+    private UsuarioDao userDao;
+    private EmprestimoDao emprestimoDao;
+    private JTextField textFieldPesquisa;
+    private JTable tableUsers;
+    private JTable tableLivros;
+    private JTable tableEmprestimos;
+    private Usuario usuarioSelecionado;
+    private Livro livroSelecionado;
+    private Emprestimo emprestimoSelecionado;
+    private Container contentPane;
+    private List<Usuario> usuariosEncontrados;
+    private List<Livro> livrosEncontrados;
+    private SelectionInList<Emprestimo> selectionEmprestimo;
+    
 	public EmprestimosGUI() {
 		initModel();
 		initLayout();
@@ -106,18 +103,15 @@ public class EmprestimosGUI extends JFrame {
 
 		textFieldPesquisa = new JTextField(20);
 		JButton btnBuscar = new JButton("Buscar");
-		btnBuscar.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (btnUser.isSelected()) {
-					realizarBuscaUsuario();
-				} else if (btnLivro.isSelected()) {
-					realizarBuscaLivro();
-				} else {
-					realizarBuscaUsuario();
-					realizarBuscaLivro();
-				}
-			}
+		btnBuscar.addActionListener(e -> {
+		    if (btnUser.isSelected()) {
+		        realizarBuscaUsuario();
+		    } else if (btnLivro.isSelected()) {
+		        realizarBuscaLivro();
+		    } else {
+		        realizarBuscaUsuario();
+		        realizarBuscaLivro();
+		    }
 		});
 
 		buscaPanel.add(new JLabel("Pesquisar:"));

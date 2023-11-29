@@ -34,6 +34,8 @@ public class LoginFrm extends JDialog {
 	private JPasswordField passField;
 	private JButton btnLogin;
 	private boolean login = false;
+	private static final String ERROR_MISSING_NAME = "FALTA INFORMAR O NOME";
+	private static final String ERROR_MISSING_PASSWORD = "FALTA INFORMAR A SENHA";
 
 	public LoginFrm() {
 		initModel();
@@ -57,47 +59,45 @@ public class LoginFrm extends JDialog {
 	}
 
 	private void actionLogin() {
-		if (!isValid(model.getBean()))return;
+	    if (!isValid(model.getBean())) return;
 
-		if (ServicoLogin.validaUsuario(model.getBean()) == true) {
-			login = true;
-			dispose();
-			System.out.println("TESTE");
-			new ApplicationFrm();
-		} else {
-			JOptionPane.showMessageDialog(this, "USUARIO INVALIDO!");
-			login = false;
-		}
+	    if (ServicoLogin.validaUsuario(model.getBean())) {
+	        login = true;
+	        dispose();
+	        System.out.println("LOGIN BEM-SUCEDIDO");
+	        new ApplicationFrm();
+	    } else {
+	        JOptionPane.showMessageDialog(this, "USUÁRIO INVÁLIDO!");
+	        login = false;
+	    }
 	}
 
 	private boolean isValid(Usuario bean) {
-		if (bean.getNome() == null) {
-			JOptionPane.showMessageDialog(this, "FALTA INFORMAR O NOME");
-			return false;
-		}
-		if (bean.getSenha() == null) {
-			JOptionPane.showMessageDialog(this, "FALTA INFORMAR A SENHA");
-			return false;
-		} else {
-			return true;
-		}
+	    if (bean.getNome() == null || bean.getNome().isEmpty()) {
+	        JOptionPane.showMessageDialog(this, ERROR_MISSING_NAME);
+	        return false;
+	    }
+	    if (bean.getSenha() == null || bean.getSenha().isEmpty()) {
+	        JOptionPane.showMessageDialog(this, ERROR_MISSING_PASSWORD);
+	        return false;
+	    }
+	    return true;
 	}
 
 	private void initLayout() {
-		
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-		panel.add(createMainForm());
-		panel.add(createButtonPanel());
+	    JPanel panel = new JPanel();
+	    panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+	    panel.add(createMainForm());
+	    panel.add(createButtonPanel());
 
-		add(panel);
-		setModal(true);
-		setPreferredSize(new Dimension(300, 150));
-		setLocationRelativeTo(null);
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		pack();
+	    add(panel);
+	    setModal(true);
+	    setPreferredSize(new Dimension(300, 150));
+	    setLocationRelativeTo(null);
+	    setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+	    pack();
 
-		setVisible(true);
+	    setVisible(true);
 	}
 
 	private Component createButtonPanel() {

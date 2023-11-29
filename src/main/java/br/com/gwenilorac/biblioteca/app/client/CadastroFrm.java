@@ -63,21 +63,26 @@ public class CadastroFrm extends JDialog {
 	}
 
 	private void actionCadastro() {
-	    if (!isValid(model.getBean()))
+	    if (!isValid(model.getBean())) {
 	        return;
+	    }
 
 	    if (selectedCoverFile == null) {
 	        JOptionPane.showMessageDialog(this, "ADICIONE UMA FOTO DE PERFIL");
 	        return;
 	    }
 
-	    model.getBean().setFoto(ServicoCadastro.LerFoto(selectedCoverFile));
+	    model.getBean().setFoto(ServicoCadastro.lerFoto(selectedCoverFile));
 
-	    ServicoCadastro.cadastraUsuario(model.getBean());
-	    cadastro = true;
-	    dispose();
+	    boolean sucessoCadastro = ServicoCadastro.cadastraUsuario(model.getBean());
+	    
+	    if (sucessoCadastro) {
+	        cadastro = true;
+	        dispose();
+	    } else {
+	        JOptionPane.showMessageDialog(this, "EMAIL JÁ CADASTRADO");
+	    }
 	}
-
 
 	private void uploadFoto() {
 			JFileChooser chooser = new JFileChooser();

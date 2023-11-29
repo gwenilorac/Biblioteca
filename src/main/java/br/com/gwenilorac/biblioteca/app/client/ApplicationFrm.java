@@ -44,20 +44,17 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 public class ApplicationFrm extends JFrame {
 
 	private Usuario usuario = ServicoLogin.getUsuarioLogado();
-	private PresentationModel<Usuario> model;
-	private JDesktopPane jDesktopPane;
-	private JButton btnLivros;
-	private JButton btnUser;
-	private JButton btnAtualizar;
-	private JButton btnEmprestimos;
-	private JInternalFrame internalFrame;
-	private boolean isDetalhesLivroFrameOpen = false;
-	private boolean isLivrosGuiOpen = false;
-	private LivrosGUI livrosGui;
-	private boolean isUsersGuiOpen = false;
-	private UsersGUI usersGUI;
-	private EmprestimosGUI emprestimosGUI;
-	private boolean isEmprestimosGUIOpen;
+    private PresentationModel<Usuario> model;
+    private JDesktopPane jDesktopPane;
+    private JButton btnAtualizar;
+    private JInternalFrame internalFrame;
+    private boolean isDetalhesLivroFrameOpen = false;
+    private boolean isLivrosGuiOpen = false;
+    private LivrosGUI livrosGui;
+    private boolean isUsersGuiOpen = false;
+    private UsersGUI usersGUI;
+    private EmprestimosGUI emprestimosGUI;
+    private boolean isEmprestimosGUIOpen;
 
 	public ApplicationFrm() {
 		initModel();
@@ -108,32 +105,21 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private JFrame livrosPanel() {
-		if (livrosGui == null || !livrosGui.isVisible()) {
-			livrosGui = new LivrosGUI();
+	    if (livrosGui != null && livrosGui.isVisible()) {
+	        livrosGui.dispose();
+	    }
 
-			livrosGui.addWindowListener(new WindowAdapter() {
-				@Override
-				public void windowClosed(WindowEvent e) {
-					isLivrosGuiOpen = false;
-				}
-			});
+	    livrosGui = new LivrosGUI();
 
-			isLivrosGuiOpen = true;
-			return livrosGui;
-		} else {
-			livrosGui.dispose();
-			livrosGui = new LivrosGUI();
+	    livrosGui.addWindowListener(new WindowAdapter() {
+	        @Override
+	        public void windowClosed(WindowEvent e) {
+	            isLivrosGuiOpen = false;
+	        }
+	    });
 
-			livrosGui.addWindowListener(new WindowAdapter() {
-				@Override
-				public void windowClosed(WindowEvent e) {
-					isLivrosGuiOpen = false;
-				}
-			});
-
-			isLivrosGuiOpen = true;
-			return livrosGui;
-		}
+	    isLivrosGuiOpen = true;
+	    return livrosGui;
 	}
 
 	private JFrame abrirInfoUsuario() {
@@ -233,31 +219,34 @@ public class ApplicationFrm extends JFrame {
 	}
 
 	private void abrirDetalhesDoLivro(Livro livro) {
-		if (!isDetalhesLivroFrameOpen) {
-			DetalhesLivroInternalFrame detalhesDoLivro = new DetalhesLivroInternalFrame(livro);
-			internalFrame = new JInternalFrame(livro.getTitulo(), false, true, false, false);
-			internalFrame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-			internalFrame.add(detalhesDoLivro);
-			internalFrame.setSize(400, 300);
-			internalFrame.setVisible(true);
-			internalFrame.pack();
+	    if (isDetalhesLivroFrameOpen) {
+	        JOptionPane.showMessageDialog(this, "Detalhes do Livro já está aberto.");
+	        return;
+	    }
 
-			centralizarPanel();
+	    DetalhesLivroInternalFrame detalhesDoLivro = new DetalhesLivroInternalFrame(livro);
+	    internalFrame = new JInternalFrame(livro.getTitulo(), true, true, true, true);
+	    configurarInternalFrame(internalFrame, detalhesDoLivro);
 
-			jDesktopPane.add(internalFrame);
+	    jDesktopPane.add(internalFrame);
+	    internalFrame.toFront();
+	    isDetalhesLivroFrameOpen = true;
+	}
 
-			internalFrame.toFront();
-			isDetalhesLivroFrameOpen = true;
+	private void configurarInternalFrame(JInternalFrame frame, Component component) {
+	    frame.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+	    frame.add(component);
+	    frame.setSize(400, 300);
+	    frame.setVisible(true);
+	    frame.pack();
+	    centralizarPanel();
 
-			internalFrame.addInternalFrameListener(new InternalFrameAdapter() {
-				@Override
-				public void internalFrameClosed(InternalFrameEvent e) {
-					isDetalhesLivroFrameOpen = false;
-				}
-			});
-		} else {
-			JOptionPane.showMessageDialog(this, "Detalhes do Livro já está aberto.");
-		}
+	    frame.addInternalFrameListener(new InternalFrameAdapter() {
+	        @Override
+	        public void internalFrameClosed(InternalFrameEvent e) {
+	            isDetalhesLivroFrameOpen = false;
+	        }
+	    });
 	}
 
 	private void centralizarPanel() {

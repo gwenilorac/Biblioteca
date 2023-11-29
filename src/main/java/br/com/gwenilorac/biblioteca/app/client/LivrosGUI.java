@@ -235,37 +235,38 @@ public class LivrosGUI extends JFrame {
 		return dialog;
 	}
 
-	private void realizarBusca() {
-		DefaultTableModel tableModel = (DefaultTableModel) tableLivros.getModel();
-		tableModel.setRowCount(0);
+    private void realizarBusca() {
+        DefaultTableModel tableModel = (DefaultTableModel) tableLivros.getModel();
+        tableModel.setRowCount(0);
 
-		for (Livro livro : livrosEncontrados) {
-			Object[] rowData = { (livro).getTitulo(), (livro).getAutor(), (livro).getGenero() };
-			tableModel.addRow(rowData);
-		}
+        for (Livro livro : livrosEncontrados) {
+            Object[] rowData = { livro.getTitulo(), livro.getAutor(), livro.getGenero() };
+            tableModel.addRow(rowData);
+        }
 
-		tableLivros.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting()) {
-					int selectedRow = tableLivros.getSelectedRow();
-					if (selectedRow != -1) {
-						livroSelecionado = livrosEncontrados.get(selectedRow);
+        tableLivros.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    int selectedRow = tableLivros.getSelectedRow();
+                    if (selectedRow != -1) {
+                        livroSelecionado = livrosEncontrados.get(selectedRow);
 
-						imagemIcon = livroSelecionado.getCapa();
-						icon = new ImageIcon(imagemIcon);
-						img = icon.getImage().getScaledInstance(150, 190, Image.SCALE_SMOOTH);
-						newIcon = new ImageIcon(img);
-						capaLabel = new JLabel(newIcon);
-						lblCapa.setIcon(newIcon);
-						textFieldNome.setText(livroSelecionado.getTitulo());
-						textFieldAutor.setText(livroSelecionado.getAutor().toString());
-						textFieldGenero.setText(livroSelecionado.getGenero().toString());
-					}
-				}
-			}
-		});
-	}
+                        imagemIcon = livroSelecionado.getCapa();
+                        icon = new ImageIcon(imagemIcon);
+                        img = icon.getImage().getScaledInstance(150, 190, Image.SCALE_SMOOTH);
+                        newIcon = new ImageIcon(img);
+                        capaLabel = new JLabel(newIcon);
+                        lblCapa.setIcon(newIcon);
+                        textFieldNome.setText(livroSelecionado.getTitulo());
+                        textFieldAutor.setText(livroSelecionado.getAutor().toString());
+                        textFieldGenero.setText(livroSelecionado.getGenero().toString());
+                    }
+                }
+            }
+        });
+    }
+
 
 	private JPanel criarPanelDadosLivro() {
 		JPanel panelDadosLivros = new JPanel(new FlowLayout());

@@ -10,18 +10,14 @@ import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 public class ServicoBusca {
 
-	public static Livro busca(String termoBusca) {
-		EntityManager em = JPAUtil.getEntityManager();
-		LivroDao livroDao = new LivroDao(em);
+	public static List<Livro> busca(String termoBusca) {
+	    EntityManager em = JPAUtil.getEntityManager();
+	    LivroDao livroDao = new LivroDao(em);
 
-		if (termoBusca == null && termoBusca.isEmpty() && termoBusca == " ") {
-			return null;
-			} else {
-				Livro buscarLivroPorTitulo = livroDao.buscarLivroPorTitulo(termoBusca);
-				if (buscarLivroPorTitulo != null) {
-					return buscarLivroPorTitulo;
-			}
-		}
-		return null;
+	    if (termoBusca == null || termoBusca.isEmpty() || termoBusca.trim().isEmpty()) {
+	        return null;
+	    } else {
+	        return livroDao.buscarLivros(termoBusca);
+	    }
 	}
 }

@@ -35,28 +35,29 @@ private EntityManager em;
 				.getResultList();
 	}
 	
-	public Usuario buscarCredenciais(String nome, String senha) {
-		try {
-			String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome AND u.senha = :senha";
-			return em.createQuery(jpql, Usuario.class)
-					.setParameter("nome", nome)
-					.setParameter("senha", senha)
-					.getResultList().get(0);
-		} catch (Exception e) {
-			return null;
-		}
-	}
-	
-	public boolean buscarEmailCadastrado(String email) {
-		try {
-		String jpql = "SELECT u FROM Usuario u WHERE u.email = :email";
-		return em.createQuery(jpql, Usuario.class)
-				.setParameter("email", email)
-				.getResultList().get(0) != null;
-		} catch (Exception e) {
-			return false;
-		}
-	}
+	 public boolean buscarEmailCadastrado(String email) {
+	        try {
+	            String jpql = "SELECT COUNT(u) FROM Usuario u WHERE u.email = :email";
+	            Long count = em.createQuery(jpql, Long.class)
+	                          .setParameter("email", email)
+	                          .getSingleResult();
+	            return count > 0;
+	        } catch (Exception e) {
+	            return false;
+	        }
+	    }
+
+	    public Usuario buscarCredenciais(String nome, String senha) {
+	        try {
+	            String jpql = "SELECT u FROM Usuario u WHERE u.nome = :nome AND u.senha = :senha";
+	            return em.createQuery(jpql, Usuario.class)
+	                     .setParameter("nome", nome)
+	                     .setParameter("senha", senha)
+	                     .getSingleResult();
+	        } catch (Exception e) {
+	            return null;
+	        }
+	    }
 	
 	public Usuario buscarUsuarioPorNome(String nome) {
 		try {

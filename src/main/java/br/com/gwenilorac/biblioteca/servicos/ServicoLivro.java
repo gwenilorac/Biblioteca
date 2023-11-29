@@ -20,70 +20,82 @@ public class ServicoLivro {
 
 	public static void adicionarLivro(String titulo, String autor, String genero, byte[] capa) {
 		EntityManager em = JPAUtil.getEntityManager();
-		AutorDao autorDao = new AutorDao(em);
-		GeneroDao generoDao = new GeneroDao(em);
-		LivroDao livroDao = new LivroDao(em);
+		try {
+			em.getTransaction().begin();
 
-		em.getTransaction().begin();
+			System.out.println("Iniciando adicionarLivro...");
 
-		System.out.println("Iniciando adicionarLivro...");
+			if (!titulo.trim().isEmpty() && !autor.trim().isEmpty() && !genero.trim().isEmpty()) {
+				AutorDao autorDao = new AutorDao(em);
+				GeneroDao generoDao = new GeneroDao(em);
+				LivroDao livroDao = new LivroDao(em);
 
-		if (!titulo.trim().isEmpty() && !autor.trim().isEmpty() && !genero.trim().isEmpty()) {
+				Autor buscarAutorPorNome = autorDao.buscarAutorPorNome(autor);
+				Genero buscarGeneroPorNome = generoDao.buscarGeneroPorNome(genero);
 
-			Autor buscarAutorPorNome = autorDao.buscarAutorPorNome(autor);
-			Genero buscarGeneroPorNome = generoDao.buscarGeneroPorNome(genero);
+				if (buscarAutorPorNome == null) {
+					Autor newAutor = new Autor(autor);
+					autorDao.cadastrar(newAutor);
+					buscarAutorPorNome = newAutor;
+				}
 
-			if (buscarAutorPorNome == null) {
-				Autor newAutor = new Autor(autor);
-				autorDao.cadastrar(newAutor);
-				buscarAutorPorNome = newAutor;
+				if (buscarGeneroPorNome == null) {
+					Genero newGenero = new Genero(genero);
+					generoDao.cadastrar(newGenero);
+					buscarGeneroPorNome = newGenero;
+				}
+
+				Livro livro = new Livro(titulo, buscarAutorPorNome, buscarGeneroPorNome, capa);
+				livroDao.cadastrar(livro);
+				System.out.println("Livro adicionado com sucesso!");
+			} else {
+				System.out.println("Informações insuficientes para adicionar o livro.");
 			}
 
-			if (buscarGeneroPorNome == null) {
-				Genero newGenero = new Genero(genero);
-				generoDao.cadastrar(newGenero);
-				buscarGeneroPorNome = newGenero;
-			}
-
-			Livro livro = new Livro(titulo, buscarAutorPorNome, buscarGeneroPorNome, capa);
-			livroDao.cadastrar(livro);
-			System.out.println("Livro adicionado com sucesso!");
-		} else {
-			System.out.println("Informações insuficientes para adicionar o livro.");
+			em.getTransaction().commit();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
-		em.getTransaction().commit();
 	}
 
 	public static boolean removerLivro(Livro livro) {
-		EntityManager em = JPAUtil.getEntityManager();
-		LivroDao livroDao = new LivroDao(em);
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            livro = em.merge(livro);
 
-		em.getTransaction().begin();
-		livro = em.merge(livro);
+            LivroDao livroDao = new LivroDao(em);
+            EmprestimoDao emprestimoDao = new EmprestimoDao(em);
 
-		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-		Emprestimo emprestimo = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
+            Emprestimo emprestimo = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
 
-		if (emprestimo != null) {
-			boolean estaAberto = emprestimoDao.EmprestimoEstaAberto(emprestimo);
-			if (estaAberto == false) {
-				emprestimoDao.remover(emprestimo);
-				livroDao.remover(livro);
-				em.getTransaction().commit();
-				em.close();
-				return true;
-			} else {
-				System.out.println("Livro esta com emprestimo aberto");
-				em.getTransaction().rollback();
+            if (emprestimo != null) {
+                boolean estaAberto = emprestimoDao.EmprestimoEstaAberto(emprestimo);
+                if (estaAberto == false) {
+                    emprestimoDao.remover(emprestimo);
+                    livroDao.remover(livro);
+                    em.getTransaction().commit();
+                    return true;
+                } else {
+                    System.out.println("Livro está com empréstimo aberto");
+                    em.getTransaction().rollback();
+                    return false;
+                }
+            } else {
+                livroDao.remover(livro);
+                em.getTransaction().commit();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            em.getTransaction().rollback();
+            return false;
+        } finally {
+            if (em != null && em.isOpen()) {
                 em.close();
-				return false;
-			}
-		} else {
-			livroDao.remover(livro);
-			em.getTransaction().commit();
-			em.close();
-			return true;
-		}
-	}
+            }
+        }
+    }
+
+
 }
