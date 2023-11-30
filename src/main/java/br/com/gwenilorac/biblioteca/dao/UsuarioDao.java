@@ -80,13 +80,6 @@ private EntityManager em;
 	        return Collections.emptyList();
 	    }
 	}
-	
-	 public List<Usuario> buscarUsuariosComMaisEmprestimos(int quantidade) {
-	        String jpql = "SELECT u FROM Usuario u ORDER BY SIZE(u.livrosEmprestados) DESC";
-	        TypedQuery<Usuario> query = em.createQuery(jpql, Usuario.class);
-	        query.setMaxResults(quantidade);
-	        return query.getResultList();
-	    }
 		
 	 public List<Livro> buscarLivrosEmprestados(Long idUsuario) {
 		    StringBuilder hql = new StringBuilder();

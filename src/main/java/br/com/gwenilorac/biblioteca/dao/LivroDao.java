@@ -66,12 +66,6 @@ public class LivroDao {
         return em.createQuery(jpql, Livro.class).setParameter("nome", nome).getResultList();
     }
 
-    public List<Livro> buscarLivrosMaisEmprestados() {
-        String jpql = "SELECT e.livro FROM Emprestimo e GROUP BY e.livro ORDER BY COUNT(e) DESC";
-        TypedQuery<Livro> query = em.createQuery(jpql, Livro.class);
-        return query.getResultList();
-    }
-
     public Livro buscarPorId(Object id) {
         try {
             String jpql = "SELECT l FROM Livro l WHERE l.id = :livroId";

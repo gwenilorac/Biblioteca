@@ -2,11 +2,8 @@ package br.com.gwenilorac.biblioteca.model;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -16,13 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import com.ibm.icu.impl.duration.Period;
-import com.ibm.icu.math.BigDecimal;
-
-import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
-import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
-import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @Entity
 @Table(name = "emprestimos")

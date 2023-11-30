@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>6.4.0</version>
+			<version>6.1.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.bouncycastle</groupId>
@@ -118,6 +118,7 @@
 			<artifactId>itext</artifactId>
 			<version>2.1.7</version>
 		</dependency>
+
 
 	</dependencies>
 </project>

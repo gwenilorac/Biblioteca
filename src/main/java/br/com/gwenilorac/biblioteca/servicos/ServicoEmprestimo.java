@@ -66,7 +66,6 @@ public class ServicoEmprestimo {
                 } else if (esteUsuarioEstaComOEmprestimoDesteLivroEncerrado) {
                     emprestimoDoLivro.pegarLivroEmprestado();
                     emprestimoDoLivro.setDataDevolucao(LocalDate.now().plusWeeks(4));
-                    emprestimoDoLivro.setMultaPaga(false);
                     emprestimoDao.atualizar(emprestimoDoLivro);
                     JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
                 } else {
@@ -127,6 +126,7 @@ public class ServicoEmprestimo {
                     emprestimo.setDiasAtrasados(emprestimo.getDataDevolucao().until(LocalDate.now()).getDays());
                     emprestimo.setValorMulta(emprestimo.getDiasAtrasados() * emprestimo.getValormultapordia());
                     emprestimo.setTemMulta(true);
+                    emprestimo.setMultaPaga(false);
 
                     em.getTransaction().commit();
                     return true;
@@ -156,11 +156,12 @@ public class ServicoEmprestimo {
         try {
             em.getTransaction().begin();
 
-            if (!emprestimo.isMultaPaga()) {
-                if (LocalDate.now().isAfter(emprestimo.getDataDevolucaoLivro())) {
-                    emprestimo.setDiasAtrasados(emprestimo.getDataDevolucao().until(LocalDate.now()).getDays());
-                    emprestimo.setValorMulta(emprestimo.getDiasAtrasados() * emprestimo.getValormultapordia());
-                    emprestimo.setTemMulta(true);
+            if (emprestimo.getTemMulta()) {
+                if (!emprestimo.isMultaPaga()) {
+                    emprestimo.setDiasAtrasados(0);
+                    emprestimo.setValorMulta(0);
+                    emprestimo.setTemMulta(false);
+                    emprestimo.setMultaPaga(true);
 
                     emprestimoDao.atualizar(emprestimo);
                     em.getTransaction().commit();
@@ -169,10 +170,10 @@ public class ServicoEmprestimo {
                     JOptionPane.showMessageDialog(null, "Multa paga com sucesso. Valor: R$ " + emprestimo.getValorMulta());
 
                 } else {
-                    JOptionPane.showMessageDialog(null, "Não há multa a ser paga.");
+                	JOptionPane.showMessageDialog(null, "Multa já foi paga anteriormente.");
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Multa já foi paga anteriormente.");
+            	JOptionPane.showMessageDialog(null, "Não há multa a ser paga.");
             }
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
