@@ -20,26 +20,28 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 
 public class GeraRelatorioTeste {
-	
+
 	public GeraRelatorioTeste() {
-		File file  = new File("GeraRelatorio.java");
+		File file = new File("GeraRelatorioTeste.java");
 		String pathAbsoluto = file.getAbsolutePath();
-		String pathAbsolutoParcial = pathAbsoluto.substring(0,pathAbsoluto.lastIndexOf('\\'))+"\\relatorios\\teste.jrxml";
-		
+		String pathAbsolutoParcial = pathAbsoluto.substring(0, pathAbsoluto.lastIndexOf('\\'))
+				+ "\\relatorios\\teste.jrxml";
+
 		try {
-			
-			List<EmprestimoView> reportList = new ArrayList<>(); //TODO buscar do banco via query 
-			
+
+			List<EmprestimoView> reportList = new ArrayList<>(); // TODO buscar do banco via query
+
 			JasperReport jasperReport = JasperCompileManager.compileReport(pathAbsolutoParcial);
-			
-			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, new HashMap<>(), new JRBeanCollectionDataSource(reportList));
-			
+
+			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, new HashMap<>(),
+					new JRBeanCollectionDataSource(reportList));
+
 			JasperViewer jasperViewer = new JasperViewer(jasperPrint, false);
-			
+
 			jasperViewer.setVisible(true);
-			
-		}  catch (JRException | PersistenceException e) {
-            e.printStackTrace();
-        }
-    }
+
+		} catch (JRException | PersistenceException e) {
+			e.printStackTrace();
+		}
+	}
 }

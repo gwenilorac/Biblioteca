@@ -16,93 +16,87 @@ public class EstatisticasDao {
         this.em = entityManager;
     }
 
-    public List<String> getTituloDosLivrosMaisEmprestados() {
-        String jpql = "SELECT e.livro.titulo FROM Emprestimo e GROUP BY e.livro ORDER BY COUNT(e) DESC";
-        return  em.createQuery(jpql, String.class)
-        		.getResultList();
-    }
+   
     
-    public List<String> getAutorDosLivrosMaisEmprestados(){
-    	String jpql = "SELECT e.livro.autor FROM Emprestimo e GROUP BY e.livro ORDER BY COUNT(e) DESC";
-    	return em.createQuery(jpql, String.class)
-    			.getResultList();
-    }
+   
     
-    public List<Long> getNumDeEmprestimosDosLivrosMaisEmprestados(){
-    	String jpql = "SELECT COUNT(e.livro) FROM Emprestimo e GROUP BY e.livro ORDER BY COUNT(e) DESC";
-    	return em.createQuery(jpql, Long.class)
-    			.getResultList();
-    }
+   
 
-	 public List<Usuario> buscarUsuariosComMaisEmprestimos() {
-		 String jpql = "SELECT e.usuario FROM Emprestimo e GROUP BY e.usuario ORDER BY COUNT(e) DESC";
-		 return em.createQuery(jpql, Usuario.class)
-				 .getResultList();
-	    }
-    
-    public List<Usuario> getNomesDosUsuariosComMulta(){
-    	String jpql = "SELECT e.usuario.nome FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.usuario ORDER BY COUNT(e) DESC";
-    	return em.createQuery(jpql, Usuario.class)
-    			.setParameter("temMulta", true)
-    			.getResultList();
+    public List<Object[]> buscarUsuariosComMaisEmprestimos() {
+        String jpql = "SELECT e.usuario, COUNT(e) FROM Emprestimo e GROUP BY e.usuario ORDER BY COUNT(e) DESC";
+        return em.createQuery(jpql, Object[].class)
+                .getResultList();
     }
     
-    public List<Livro> getTitulosDosLivrosComMulta(){
-    	String jpql = "SELECT e.livro.titulo FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.livro ORDER BY COUNT(e) DESC";
-    	return em.createQuery(jpql, Livro.class)
-    			.setParameter("temMulta", true)
-    			.getResultList();
+    public List<String> getNomesDosUsuariosComMulta() {
+        String jpql = "SELECT e.usuario.nome FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.usuario.nome ORDER BY COUNT(e) DESC";
+        return em.createQuery(jpql, String.class)
+                .setParameter("temMulta", true)
+                .getResultList();
     }
     
-    public List<LocalDate> getDiasAtrasadosDosLivrosComMulta(){
-    	String jpql = "SELECT e.diasAtrasados FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.livro ORDER BY COUNT(e) DESC";
-    	return em.createQuery(jpql, LocalDate.class)
-    			.setParameter("temMulta", true)
-    			.getResultList();
+    public List<String> getTitulosDosLivrosComMulta() {
+        String jpql = "SELECT e.livro.titulo FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.livro.titulo ORDER BY COUNT(e) DESC";
+        return em.createQuery(jpql, String.class)
+                .setParameter("temMulta", true)
+                .getResultList();
     }
     
-    public List<Double> getValorMultaDosLivrosComMulta(){
-    	String jpql = "SELECT e.valorMulta FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.livro ORDER BY COUNT(e) DESC";
-    	return em.createQuery(jpql, Double.class)
-    			.setParameter("temMulta", true)
-    			.getResultList();
+    public List<LocalDate> getDiasAtrasadosDosLivrosComMulta() {
+        String jpql = "SELECT e.diasAtrasados FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.diasAtrasados ORDER BY COUNT(e) DESC";
+        return em.createQuery(jpql, LocalDate.class)
+                .setParameter("temMulta", true)
+                .getResultList();
     }
     
-    public List<Usuario> getTotalDeUsuariosComMulta(){
-    	String jpql = "SELECT e.usuario FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.livro ORDER BY COUNT(e) DESC";
-    	return em.createQuery(jpql, Usuario.class)
-    			.setParameter("temMulta", Usuario.class)
-    			.getResultList();
+    public List<Double> getValorMultaDosLivrosComMulta() {
+        String jpql = "SELECT e.valorMulta FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.livro.titulo ORDER BY COUNT(e) DESC";
+        return em.createQuery(jpql, Double.class)
+                .setParameter("temMulta", true)
+                .getResultList();
     }
     
-    public List<Usuario> getNomesDosUsuarios(){
-    	String jpql = "SELECT u.nome FROM Usuario u";
-    	return em.createQuery(jpql, Usuario.class)
-    			.getResultList();
+    public List<Usuario> getTotalDeUsuariosComMulta() {
+        String jpql = "SELECT e.usuario FROM Emprestimo e WHERE e.temMulta = :temMulta GROUP BY e.usuario ORDER BY COUNT(e) DESC";
+        return em.createQuery(jpql, Usuario.class)
+                .setParameter("temMulta", true)
+                .getResultList();
     }
     
-    public List<Usuario> getEmailDosUsuarios(){
-    	String jpql = "SELECT u.email FROM Usuario u";
-    	return em.createQuery(jpql, Usuario.class)
-    			.getResultList();
+    public List<String> getNomesDosUsuarios() {
+        String jpql = "SELECT u.nome FROM Usuario u";
+        return em.createQuery(jpql, String.class)
+                .getResultList();
+    }
+    
+    public List<String> getEmailDosUsuarios() {
+        String jpql = "SELECT u.email FROM Usuario u";
+        return em.createQuery(jpql, String.class)
+                .getResultList();
     }
     
     public int getTotalEmprestimos() {
-    	String jpql = "SELECT COUNT(e) FROM Emprestimo e";
-    	return em.createQuery(jpql, Long.class)
-    			.getSingleResult().intValue();
+        String jpql = "SELECT COUNT(e) FROM Emprestimo e";
+        Long resultado = em.createQuery(jpql, Long.class)
+                          .getSingleResult();
+
+        return resultado != null ? resultado.intValue() : 0;
     }
     
     public int getTotalLivrosNaBiblioteca() {
-    	String jpql = "SELECT COUNT(l) FROM Livro l";
-    	return em.createQuery(jpql, Long.class)
-    			.getSingleResult().intValue();
+        String jpql = "SELECT COUNT(l) FROM Livro l";
+        Long resultado = em.createQuery(jpql, Long.class)
+                          .getSingleResult();
+
+        return resultado != null ? resultado.intValue() : 0;
     }
 
     public int getTotalUsuariosRegistrados() {
         String jpql = "SELECT COUNT(u) FROM Usuario u";
-        return em.createQuery(jpql, Long.class)
-        		.getSingleResult().intValue();
+        Long resultado = em.createQuery(jpql, Long.class)
+                          .getSingleResult();
+
+        return resultado != null ? resultado.intValue() : 0;
     }
 
 }
