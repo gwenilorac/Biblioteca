@@ -1,10 +1,10 @@
 package br.com.gwenilorac.biblioteca.dao;
 
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-
+import javax.persistence.TypedQuery;
+import br.com.gwenilorac.biblioteca.domain.ReservaView;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Reserva;
 import br.com.gwenilorac.biblioteca.model.Usuario;
@@ -66,4 +66,21 @@ public class ReservaDao {
             return null;
         }
     }
+    
+	public List<ReservaView> findReservasReporList() {
+		StringBuilder hql = new StringBuilder();
+		hql.append("SELECT new br.com.gwenilorac.biblioteca.domain.ReservaView(livr.titulo ");
+		hql.append(", livr.autor.nome ");
+		hql.append(", user.nome ) ");
+		hql.append("FROM Reserva r ");
+		hql.append("INNER JOIN r.livro livr ");
+		hql.append("INNER JOIN r.usuario user ");
+		hql.append("GROUP BY livr.titulo");
+		hql.append(", livr.autor.nome ");
+		hql.append(", user.nome ");
+		hql.append("ORDER BY count(user.nome) DESC");
+		TypedQuery<ReservaView> createQuery = em.createQuery(hql.toString(), ReservaView.class);
+		return createQuery.getResultList();
+	}
+
 }

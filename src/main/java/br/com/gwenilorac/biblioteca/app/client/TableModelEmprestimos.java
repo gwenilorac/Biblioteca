@@ -2,7 +2,6 @@ package br.com.gwenilorac.biblioteca.app.client;
 
 import com.jgoodies.binding.adapter.AbstractTableAdapter;
 import com.jgoodies.binding.list.SelectionInList;
-
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 
 @SuppressWarnings("serial")

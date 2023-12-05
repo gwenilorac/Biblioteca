@@ -9,10 +9,8 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -32,16 +30,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-
 import com.jgoodies.binding.list.SelectionInList;
-
+import br.com.gwenilorac.biblioteca.controller.GeraRelatorioLivrosMaisEmprestados;
+import br.com.gwenilorac.biblioteca.controller.GeraRelatorioUsuariosComMulta;
 import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
-import br.com.gwenilorac.biblioteca.dao.ReservaDao;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
-import br.com.gwenilorac.biblioteca.model.Reserva;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoEmprestimo;
 import br.com.gwenilorac.biblioteca.servicos.ServicoReserva;
@@ -340,10 +336,18 @@ public class EmprestimosGUI extends JFrame {
 				ServicoReserva.realizarReserva(usuarioSelecionado, livroSelecionado);
 			}
 		});
+		
+		JButton btnRelatorioLivros = new JButton("Relatorio Livros Mais Emprestados");
+		btnRelatorioLivros.addActionListener(br -> new GeraRelatorioLivrosMaisEmprestados());
+		
+		JButton btnRelatorioMultas = new JButton("Relatorio Multas");
+		btnRelatorioMultas.addActionListener(br -> new GeraRelatorioUsuariosComMulta());
+		
 		panel.add(btnReservar);
-
 		panel.add(btnPegarEmprestado);
 		panel.add(btnDevolverLivro);
+		panel.add(btnRelatorioLivros);
+		panel.add(btnRelatorioMultas);
 
 		return panel;
 	}

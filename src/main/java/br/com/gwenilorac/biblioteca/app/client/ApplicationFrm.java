@@ -10,7 +10,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyVetoException;
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -26,25 +25,16 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
-
-import com.jgoodies.binding.PresentationModel;
-
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.model.Livro;
-import br.com.gwenilorac.biblioteca.model.Usuario;
-import br.com.gwenilorac.biblioteca.servicos.ServicoBusca;
-import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
 public class ApplicationFrm extends JFrame {
 
-	private Usuario usuario = ServicoLogin.getUsuarioLogado();
-    private PresentationModel<Usuario> model;
     private JDesktopPane jDesktopPane;
     private JButton btnAtualizar;
     private JInternalFrame internalFrame;
@@ -57,13 +47,8 @@ public class ApplicationFrm extends JFrame {
     private boolean isEmprestimosGUIOpen;
 
 	public ApplicationFrm() {
-		initModel();
 		initComponents();
 		initLayout();
-	}
-
-	private void initModel() {
-		model = new PresentationModel<Usuario>(usuario);
 	}
 
 	private void initComponents() {

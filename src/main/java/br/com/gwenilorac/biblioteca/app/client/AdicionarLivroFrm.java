@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -22,7 +21,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
+import br.com.gwenilorac.biblioteca.dao.AutorDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
+import br.com.gwenilorac.biblioteca.model.Autor;
 import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -31,7 +32,7 @@ public class AdicionarLivroFrm extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField titleField;
-	private JTextField authorField;
+	private JComboBox<Autor> autorCb;
 	private JComboBox<Genero> generosCb;
 	private JButton addButton;
 	private JButton selectCoverButton;
@@ -44,7 +45,6 @@ public class AdicionarLivroFrm extends JPanel {
 
 	private void initComponents() {
 		titleField = new JTextField(20);
-		authorField = new JTextField(20);
 		
 		addButton = new JButton("Adicionar Livro");
 		selectCoverButton = new JButton("Selecionar Capa");
@@ -52,6 +52,7 @@ public class AdicionarLivroFrm extends JPanel {
 		addButton.addActionListener(e -> adicionarLivro());
 		selectCoverButton.addActionListener(e -> selecionarCapa());
 		
+		autorCb = initCbAutor();
 		generosCb = initCbGenero();
 	}
 
@@ -68,10 +69,10 @@ public class AdicionarLivroFrm extends JPanel {
 
 	private void adicionarLivro() {
 	    String titulo = titleField.getText();
-	    String autor = authorField.getText();
+	    Autor autor = (Autor) autorCb.getSelectedItem();
 	    Genero genero = (Genero) generosCb.getSelectedItem();
 
-	    if (titulo.isEmpty() || autor.isEmpty() || genero == null || selectedCoverFile == null) {
+	    if (titulo.isEmpty() || autor == null|| genero == null || selectedCoverFile == null) {
 	        JOptionPane.showMessageDialog(this, "Preencha todos os campos e selecione uma capa.");
 	        return;
 	    }
@@ -81,7 +82,7 @@ public class AdicionarLivroFrm extends JPanel {
 
 	        System.out.println("Caminho do arquivo selecionado: " + selectedCoverFile.getAbsolutePath());
 
-	        ServicoLivro.adicionarLivro(titulo, autor, genero.getNome(), capa);
+	        ServicoLivro.adicionarLivro(titulo, autor.getNome(), genero.getNome(), capa);
 
 	        JOptionPane.showMessageDialog(this, "Livro adicionado com sucesso!");
 
@@ -96,7 +97,7 @@ public class AdicionarLivroFrm extends JPanel {
 
 	private void limparCampos() {
 		titleField.setText("");
-		authorField.setText("");
+		autorCb.setSelectedItem(null);
 		generosCb.setSelectedItem(null);
 		selectedCoverFile = null;
 	}
@@ -122,7 +123,7 @@ public class AdicionarLivroFrm extends JPanel {
 		builder.append("Título: ", titleField);
 		builder.nextLine();
 
-		builder.append("Autor: ", authorField);
+		builder.append("Autor: ", autorCb);
 		builder.nextLine();
 		
 		builder.append("Genero: ", generosCb);
@@ -132,6 +133,22 @@ public class AdicionarLivroFrm extends JPanel {
 		addPanel.add(formPanel);
 
 		return addPanel;
+	}
+	
+	private JComboBox<Autor> initCbAutor(){
+		EntityManager em = JPAUtil.getEntityManager();
+		AutorDao autorDao = new AutorDao(em);
+		
+		autorCb = new JComboBox<Autor>();
+		autorCb.setEditable(true);
+
+		List<Autor> autores = autorDao.buscarTodosAutores();
+		
+		for (Autor autor : autores) {
+			autorCb.addItem(autor);
+		}
+		
+		return autorCb;
 	}
 	
 	private JComboBox<Genero> initCbGenero(){

@@ -84,33 +84,7 @@
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
-			<version>6.1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>bcmail-jdk14</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>bouncycastle</groupId>
-					<artifactId>bcmail-jdk14</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>bctsp-jdk14</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>bouncycastle</groupId>
-					<artifactId>bcprov-jdk14</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>itext</artifactId>
-					<groupId>com.lowagie</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>olap4j</artifactId>
-					<groupId>org.olap4j</groupId>
-				</exclusion>
-			</exclusions>
+			<version>6.20.6</version>
 		</dependency>
 
 		<dependency>

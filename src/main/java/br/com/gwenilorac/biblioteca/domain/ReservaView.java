@@ -1,15 +1,15 @@
 package br.com.gwenilorac.biblioteca.domain;
 
-public class EmprestimoView {
-
+public class ReservaView {
+	
 	private String nmLivro;
 	private String nmAutor;
-	private Long numEmprestimos;
+	private String nmUsuario;
 	
-	public EmprestimoView(String nmLivro, String nmAutor, Long numEmprestimos) {
+	public ReservaView(String nmLivro, String nmAutor, String nmUsuario) {
 		this.nmLivro = nmLivro;
 		this.nmAutor = nmAutor;
-		this.numEmprestimos = numEmprestimos;
+		this.nmUsuario = nmUsuario;
 	}
 
 	public String getNmLivro() {
@@ -19,21 +19,21 @@ public class EmprestimoView {
 	public void setNmLivro(String nmLivro) {
 		this.nmLivro = nmLivro;
 	}
+	
+	public String getNmUsuario() {
+		return nmUsuario;
+	}
+	
+	public void setNmUsuario(String nmUsuario) {
+		this.nmUsuario = nmUsuario;
+	}
 
 	public String getNmAutor() {
 		return nmAutor;
 	}
-	
+
 	public void setNmAutor(String nmAutor) {
 		this.nmAutor = nmAutor;
-	}
-
-	public Long getNumEmprestimos() {
-		return numEmprestimos;
-	}
-	
-	public void setNumEmprestimos(Long numEmprestimos) {
-		this.numEmprestimos = numEmprestimos;
 	}
 
 }

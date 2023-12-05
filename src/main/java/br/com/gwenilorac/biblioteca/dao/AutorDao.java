@@ -1,11 +1,9 @@
 package br.com.gwenilorac.biblioteca.dao;
 
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
-
 import br.com.gwenilorac.biblioteca.model.Autor;
 
 public class AutorDao {

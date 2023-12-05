@@ -4,10 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.swing.JOptionPane;
-
 import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.ReservaDao;
-import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.Reserva;
@@ -27,10 +25,10 @@ public class ServicoEmprestimo {
             boolean livroTemReserva = reservaDao.buscarSeLivroTemReserva(livro);
 
             if (!livroTemReserva) {
-                EmprestarLivro(livro, usuario, em, reservaDao);
+            	emprestarLivro(livro, usuario, em, reservaDao);
             } else if (livroEstaReservadoPorUsuario != null) {
                 reservaDao.remover(livroEstaReservadoPorUsuario);
-                EmprestarLivro(livro, usuario, em, reservaDao);
+                emprestarLivro(livro, usuario, em, reservaDao);
             } else {
                 JOptionPane.showMessageDialog(null, "LIVRO RESERVADO");
             }
@@ -46,11 +44,10 @@ public class ServicoEmprestimo {
         }
     }
 
-    private static void EmprestarLivro(Livro livro, Usuario usuario, EntityManager em, ReservaDao reservaDao) {
-        UsuarioDao usuarioDao = new UsuarioDao(em);
+    private static void emprestarLivro(Livro livro, Usuario usuario, EntityManager em, ReservaDao reservaDao) {
         EmprestimoDao emprestimoDao = new EmprestimoDao(em);
         Emprestimo emprestimoDoLivro = emprestimoDao.buscarSeLivroJaTemEmprestimoRelacionadoAUsuario(livro, usuario);
-        List<Livro> livrosEmprestados = usuarioDao.buscarLivrosEmprestados(usuario.getId());
+        List<Emprestimo> livrosEmprestados = emprestimoDao.buscarEmprestimosUser(usuario.getId());
         boolean esteUsuarioEstaComOEmprestimoDesteLivroEncerrado = emprestimoDao
                 .esteUsuarioEstaComOEmprestimoDesteLivroEncerrado(livro, usuario);
         boolean isLivroEmprestado = emprestimoDao.isLivroEmprestado(livro);
@@ -183,6 +180,13 @@ public class ServicoEmprestimo {
         } finally {
             em.close();
         }
+    }
+    
+    public static Emprestimo quemEstaComLivro(Livro livro) {
+    	EntityManager em = JPAUtil.getEntityManager();
+		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+		Emprestimo quemEstaComLivro = emprestimoDao.buscarQuemEstaComLivro(livro);
+		return quemEstaComLivro;
     }
 
 }

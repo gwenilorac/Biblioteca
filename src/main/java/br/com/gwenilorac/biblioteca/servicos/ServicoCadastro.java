@@ -1,12 +1,7 @@
 package br.com.gwenilorac.biblioteca.servicos;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -29,8 +24,7 @@ public class ServicoCadastro {
             if (emailCadastrado) {
                 return false;
             } else {
-                byte[] foto = usuario.getFoto();
-                Usuario newUsuario = new Usuario(usuario.getNome(), usuario.getEmail(), usuario.getSenha(), foto);
+                Usuario newUsuario = new Usuario(usuario.getNome(), usuario.getEmail(), usuario.getSenha());
 
                 EntityTransaction transaction = em.getTransaction();
                 transaction.begin();
@@ -42,21 +36,6 @@ public class ServicoCadastro {
             if (em != null && em.isOpen()) {
                 em.close();
             }
-        }
-    }
-
-    public static byte[] lerFoto(File selectedPhoto) {
-        if (selectedPhoto == null || !selectedPhoto.exists() || !selectedPhoto.isFile()) {
-            throw new IllegalArgumentException("O arquivo de foto não é válido.");
-        }
-
-        try (FileInputStream fis = new FileInputStream(selectedPhoto)) {
-            byte[] photoBytes = new byte[(int) selectedPhoto.length()];
-            fis.read(photoBytes);
-            return photoBytes;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 }

@@ -5,38 +5,26 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
-
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
-
+import br.com.gwenilorac.biblioteca.controller.GeraRelatorioUsuarios;
 import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoUsuario;
@@ -49,12 +37,10 @@ public class UsersGUI extends JFrame {
 	private UsuarioDao usuarioDao;
 	private JTextField textFieldPesquisa;
 	private JTable tableUsers;
-	private JLabel lblFoto;
 	private JTextField textFieldNome;
 	private JTextField textFieldEmail;
 	private JTextField textFieldSenha;
 	private Usuario usuarioSelecionado;
-	private File selectedCoverFile;
 	private Container contentPane;
 	private JDialog dialog;
 	private List<Usuario> usuariosEncontrados;
@@ -109,18 +95,6 @@ public class UsersGUI extends JFrame {
 							if (selectedRow != -1) {
 								usuarioSelecionado = usuariosEncontrados.get(selectedRow);
 
-								if (usuarioSelecionado != null) {
-									byte[] imagemIcon = usuarioSelecionado.getFoto();
-									if (imagemIcon != null) {
-										ImageIcon icon = new ImageIcon(imagemIcon);
-										Image img = icon.getImage().getScaledInstance(150, 190, Image.SCALE_SMOOTH);
-										ImageIcon newIcon = new ImageIcon(img);
-										lblFoto.setIcon(newIcon);
-									} else {
-										JOptionPane.showMessageDialog(null, "Foto Inexistente!");
-									}
-								}
-
 								textFieldNome.setText(usuarioSelecionado.getNome());
 								textFieldEmail.setText(usuarioSelecionado.getEmail());
 								textFieldSenha.setText(usuarioSelecionado.getSenha());
@@ -155,10 +129,6 @@ public class UsersGUI extends JFrame {
 		JPanel panelDadosUsers = new JPanel(new FlowLayout());
 		panelDadosUsers.setBorder(BorderFactory.createTitledBorder("Detalhes do Usuario"));
 
-		JPanel fotoPanel = new JPanel();
-		lblFoto = new JLabel();
-		fotoPanel.add(lblFoto);
-
 		FormLayout layout = new FormLayout("pref, 5px, 70dlu");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 
@@ -174,8 +144,6 @@ public class UsersGUI extends JFrame {
 
 		JPanel formPanel = builder.getPanel();
 
-		panelDadosUsers.add(fotoPanel);
-		panelDadosUsers.add(new JSeparator(JSeparator.VERTICAL));
 		panelDadosUsers.add(formPanel);
 
 		return panelDadosUsers;
@@ -196,7 +164,7 @@ public class UsersGUI extends JFrame {
 
 					if (confirmacao == JOptionPane.YES_OPTION) {
 						boolean removerUsuario = ServicoUsuario.removerUsuario(usuarioSelecionado);
-						if (removerUsuario == true) {
+						if (removerUsuario) {
 							System.out.println("User removido: " + usuarioSelecionado.getNome());
 							JOptionPane.showMessageDialog(null, "USUARIO REMOVIDO COM SUCESSO!");
 						} else {
@@ -230,47 +198,6 @@ public class UsersGUI extends JFrame {
 			}
 		});
 
-		JButton btnEditarFoto = new JButton("Editar Foto de Perfil");
-		btnEditarFoto.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (usuarioSelecionado != null) {
-					JFileChooser chooser = new JFileChooser();
-					FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
-					chooser.setFileFilter(filter);
-					int result = chooser.showOpenDialog(null);
-
-					if (result == JFileChooser.APPROVE_OPTION) {
-						selectedCoverFile = chooser.getSelectedFile();
-						try {
-							BufferedImage originalImage = ImageIO.read(selectedCoverFile);
-							Image resizedImage = originalImage.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-
-							BufferedImage bufferedResizedImage = new BufferedImage(150, 150,
-									BufferedImage.TYPE_INT_RGB);
-							bufferedResizedImage.getGraphics().drawImage(resizedImage, 0, 0, null);
-
-							ImageIcon novaFotoIcon = new ImageIcon(bufferedResizedImage);
-							lblFoto.setIcon(novaFotoIcon);
-
-							ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-							ImageIO.write(originalImage, "png", outputStream);
-							byte[] coverImageBytes = outputStream.toByteArray();
-							outputStream.close();
-							usuarioSelecionado.setFoto(coverImageBytes);
-
-							JOptionPane.showMessageDialog(null, "FOTO EDITADA COM SUCESSO!");
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						    JOptionPane.showMessageDialog(null, "Erro ao editar a foto.", "Erro", JOptionPane.ERROR_MESSAGE);
-						}
-					}
-				} else {
-					JOptionPane.showMessageDialog(null, "SELECIONE UM USUARIO!");
-				}
-			}
-		});
-
 		JButton btnAlterar = new JButton("Salvar Alterações");
 		btnAlterar.addActionListener(new ActionListener() {
 			@Override
@@ -282,20 +209,6 @@ public class UsersGUI extends JFrame {
 					String novoNome = textFieldNome.getText();
 					String novoEmail = textFieldEmail.getText();
 					String novoSenha = textFieldSenha.getText();
-
-					if (selectedCoverFile != null) {
-						try {
-							BufferedImage originalImage = ImageIO.read(selectedCoverFile);
-							ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-							ImageIO.write(originalImage, "png", outputStream);
-							byte[] coverImageBytes = outputStream.toByteArray();
-							outputStream.close();
-							usuarioSelecionado.setFoto(coverImageBytes);
-
-						} catch (IOException ex) {
-							ex.printStackTrace();
-						}
-					}
 
 					usuarioSelecionado.setNome(novoNome);
 					usuarioSelecionado.setEmail(novoEmail);
@@ -310,14 +223,17 @@ public class UsersGUI extends JFrame {
 					JOptionPane.showMessageDialog(null, "SELECIONE UM USUARIO!");
 				}
 			}
+			
 		});
 
+		JButton btnRelatorio = new JButton("Relatorio");
+		btnRelatorio.addActionListener(br -> new GeraRelatorioUsuarios());
+		
 		panel.add(btnExcluir);
 		panel.add(btnAdicionar);
-		panel.add(btnEditarFoto);
 		panel.add(btnAlterar);
+		panel.add(btnRelatorio);
 
 		return panel;
 	}
-
 }

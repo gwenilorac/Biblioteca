@@ -15,7 +15,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
 import javax.swing.BorderFactory;
@@ -38,27 +37,25 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
-
-import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
-
+import br.com.gwenilorac.biblioteca.controller.GeraRelatorioReservas;
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
+import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
 import br.com.gwenilorac.biblioteca.model.Autor;
+import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.servicos.ServicoEmprestimo;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
 public class LivrosGUI extends JFrame {
 
-	private EntityManager em = JPAUtil.getEntityManager();
-	private PresentationModel<Livro> model;
 	private LivroDao livroDao;
-	private GeneroDao generoDao;
 	private JTextField textFieldPesquisa;
 	private JTable tableLivros;
 	private JLabel lblCapa;
@@ -81,13 +78,7 @@ public class LivrosGUI extends JFrame {
 	private List<Livro> livrosEncontrados;
 
 	public LivrosGUI() {
-		initModel();
 		initLayout();
-	}
-
-	private void initModel() {
-		Livro livro = new Livro();
-		model = new PresentationModel<Livro>(livro);
 	}
 
 	public void initLayout() {
@@ -318,8 +309,10 @@ public class LivrosGUI extends JFrame {
 							System.out.println("Livro removido: " + livroSelecionado.getTitulo());
 							JOptionPane.showMessageDialog(null, "LIVRO REMOVIDO COM SUCESSO!");
 						} else {
+							Emprestimo quemEstaComLivro = ServicoEmprestimo.quemEstaComLivro(livroSelecionado);
 							JOptionPane.showMessageDialog(null,
-									"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER");
+									"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER" +
+									"O LIVRO ESTA COM " + quemEstaComLivro.getUsuario().getNome());
 						}
 					}
 				} else {
@@ -381,8 +374,6 @@ public class LivrosGUI extends JFrame {
 									BufferedImage.TYPE_INT_RGB);
 							bufferedResizedImage.getGraphics().drawImage(resizedImage, 0, 0, null);
 
-							ImageIcon novaCapaIcon = new ImageIcon(bufferedResizedImage);
-
 							JOptionPane.showMessageDialog(null, "CAPA EDITADA COM SUCESSO!");
 						} catch (IOException e1) {
 							e1.printStackTrace();
@@ -438,11 +429,15 @@ public class LivrosGUI extends JFrame {
 				}
 			}
 		});
+		
+		JButton btnRelatorioReservas = new JButton("Relatorio Reservas");
+		btnRelatorioReservas.addActionListener(brr -> new GeraRelatorioReservas());
 
 		panel.add(btnExcluir);
 		panel.add(btnAdicionar);
 		panel.add(btnEditarCapa);
 		panel.add(btnAlterar);
+		panel.add(btnRelatorioReservas);
 
 		return panel;
 	}

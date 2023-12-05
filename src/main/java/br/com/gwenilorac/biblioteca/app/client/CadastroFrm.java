@@ -3,25 +3,17 @@ package br.com.gwenilorac.biblioteca.app.client;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.event.KeyEvent;
-import java.io.File;
-
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
-
 import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoCadastro;
 
@@ -33,8 +25,6 @@ public class CadastroFrm extends JDialog {
 	private JTextField tfEmail;
 	private JPasswordField passField;
 	private JButton btnCadastro;
-	private JButton btnUploadPhoto;
-	private File selectedCoverFile;
 	private boolean cadastro = false;
 
 	public CadastroFrm() {
@@ -57,51 +47,28 @@ public class CadastroFrm extends JDialog {
 		getRootPane().setDefaultButton(btnCadastro);
 		btnCadastro.setMnemonic(KeyEvent.VK_ENTER);
 		btnCadastro.addActionListener(evt -> actionCadastro());
-
-		btnUploadPhoto = new JButton("Upload Photo");
-		btnUploadPhoto.addActionListener(evt -> uploadFoto());
 	}
 
 	private void actionCadastro() {
-	    if (!isValid(model.getBean())) {
-	        return;
-	    }
+		if (!isValid(model.getBean())) {
+			return;
+		}
 
-	    if (selectedCoverFile == null) {
-	        JOptionPane.showMessageDialog(this, "ADICIONE UMA FOTO DE PERFIL");
-	        return;
-	    }
+		boolean sucessoCadastro = ServicoCadastro.cadastraUsuario(model.getBean());
 
-	    model.getBean().setFoto(ServicoCadastro.lerFoto(selectedCoverFile));
-
-	    boolean sucessoCadastro = ServicoCadastro.cadastraUsuario(model.getBean());
-	    
-	    if (sucessoCadastro) {
-	        cadastro = true;
-	        dispose();
-	    } else {
-	        JOptionPane.showMessageDialog(this, "EMAIL JÁ CADASTRADO");
-	    }
-	}
-
-	private void uploadFoto() {
-			JFileChooser chooser = new JFileChooser();
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & PNG Images", "jpg", "png");
-			chooser.setFileFilter(filter);
-			int result = chooser.showOpenDialog(this);
-
-			if (result == JFileChooser.APPROVE_OPTION) {
-				selectedCoverFile = chooser.getSelectedFile();
-				displayfotoSelecionada(selectedCoverFile);
-				System.out.println(selectedCoverFile.getName());
+		if (sucessoCadastro) {
+			JOptionPane.showMessageDialog(this, "USUARIO CADASTRADO COM SUCESSO!");
+			cadastro = true;
+			limparCampos();
+		} else {
+			JOptionPane.showMessageDialog(this, "EMAIL JÁ CADASTRADO");
 		}
 	}
 
-	private void displayfotoSelecionada(File file) {
-	    ImageIcon icon = new ImageIcon(file.getPath());
-	    Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-	    ImageIcon resizedIcon = new ImageIcon(img);
-	    JOptionPane.showMessageDialog(this, resizedIcon, "Selected Photo", JOptionPane.PLAIN_MESSAGE);
+	private void limparCampos() {
+		tfUserName.setText("");
+		tfEmail.setText("");
+		passField.setText(null);
 	}
 
 	private boolean isValid(Usuario bean) {
@@ -145,7 +112,6 @@ public class CadastroFrm extends JDialog {
 	private Component createButtonPanel() {
 		JPanel panel = new JPanel();
 		panel.add(btnCadastro);
-		panel.add(btnUploadPhoto);
 		return panel;
 	}
 

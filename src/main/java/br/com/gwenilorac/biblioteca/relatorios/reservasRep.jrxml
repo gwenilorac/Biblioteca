@@ -13,9 +13,9 @@
 	<queryString>
 		<![CDATA[SELECT * FROM usuarios]]>
 	</queryString>
+	<field name="nmUsuario" class="java.lang.String"/>
 	<field name="nmLivro" class="java.lang.String"/>
 	<field name="nmAutor" class="java.lang.String"/>
-	<field name="numEmprestimos" class="java.lang.Long"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -23,10 +23,10 @@
 		<band height="70" splitType="Stretch">
 			<staticText>
 				<reportElement style="Title" x="0" y="13" width="553" height="33" uuid="6f9c1004-6140-4588-9c4f-d75824835765"/>
-				<textElement verticalAlignment="Middle">
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="DejaVu Sans"/>
 				</textElement>
-				<text><![CDATA[Livros Mais Emprestados]]></text>
+				<text><![CDATA[Reservas]]></text>
 			</staticText>
 		</band>
 	</title>
@@ -34,7 +34,7 @@
 		<band splitType="Stretch"/>
 	</pageHeader>
 	<columnHeader>
-		<band height="50" splitType="Stretch">
+		<band height="40" splitType="Stretch">
 			<line>
 				<reportElement positionType="FixRelativeToBottom" x="0" y="35" width="555" height="1" uuid="544e89f7-0fd1-4142-aa23-e335e3be7007"/>
 				<graphicElement>
@@ -42,8 +42,8 @@
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="30" y="20" width="100" height="30" uuid="4f98372e-5c49-4bdf-8d71-c8388bcc1005">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eec606ca-9f49-43b7-bb3c-3c09d999aa71"/>
+				<reportElement x="30" y="10" width="100" height="30" uuid="b5d0d2f3-e7fa-44fd-a146-a6f20f9d6440">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="fa80010a-9cf2-4d4c-80bb-2316349ddcd6"/>
 				</reportElement>
 				<textElement>
 					<font fontName="DejaVu Sans" isBold="true"/>
@@ -51,30 +51,30 @@
 				<text><![CDATA[LIVRO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="226" y="20" width="100" height="30" uuid="d15a6ca7-2571-44e9-aa0f-745767d77dea">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ee94add1-3cdd-4fa9-9601-b5268e17f92d"/>
+				<reportElement x="420" y="10" width="100" height="30" uuid="c4a1511b-b5ce-4f45-9f19-f5dd6047bcd3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4b1f1769-a8be-47d1-b5b9-ba62933bd2dc"/>
 				</reportElement>
 				<textElement>
 					<font fontName="DejaVu Sans" isBold="true"/>
 				</textElement>
-				<text><![CDATA[AUTOR]]></text>
+				<text><![CDATA[USUARIO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="420" y="20" width="100" height="30" uuid="bc422690-8f7b-4c70-87d3-6fe6a82d5a11">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c6b7cd6a-ddb4-40f1-8cb4-56736cbba708"/>
+				<reportElement x="227" y="10" width="100" height="30" uuid="0d24230c-0e12-4a4a-bdc6-8d8e5e1a333d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cc6d69a2-0ac1-45c9-aed6-5d3a6f72c6f2"/>
 				</reportElement>
 				<textElement>
-					<font fontName="DejaVu Sans" isBold="true"/>
+					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Nº EMPRESTIMOS]]></text>
+				<text><![CDATA[AUTOR]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="50" splitType="Stretch">
+		<band height="52" splitType="Stretch">
 			<textField>
-				<reportElement x="30" y="0" width="100" height="30" uuid="c1f68bb0-17aa-4064-a2ad-32077bae5dba">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eec606ca-9f49-43b7-bb3c-3c09d999aa71"/>
+				<reportElement x="30" y="0" width="100" height="30" uuid="51d37070-7f7b-48ba-8383-1a36667520c4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="39259f34-7791-4059-abb6-fb758461e3bd"/>
 				</reportElement>
 				<textElement>
 					<font fontName="DejaVu Sans"/>
@@ -82,22 +82,19 @@
 				<textFieldExpression><![CDATA[$F{nmLivro}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="227" y="0" width="100" height="30" uuid="8783a44b-2725-46cb-8566-0d1a409bf9bd">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ee94add1-3cdd-4fa9-9601-b5268e17f92d"/>
+				<reportElement x="420" y="0" width="100" height="30" uuid="9773fcc8-8e43-4f58-847d-301fe952a8e5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a9fe6e8c-2d33-47d8-916e-f958daa68aa1"/>
 				</reportElement>
 				<textElement>
 					<font fontName="DejaVu Sans"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{nmAutor}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{nmUsuario}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="420" y="0" width="100" height="30" uuid="0c43ee43-9c91-4f3d-ae70-a12ea0f3e548">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c6b7cd6a-ddb4-40f1-8cb4-56736cbba708"/>
+				<reportElement x="227" y="0" width="100" height="30" uuid="44237d09-e93f-4a18-9195-ea9a441e1df4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cc6d69a2-0ac1-45c9-aed6-5d3a6f72c6f2"/>
 				</reportElement>
-				<textElement>
-					<font fontName="DejaVu Sans"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{numEmprestimos}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{nmAutor}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

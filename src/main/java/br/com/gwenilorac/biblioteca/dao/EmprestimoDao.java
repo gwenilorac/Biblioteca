@@ -1,10 +1,11 @@
 package br.com.gwenilorac.biblioteca.dao;
 
 import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-
+import br.com.gwenilorac.biblioteca.domain.EmprestimoView;
+import br.com.gwenilorac.biblioteca.domain.MultasView;
+import br.com.gwenilorac.biblioteca.domain.UsuariosView;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Livro;
 import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
@@ -58,11 +59,18 @@ public class EmprestimoDao {
 		}
 	}
 
-	public List<Emprestimo> buscarEmprestimosUser(Long idUsuario) {
-		String jpql = "SELECT e FROM Emprestimo e WHERE e.usuario.id = :idUsuario AND e.status = :status";
-		return em.createQuery(jpql, Emprestimo.class).setParameter("idUsuario", idUsuario)
-				.setParameter("status", StatusEmprestimo.ABERTO).getResultList();
-	}
+	 public List<Emprestimo> buscarEmprestimosUser(Long idUsuario) {
+		    StringBuilder hql = new StringBuilder();
+		    hql.append("SELECT empr ");
+		    hql.append("FROM Emprestimo empr ");
+		    hql.append("WHERE empr.status = :status ");
+		    hql.append("AND empr.usuario.id = :idUsuario ");
+
+		    return em.createQuery(hql.toString(), Emprestimo.class)
+		            .setParameter("status", StatusEmprestimo.ABERTO)
+		            .setParameter("idUsuario", idUsuario)
+		            .getResultList();
+		}
 
 	public boolean EmprestimoEstaAberto(Emprestimo emprestimo) {
 		try {
@@ -93,7 +101,15 @@ public class EmprestimoDao {
 			return false;
 		}
 	}
-
+	
+	public Emprestimo buscarQuemEstaComLivro(Livro livro) {
+		String jpql = "SELECT e.usuario FROM Emprestimo e WHERE e.livro = :livro AND e.status :status";
+		return em.createQuery(jpql, Emprestimo.class)
+				.setParameter("livro", livro)
+				.setParameter("status", StatusEmprestimo.ABERTO)
+				.getSingleResult();
+	}
+	
 	public Emprestimo buscarSeLivroJaTemEmprestimoRelacionadoAUsuario(Livro livro, Usuario usuario) {
 		try {
 			String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro AND e.usuario = :usuario";
@@ -114,4 +130,51 @@ public class EmprestimoDao {
 			return null;
 		}
 	}
+	
+	public List<EmprestimoView> findEmprestimosReporList() {
+		StringBuilder hql = new StringBuilder();
+		hql.append("SELECT new br.com.gwenilorac.biblioteca.domain.EmprestimoView(livr.titulo ");
+		hql.append(", auto.nome ");
+		hql.append(", count(e.id) ) ");
+		hql.append("FROM Emprestimo e ");
+		hql.append("INNER JOIN e.livro livr ");
+		hql.append("INNER JOIN livr.autor auto ");
+		hql.append("GROUP BY livr.titulo");
+		hql.append(", auto.nome ");
+		hql.append("ORDER BY count(e.id) DESC");
+		TypedQuery<EmprestimoView> createQuery = em.createQuery(hql.toString(), EmprestimoView.class);
+		return createQuery.getResultList();
+	}
+
+	public List<MultasView> findMultasReportList() {
+		StringBuilder hql = new StringBuilder();
+		hql.append("SELECT new br.com.gwenilorac.biblioteca.domain.MultasView(user.nome ");
+		hql.append(", livr.titulo ");
+		hql.append(", count(e.diasAtrasados) ");
+		hql.append(", e.valorMulta) ");
+		hql.append("FROM Emprestimo e ");
+		hql.append("INNER JOIN e.usuario user ");
+		hql.append("INNER JOIN e.livro livr ");
+		hql.append("GROUP BY user.nome");
+		hql.append(", livr.titulo ");
+		hql.append(", e.valorMulta ");
+		hql.append("ORDER BY count(e.diasAtrasados) DESC");
+		TypedQuery<MultasView> createQuery = em.createQuery(hql.toString(), MultasView.class);
+		return createQuery.getResultList();
+	}
+
+	public List<UsuariosView> findUsuarioReportList() {
+		StringBuilder hql = new StringBuilder();
+		hql.append("SELECT new br.com.gwenilorac.biblioteca.domain.UsuariosView(user.nome ");
+		hql.append(", user.email ");
+		hql.append(", count(e.id) ) ");
+		hql.append("FROM Emprestimo e ");
+		hql.append("INNER JOIN e.usuario user ");
+		hql.append("GROUP BY user.nome");
+		hql.append(", user.email ");
+		hql.append("ORDER BY count(e.id) DESC");
+		TypedQuery<UsuariosView> createQuery = em.createQuery(hql.toString(), UsuariosView.class);
+		return createQuery.getResultList();
+	}
+
 }

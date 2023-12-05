@@ -4,43 +4,15 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import javax.imageio.ImageIO;
-import javax.persistence.EntityManager;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import org.hibernate.event.spi.RefreshEvent;
-import com.jgoodies.binding.PresentationModel;
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-import br.com.gwenilorac.biblioteca.dao.AutorDao;
-import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
-import br.com.gwenilorac.biblioteca.dao.GeneroDao;
-import br.com.gwenilorac.biblioteca.dao.LivroDao;
-import br.com.gwenilorac.biblioteca.dao.UsuarioDao;
-import br.com.gwenilorac.biblioteca.model.Emprestimo;
+
 import br.com.gwenilorac.biblioteca.model.Livro;
-import br.com.gwenilorac.biblioteca.model.StatusEmprestimo;
-import br.com.gwenilorac.biblioteca.model.Usuario;
-import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
-import br.com.gwenilorac.biblioteca.servicos.ServicoLogin;
-import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 @SuppressWarnings("serial")
 public class DetalhesLivroInternalFrame extends JPanel {
