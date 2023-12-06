@@ -63,6 +63,8 @@ public class ServicoEmprestimo {
                 } else if (esteUsuarioEstaComOEmprestimoDesteLivroEncerrado) {
                     emprestimoDoLivro.pegarLivroEmprestado();
                     emprestimoDoLivro.setDataDevolucao(LocalDate.now().plusWeeks(4));
+                    emprestimoDoLivro.setDiasAtrasados(0);
+                    emprestimoDoLivro.setMultaPaga(false);
                     emprestimoDao.atualizar(emprestimoDoLivro);
                     JOptionPane.showMessageDialog(null, "LIVRO EMPRESTADO COM SUCESSO!");
                 } else {
@@ -124,6 +126,7 @@ public class ServicoEmprestimo {
                     emprestimo.setValorMulta(emprestimo.getDiasAtrasados() * emprestimo.getValormultapordia());
                     emprestimo.setTemMulta(true);
                     emprestimo.setMultaPaga(false);
+                    em.merge(emprestimo);
 
                     em.getTransaction().commit();
                     return true;
@@ -182,10 +185,10 @@ public class ServicoEmprestimo {
         }
     }
     
-    public static Emprestimo quemEstaComLivro(Livro livro) {
+    public static Usuario quemEstaComLivro(Livro livro) {
     	EntityManager em = JPAUtil.getEntityManager();
 		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-		Emprestimo quemEstaComLivro = emprestimoDao.buscarQuemEstaComLivro(livro);
+		Usuario quemEstaComLivro = emprestimoDao.buscarQuemEstaComLivro(livro);
 		return quemEstaComLivro;
     }
 

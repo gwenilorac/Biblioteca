@@ -48,6 +48,7 @@ import br.com.gwenilorac.biblioteca.model.Autor;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.model.Usuario;
 import br.com.gwenilorac.biblioteca.servicos.ServicoEmprestimo;
 import br.com.gwenilorac.biblioteca.servicos.ServicoLivro;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
@@ -309,10 +310,10 @@ public class LivrosGUI extends JFrame {
 							System.out.println("Livro removido: " + livroSelecionado.getTitulo());
 							JOptionPane.showMessageDialog(null, "LIVRO REMOVIDO COM SUCESSO!");
 						} else {
-							Emprestimo quemEstaComLivro = ServicoEmprestimo.quemEstaComLivro(livroSelecionado);
+							Usuario quemEstaComLivro = ServicoEmprestimo.quemEstaComLivro(livroSelecionado);
 							JOptionPane.showMessageDialog(null,
 									"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER" +
-									"O LIVRO ESTA COM " + quemEstaComLivro.getUsuario().getNome());
+									"\nO LIVRO ESTA COM " + quemEstaComLivro.getNome());
 						}
 					}
 				} else {

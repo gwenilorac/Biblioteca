@@ -1,11 +1,8 @@
 package br.com.gwenilorac.biblioteca.controller;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import javax.persistence.PersistenceException;
-
-import br.com.gwenilorac.biblioteca.domain.EmprestimoView;
 import br.com.gwenilorac.biblioteca.domain.ReservaService;
 import br.com.gwenilorac.biblioteca.domain.ReservaView;
 import net.sf.jasperreports.engine.JRException;
@@ -22,7 +19,7 @@ public class GeraRelatorioReservas {
 
 	public GeraRelatorioReservas() {
 		
-		String jasperFile = "/home/caroline/workspace/projeto/caroline_project/src/main/java/br/com/gwenilorac/biblioteca/relatorios/reservasRep.jasper";
+		String jasperFile = "C:\\Users\\carol\\Downloads\\caroline_project\\src\\main\\java\\br\\com\\gwenilorac\\biblioteca\\relatorios\\reservasRep.jasper";
 
 		try {
 

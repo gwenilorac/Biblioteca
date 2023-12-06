@@ -1,14 +1,10 @@
 package br.com.gwenilorac.biblioteca.controller;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.persistence.PersistenceException;
-
 import br.com.gwenilorac.biblioteca.domain.MultasService;
 import br.com.gwenilorac.biblioteca.domain.MultasView;
-import br.com.gwenilorac.biblioteca.domain.ReservaView;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -23,7 +19,7 @@ public class GeraRelatorioUsuariosComMulta {
 
 	public GeraRelatorioUsuariosComMulta() {
 		
-		String jasperFile = "/home/caroline/workspace/projeto/caroline_project/src/main/java/br/com/gwenilorac/biblioteca/relatorios/multasRep.jasper";
+		String jasperFile = "C:\\Users\\carol\\Downloads\\caroline_project\\src\\main\\java\\br\\com\\gwenilorac\\biblioteca\\relatorios\\multasRep.jasper";
 
 		try {
 

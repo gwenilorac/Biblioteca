@@ -1,8 +1,11 @@
 package br.com.gwenilorac.biblioteca.dao;
 
 import java.util.List;
+
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+
 import br.com.gwenilorac.biblioteca.domain.EmprestimoView;
 import br.com.gwenilorac.biblioteca.domain.MultasView;
 import br.com.gwenilorac.biblioteca.domain.UsuariosView;
@@ -102,13 +105,18 @@ public class EmprestimoDao {
 		}
 	}
 	
-	public Emprestimo buscarQuemEstaComLivro(Livro livro) {
-		String jpql = "SELECT e.usuario FROM Emprestimo e WHERE e.livro = :livro AND e.status :status";
-		return em.createQuery(jpql, Emprestimo.class)
-				.setParameter("livro", livro)
-				.setParameter("status", StatusEmprestimo.ABERTO)
-				.getSingleResult();
+	public Usuario buscarQuemEstaComLivro(Livro livro) {
+	    try {
+	        String jpql = "SELECT e.usuario FROM Emprestimo e WHERE e.livro = :livro AND e.status = :status";
+	        return em.createQuery(jpql, Usuario.class)
+	                .setParameter("livro", livro)
+	                .setParameter("status", StatusEmprestimo.ABERTO)
+	                .getSingleResult();
+	    } catch (NoResultException e) {
+	        return null; 
+	    }
 	}
+
 	
 	public Emprestimo buscarSeLivroJaTemEmprestimoRelacionadoAUsuario(Livro livro, Usuario usuario) {
 		try {
