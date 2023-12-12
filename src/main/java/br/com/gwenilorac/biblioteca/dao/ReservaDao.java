@@ -54,6 +54,17 @@ public class ReservaDao {
             return null;
         }
     }
+    
+    public Reserva buscarReservaPorLivro(Livro livro) {
+        try {
+            String jpql = "SELECT r FROM Reserva r WHERE r.livro = :livro";
+            return em.createQuery(jpql, Reserva.class)
+                     .setParameter("livro", livro)
+                     .getSingleResult();
+        } catch (NoResultException e) {
+            return null; 
+        }
+    }
 
     public Reserva livroEstaReservadoPorUsuario(Livro livro, Usuario usuario) {
         try {

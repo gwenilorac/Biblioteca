@@ -310,10 +310,8 @@ public class LivrosGUI extends JFrame {
 							System.out.println("Livro removido: " + livroSelecionado.getTitulo());
 							JOptionPane.showMessageDialog(null, "LIVRO REMOVIDO COM SUCESSO!");
 						} else {
-							Usuario quemEstaComLivro = ServicoEmprestimo.quemEstaComLivro(livroSelecionado);
 							JOptionPane.showMessageDialog(null,
-									"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER" +
-									"\nO LIVRO ESTA COM " + quemEstaComLivro.getNome());
+									"ERRO AO REMOVER O LIVRO!" + "\nPOR FAVOR DEVOLVER LIVRO ANTES DE REMOVER");
 						}
 					}
 				} else {
@@ -375,7 +373,7 @@ public class LivrosGUI extends JFrame {
 									BufferedImage.TYPE_INT_RGB);
 							bufferedResizedImage.getGraphics().drawImage(resizedImage, 0, 0, null);
 
-							JOptionPane.showMessageDialog(null, "CAPA EDITADA COM SUCESSO!");
+							JOptionPane.showMessageDialog(null, "CAPA EDITADA COM SUCESSO!" + "\nPOR FAVOR SALVAR ALTERAÇÕES!");
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}

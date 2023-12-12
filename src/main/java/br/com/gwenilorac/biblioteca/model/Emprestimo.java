@@ -62,6 +62,7 @@ public class Emprestimo {
         this.status = StatusEmprestimo.ENCERRADO;
         this.multaPaga = false;
         this.temMulta = false;
+        this.diasAtrasados = null;
     }
 
     public void pegarLivroEmprestado() {

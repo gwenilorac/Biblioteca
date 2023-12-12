@@ -72,25 +72,20 @@ public class CadastroFrm extends JDialog {
 	}
 
 	private boolean isValid(Usuario bean) {
-		if (bean.getNome() == null || bean.getNome().isEmpty() || bean.getNome() == " ") {
-			JOptionPane.showMessageDialog(this, "FALTA INFORMAR O NOME");
-			return false;
-		}
-		if (bean.getEmail() == null || bean.getEmail().isEmpty() || bean.getEmail() == " "
-				|| (!bean.getEmail().contains("@"))) {
-			JOptionPane.showMessageDialog(this, "INSIRA UM EMAIL VALIDO");
-			return false;
-		}
-		if (bean.getSenha() == null || bean.getSenha().isEmpty() || bean.getSenha() == " ") {
-			JOptionPane.showMessageDialog(this, "FALTA INFORMAR A SENHA");
-			return false;
-		}
-		if (ServicoCadastro.cadastraUsuario(model.getBean()) == false) {
-			JOptionPane.showMessageDialog(this, "EMAIL JA CADASTRADO");
-			return false;
-		} else {
-			return true;
-		}
+	    if (bean.getNome() == null || bean.getNome().isEmpty() || bean.getNome().trim().isEmpty()) {
+	        JOptionPane.showMessageDialog(this, "FALTA INFORMAR O NOME");
+	        return false;
+	    }
+	    if (bean.getEmail() == null || bean.getEmail().isEmpty() || bean.getEmail().trim().isEmpty()
+	            || (!bean.getEmail().contains("@"))) {
+	        JOptionPane.showMessageDialog(this, "INSIRA UM EMAIL VALIDO");
+	        return false;
+	    }
+	    if (bean.getSenha() == null || bean.getSenha().isEmpty() || bean.getSenha().trim().isEmpty()) {
+	        JOptionPane.showMessageDialog(this, "FALTA INFORMAR A SENHA");
+	        return false;
+	    }
+	    return true;
 	}
 
 	private void initLayout() {

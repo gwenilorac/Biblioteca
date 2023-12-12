@@ -1,9 +1,9 @@
 package br.com.gwenilorac.biblioteca.dao;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
 import br.com.gwenilorac.biblioteca.domain.EmprestimoView;
@@ -37,13 +37,16 @@ public class EmprestimoDao {
 	public boolean isLivroEmprestado(Livro livro) {
 		try {
 			String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro AND e.status = :status";
-			return !em.createQuery(jpql, Emprestimo.class).setParameter("livro", livro)
-					.setParameter("status", StatusEmprestimo.ABERTO).getResultList().isEmpty();
+			return em.createQuery(jpql, Emprestimo.class)
+					.setParameter("livro", livro)
+					.setParameter("status", StatusEmprestimo.ABERTO)
+					.getResultList()
+					.get(0) != null;
 		} catch (Exception e) {
 			return false;
 		}
 	}
-
+	
 	public Emprestimo buscarSeLivroJaTemEmprestimo(Livro livro) {
 		try {
 			String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro";
@@ -75,15 +78,6 @@ public class EmprestimoDao {
 		            .getResultList();
 		}
 
-	public boolean EmprestimoEstaAberto(Emprestimo emprestimo) {
-		try {
-			String jpql = "SELECT e FROM Emprestimo e WHERE e.status = :status";
-			return em.createQuery(jpql, Emprestimo.class).setParameter("status", StatusEmprestimo.ABERTO)
-					.getResultList().get(0) != null;
-		} catch (Exception e) {
-			return false;
-		}
-	}
 
 	public Emprestimo buscarSeLivroEstaEmprestadoPorUser(Usuario usuario, Livro livro) {
 		try {
@@ -104,19 +98,6 @@ public class EmprestimoDao {
 			return false;
 		}
 	}
-	
-	public Usuario buscarQuemEstaComLivro(Livro livro) {
-	    try {
-	        String jpql = "SELECT e.usuario FROM Emprestimo e WHERE e.livro = :livro AND e.status = :status";
-	        return em.createQuery(jpql, Usuario.class)
-	                .setParameter("livro", livro)
-	                .setParameter("status", StatusEmprestimo.ABERTO)
-	                .getSingleResult();
-	    } catch (NoResultException e) {
-	        return null; 
-	    }
-	}
-
 	
 	public Emprestimo buscarSeLivroJaTemEmprestimoRelacionadoAUsuario(Livro livro, Usuario usuario) {
 		try {
@@ -139,6 +120,19 @@ public class EmprestimoDao {
 		}
 	}
 	
+	
+	public List<Emprestimo> buscarEmprestimosPorLivro(Livro livro) {
+	    try {
+	        String jpql = "SELECT e FROM Emprestimo e WHERE e.livro = :livro";
+	        return em.createQuery(jpql, Emprestimo.class)
+	                 .setParameter("livro", livro)
+	                 .getResultList();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Collections.emptyList();
+	    }
+	}
+	
 	public List<EmprestimoView> findEmprestimosReporList() {
 		StringBuilder hql = new StringBuilder();
 		hql.append("SELECT new br.com.gwenilorac.biblioteca.domain.EmprestimoView(livr.titulo ");
@@ -155,21 +149,22 @@ public class EmprestimoDao {
 	}
 
 	public List<MultasView> findMultasReportList() {
-		StringBuilder hql = new StringBuilder();
-		hql.append("SELECT new br.com.gwenilorac.biblioteca.domain.MultasView(user.nome ");
-		hql.append(", livr.titulo ");
-		hql.append(", count(e.diasAtrasados) ");
-		hql.append(", e.valorMulta) ");
-		hql.append("FROM Emprestimo e ");
-		hql.append("INNER JOIN e.usuario user ");
-		hql.append("INNER JOIN e.livro livr ");
-		hql.append("GROUP BY user.nome");
-		hql.append(", livr.titulo ");
-		hql.append(", e.valorMulta ");
-		hql.append("ORDER BY count(e.diasAtrasados) DESC");
-		TypedQuery<MultasView> createQuery = em.createQuery(hql.toString(), MultasView.class);
-		return createQuery.getResultList();
+	    StringBuilder hql = new StringBuilder();
+	    hql.append("SELECT new br.com.gwenilorac.biblioteca.domain.MultasView(user.nome ");
+	    hql.append(", livr.titulo ");
+	    hql.append(", SUM(e.diasAtrasados) ");
+	    hql.append(", SUM(e.valorMulta)) ");   
+	    hql.append("FROM Emprestimo e ");
+	    hql.append("INNER JOIN e.usuario user ");
+	    hql.append("INNER JOIN e.livro livr ");
+	    hql.append("GROUP BY user.nome, livr.titulo ");
+	    hql.append("HAVING SUM(e.valorMulta) > 0 "); 
+	    hql.append("ORDER BY SUM(e.diasAtrasados) DESC"); 
+
+	    TypedQuery<MultasView> createQuery = em.createQuery(hql.toString(), MultasView.class);
+	    return createQuery.getResultList();
 	}
+
 
 	public List<UsuariosView> findUsuarioReportList() {
 		StringBuilder hql = new StringBuilder();

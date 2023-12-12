@@ -1,14 +1,19 @@
 package br.com.gwenilorac.biblioteca.servicos;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
+
 import br.com.gwenilorac.biblioteca.dao.AutorDao;
 import br.com.gwenilorac.biblioteca.dao.EmprestimoDao;
 import br.com.gwenilorac.biblioteca.dao.GeneroDao;
 import br.com.gwenilorac.biblioteca.dao.LivroDao;
+import br.com.gwenilorac.biblioteca.dao.ReservaDao;
 import br.com.gwenilorac.biblioteca.model.Autor;
 import br.com.gwenilorac.biblioteca.model.Emprestimo;
 import br.com.gwenilorac.biblioteca.model.Genero;
 import br.com.gwenilorac.biblioteca.model.Livro;
+import br.com.gwenilorac.biblioteca.model.Reserva;
 import br.com.gwenilorac.biblioteca.util.JPAUtil;
 
 public class ServicoLivro {
@@ -54,42 +59,53 @@ public class ServicoLivro {
 	}
 
 	public static boolean removerLivro(Livro livro) {
-        EntityManager em = JPAUtil.getEntityManager();
-        try {
-            em.getTransaction().begin();
-            livro = em.merge(livro);
+		EntityManager em = JPAUtil.getEntityManager();
+		try {
+			em.getTransaction().begin();
+			livro = em.merge(livro);
 
-            LivroDao livroDao = new LivroDao(em);
-            EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+			LivroDao livroDao = new LivroDao(em);
+			EmprestimoDao emprestimoDao = new EmprestimoDao(em);
+			ReservaDao reservaDao = new ReservaDao(em);
 
-            Emprestimo emprestimo = emprestimoDao.buscarSeLivroJaTemEmprestimo(livro);
+			List<Emprestimo> emprestimos = emprestimoDao.buscarEmprestimosPorLivro(livro);
+			Reserva reserva = reservaDao.buscarReservaPorLivro(livro);
 
-            if (emprestimo != null) {
-                boolean estaAberto = emprestimoDao.EmprestimoEstaAberto(emprestimo);
-                if (estaAberto == false) {
-                    emprestimoDao.remover(emprestimo);
-                    livroDao.remover(livro);
-                    em.getTransaction().commit();
-                    return true;
-                } else {
-                    System.out.println("Livro está com empréstimo aberto");
-                    em.getTransaction().rollback();
-                    return false;
-                }
-            } else {
-                livroDao.remover(livro);
-                em.getTransaction().commit();
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            em.getTransaction().rollback();
-            return false;
-        } finally {
-            if (em != null && em.isOpen()) {
-                em.close();
-            }
-        }
-    }
-	
+			if (emprestimos != null) {
+				boolean isLivroEmprestado = emprestimoDao.isLivroEmprestado(livro);
+
+				if (!isLivroEmprestado) {
+					for (Emprestimo emprestimo : emprestimos) {
+						emprestimoDao.remover(emprestimo);
+					}
+					
+					if (reserva != null) { 
+				        reservaDao.remover(reserva);
+				    }
+
+					livroDao.remover(livro);
+					em.getTransaction().commit();
+					return true;
+				} else {
+					System.out.println("Livro está com empréstimo aberto");
+					em.getTransaction().rollback();
+					return false;
+				}
+			} else {
+				livroDao.remover(livro);
+				em.getTransaction().commit();
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Erro durante a remoção do livro: " + e.getMessage());
+			em.getTransaction().rollback();
+			return false;
+		} finally {
+			if (em != null && em.isOpen()) {
+				em.close();
+			}
+		}
+	}
+
 }

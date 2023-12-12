@@ -15,7 +15,7 @@
 	</queryString>
 	<field name="nmUsuario" class="java.lang.String"/>
 	<field name="nmLivro" class="java.lang.String"/>
-	<field name="diasAtrasados" class="java.lang.Long"/>
+	<field name="diasAtrasados" class="java.lang.Integer"/>
 	<field name="valorMulta" class="java.lang.Double"/>
 	<background>
 		<band splitType="Stretch"/>

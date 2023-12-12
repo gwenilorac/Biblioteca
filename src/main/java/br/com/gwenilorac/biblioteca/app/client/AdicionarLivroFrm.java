@@ -68,9 +68,13 @@ public class AdicionarLivroFrm extends JPanel {
 	}
 
 	private void adicionarLivro() {
-	    String titulo = titleField.getText();
-	    Autor autor = (Autor) autorCb.getSelectedItem();
-	    Genero genero = (Genero) generosCb.getSelectedItem();
+		String titulo = titleField.getText();
+		Object selectedAuthor = autorCb.getSelectedItem();
+		Autor autor = (selectedAuthor instanceof Autor) ? (Autor) selectedAuthor : new Autor((String) selectedAuthor);
+
+		Object selectedGenero = generosCb.getSelectedItem();
+		Genero genero = (selectedGenero instanceof Genero) ? (Genero) selectedGenero : new Genero((String) selectedGenero);
+
 
 	    if (titulo.isEmpty() || autor == null|| genero == null || selectedCoverFile == null) {
 	        JOptionPane.showMessageDialog(this, "Preencha todos os campos e selecione uma capa.");

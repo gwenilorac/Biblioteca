@@ -3,7 +3,6 @@ package br.com.gwenilorac.biblioteca.model;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -30,13 +29,13 @@ public class Livro implements Serializable{
 	@Column(nullable = false)
 	private String titulo;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "autor_id")
-    private Autor autor;
-	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "genero_id")
-    private Genero genero;
+	private Autor autor;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "genero_id")
+	private Genero genero;
 	
 	@Type(type="org.hibernate.type.BinaryType")
 	@Column(name = "capa")

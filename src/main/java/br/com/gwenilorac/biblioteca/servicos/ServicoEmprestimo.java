@@ -112,7 +112,6 @@ public class ServicoEmprestimo {
             }
         }
     }
-
     
     public static boolean isMultaValid(Emprestimo emprestimo) {
         EntityManager em = JPAUtil.getEntityManager();
@@ -135,7 +134,13 @@ public class ServicoEmprestimo {
                     return false;
                 }
             } else {
-                System.out.println("Multa já foi paga anteriormente.");
+                emprestimo.setDiasAtrasados(0);
+                emprestimo.setValorMulta(0);
+                emprestimo.setTemMulta(false);
+                emprestimo.setMultaPaga(true);
+                em.merge(emprestimo);
+
+                em.getTransaction().commit();
                 return false;
             }
         } catch (Exception e) {
@@ -148,6 +153,7 @@ public class ServicoEmprestimo {
             em.close();
         }
     }
+
     
     public static void pagarMulta(Emprestimo emprestimo) {
         EntityManager em = JPAUtil.getEntityManager();
@@ -185,11 +191,4 @@ public class ServicoEmprestimo {
         }
     }
     
-    public static Usuario quemEstaComLivro(Livro livro) {
-    	EntityManager em = JPAUtil.getEntityManager();
-		EmprestimoDao emprestimoDao = new EmprestimoDao(em);
-		Usuario quemEstaComLivro = emprestimoDao.buscarQuemEstaComLivro(livro);
-		return quemEstaComLivro;
-    }
-
 }
