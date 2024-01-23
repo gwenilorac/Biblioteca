@@ -275,7 +275,7 @@ public class EmprestimosGUI extends JFrame {
 				ServicoEmprestimo.pagarMulta(emprestimo);
 
 				JOptionPane.showMessageDialog(multaDialog, "Multa paga com sucesso. Data: " + LocalDate.now(),
-						"Multa Paga", JOptionPane.INFORMATION_MESSAGE);
+						" Multa Paga", JOptionPane.INFORMATION_MESSAGE);
 
 				((AbstractTableModel) tableEmprestimos.getModel()).fireTableDataChanged();
 
